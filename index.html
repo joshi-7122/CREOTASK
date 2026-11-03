@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CREOTASK — Connect · Create · Compete</title>
+  <meta name="description" content="CREOTASK is a gamified freelancing platform: connect with clients, create standout work, and compete on the leaderboard." />
+  <meta name="theme-color" content="#0b0b0d" />
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/landing.css" />
+</head>
+<body class="landing">
+  <!-- Logo symbol (uses currentColor so it can be silver or gold) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="logo" viewBox="0 0 64 64"><g fill="currentColor"><path d="M32 1C33.82 19.6 33.56 47.5 32 63C30.44 47.5 30.18 19.6 32 1Z"/><path d="M26 15C27.54 28.2 27.32 48 26 59C24.68 48 24.46 28.2 26 15Z"/><path d="M38 15C39.54 28.2 39.32 48 38 59C36.68 48 36.46 28.2 38 15Z"/><path d="M31.45 33.6Q18.17 42.21 5 51Q18.83 43.29 32.55 35.4Z"/><path d="M31.45 35.4Q45.17 43.29 59 51Q45.83 42.21 32.55 33.6Z"/><path d="M25.48 41.83Q20.19 46.35 15 51Q20.81 47.15 26.52 43.17Z"/><path d="M37.48 43.17Q43.19 47.15 49 51Q43.81 46.35 38.52 41.83Z"/></g></symbol>
+  </svg>
+
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="CREOTASK home">
+      <svg class="brand__mark"><use href="#logo"/></svg>
+      <span class="brand__name">CREOTASK</span>
+    </a>
+    <nav class="site-header__actions" id="headerActions">
+      <button class="btn btn--ghost" data-auth="signin">Sign in</button>
+      <button class="btn btn--light" data-auth="signup">Sign up</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <h1 class="hero__title">
+          <span>Connect</span><span class="accent">Create</span><span>Compete</span>
+        </h1>
+        <p class="hero__lead">
+          Join India's gamified freelancing platform — connect with clients, create standout work,
+          and compete on the leaderboard to showcase your skills.
+        </p>
+        <div class="hero__cta">
+          <button class="btn btn--light btn--pill" data-auth="signup">Hire Talent</button>
+          <button class="btn btn--pill" data-auth="signup">Start Freelancing</button>
+        </div>
+        <div class="hero__chips" aria-label="Highlights">
+          <span class="chip">Daily Challenges</span>
+          <span class="chip">Skill Tree</span>
+          <span class="chip">XP &amp; Levels</span>
+          <span class="chip">Badges</span>
+          <span class="chip">Leaderboards</span>
+        </div>
+      </div>
+      <div class="hero__glow" aria-hidden="true"></div>
+    </section>
+
+    <section class="section" id="how">
+      <p class="section__eyebrow">HOW IT WORKS</p>
+      <h2 class="section__title">Freelancing that levels you up</h2>
+      <div class="pillars">
+        <article class="pillar">
+          <div class="pillar__icon">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15 14.5c3 0 6 1.8 6 5"/></svg>
+          </div>
+          <h3>Connect</h3>
+          <p>Meet clients and fellow creators who match your skills. A verified profile and real reviews build trust from day one.</p>
+        </article>
+        <article class="pillar">
+          <div class="pillar__icon">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/></svg>
+          </div>
+          <h3>Create</h3>
+          <p>Build a portfolio of featured work and grow your skill tree. Every project you ship earns XP.</p>
+        </article>
+        <article class="pillar">
+          <div class="pillar__icon">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>
+          </div>
+          <h3>Compete</h3>
+          <p>Take on daily challenges, unlock badges and climb the leaderboard so clients find the best first.</p>
+        </article>
+      </div>
+
+      <div class="brand-band">
+        <svg class="brand__mark brand__mark--gold"><use href="#logo"/></svg>
+        <p class="brand-band__name">CREOTASK</p>
+        <p class="brand-band__tag">CREATE CONNECT COMPETE</p>
+        <button class="btn btn--gold btn--pill" data-auth="signup">Create your free profile</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <a class="brand brand--sm brand--gold" href="index.html">
+      <svg class="brand__mark"><use href="#logo"/></svg>
+      <span class="brand__name">CREOTASK</span>
+    </a>
+    <p>© <span id="year"></span> CREOTASK. All rights reserved.</p>
+  </footer>
+
+  <!-- Auth modal -->
+  <div class="modal auth" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle" aria-hidden="true">
+    <div class="modal__dialog">
+      <div class="auth__inner">
+        <button class="modal__close" data-close aria-label="Close">&times;</button>
+        <div class="brand brand--sm brand--gold auth__brand">
+          <svg class="brand__mark"><use href="#logo"/></svg>
+          <span class="brand__name">CREOTASK</span>
+        </div>
+        <h2 class="auth__title" id="authTitle">Sign Up or Login</h2>
+        <p class="auth__sub">For Freelancers and Clients</p>
+
+        <form class="stack" id="authForm" novalidate>
+          <div class="role-toggle" role="radiogroup" aria-label="I am a" id="roleToggle">
+            <label><input type="radio" name="role" value="freelancer" checked /><span>I'm a Freelancer</span></label>
+            <label><input type="radio" name="role" value="client" /><span>I'm a Client</span></label>
+          </div>
+          <label class="field">
+            <span class="sr-only">Email</span>
+            <input class="input" type="email" name="email" placeholder="Email" autocomplete="email" required />
+          </label>
+          <label class="field">
+            <span class="sr-only">Password</span>
+            <input class="input" type="password" name="password" placeholder="Password" autocomplete="current-password" minlength="6" required style="padding-right:130px" />
+            <button type="button" class="field__aside" id="forgotBtn">Forgot password?</button>
+          </label>
+          <p class="form-error" id="authError" role="alert"></p>
+          <button class="btn btn--block" type="submit" id="authSubmit" style="font-size:16px;padding:11px">Sign Up</button>
+
+          <div class="auth__divider">or</div>
+
+          <button type="button" class="btn btn--block btn--social" data-provider="google">
+            <svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+            Continue with Google
+          </button>
+          <button type="button" class="btn btn--block btn--social" data-provider="github">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0C17.3 4.8 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5z"/></svg>
+            Continue with Github
+          </button>
+          <button type="button" class="btn btn--block btn--social" data-provider="linkedin">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="3" fill="#0A66C2"/><path fill="#fff" d="M7.1 9.5H4.6V19h2.5zM5.9 5a1.4 1.4 0 1 0 0 2.9 1.4 1.4 0 0 0 0-2.9zM19.4 13.6c0-2.6-1.4-4.3-3.7-4.3-1.3 0-2.1.7-2.5 1.3V9.5h-2.4V19h2.5v-4.9c0-1.2.4-2.4 1.8-2.4s1.6 1.3 1.6 2.4V19h2.5z"/></svg>
+            Continue with Linkedin
+          </button>
+        </form>
+
+        <p class="auth__switch" id="authSwitch"></p>
+        <p class="auth__note">Email verification required</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/landing.js"></script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CREOTASK</title>
+  <meta name="theme-color" content="#0b0b0d" />
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/app.css" />
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script>if (!Store.current()) location.replace("index.html?auth=signin");</script>
+</head>
+<body class="app-body">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="logo" viewBox="0 0 64 64"><g fill="currentColor"><path d="M32 1C33.82 19.6 33.56 47.5 32 63C30.44 47.5 30.18 19.6 32 1Z"/><path d="M26 15C27.54 28.2 27.32 48 26 59C24.68 48 24.46 28.2 26 15Z"/><path d="M38 15C39.54 28.2 39.32 48 38 59C36.68 48 36.46 28.2 38 15Z"/><path d="M31.45 33.6Q18.17 42.21 5 51Q18.83 43.29 32.55 35.4Z"/><path d="M31.45 35.4Q45.17 43.29 59 51Q45.83 42.21 32.55 33.6Z"/><path d="M25.48 41.83Q20.19 46.35 15 51Q20.81 47.15 26.52 43.17Z"/><path d="M37.48 43.17Q43.19 47.15 49 51Q43.81 46.35 38.52 41.83Z"/></g></symbol>
+  </svg>
+
+  <header class="app-top">
+    <a class="brand" href="#home" aria-label="CREOTASK home">
+      <svg class="brand__mark"><use href="#logo"/></svg>
+      <span class="brand__name">CREOTASK</span>
+    </a>
+    <a class="xp-card" href="dashboard.html" title="Open your profile">
+      <div class="xp-card__avatar">
+        <span class="xp-card__face" id="xpAvatar"></span>
+        <span class="xp-card__level" id="xpLevel">1</span>
+      </div>
+      <div class="xp-card__meta">
+        <div class="xp-card__label"><span>Exp</span><span id="xpText">0 / 500</span></div>
+        <div class="bar"><div class="bar__fill" id="xpBar" style="width:0%"></div></div>
+        <div class="xp-card__tier" id="xpTier"></div>
+      </div>
+    </a>
+  </header>
+
+  <main class="app-main" id="view" tabindex="-1" aria-live="polite"></main>
+
+  <!-- Floating bottom navigation -->
+  <nav class="dock" aria-label="Main">
+    <a class="dock__item" href="#home" data-route="home">Home</a>
+    <a class="dock__item" href="#explore" data-route="explore">Explore</a>
+    <div class="dock__group">
+      <button class="dock__item" aria-haspopup="true" aria-expanded="false" data-menu="resources" data-route="contests academy">Resources</button>
+      <div class="dock__menu" id="menu-resources" role="menu">
+        <a role="menuitem" href="#contests">🏆 Contests<small>Compete for client projects</small></a>
+        <a role="menuitem" href="#academy">🎓 Academy<small>Courses to level up</small></a>
+      </div>
+    </div>
+    <div class="dock__group">
+      <button class="dock__item" aria-haspopup="true" aria-expanded="false" data-menu="connect" data-route="contact">Connect</button>
+      <div class="dock__menu" id="menu-connect" role="menu">
+        <a role="menuitem" href="#contact">✉️ Contact us<small>Support tickets &amp; FAQ</small></a>
+        <a role="menuitem" href="#explore">🤝 Find freelancers<small>Search &amp; shortlist talent</small></a>
+      </div>
+    </div>
+    <a class="dock__item" href="#pro" data-route="pro">Creotask Pro</a>
+  </nav>
+
+  <!-- Contest detail -->
+  <div class="modal" id="contestModal" role="dialog" aria-modal="true" aria-labelledby="cmTitle" aria-hidden="true">
+    <div class="modal__dialog modal__dialog--wide">
+      <button class="modal__close" data-close aria-label="Close">&times;</button>
+      <div id="contestDetail"></div>
+    </div>
+  </div>
+
+  <!-- Host a contest -->
+  <div class="modal" id="hostModal" role="dialog" aria-modal="true" aria-labelledby="hostTitle" aria-hidden="true">
+    <div class="modal__dialog modal__dialog--wide">
+      <button class="modal__close" data-close aria-label="Close">&times;</button>
+      <h2 class="modal__title" id="hostTitle">Host a contest</h2>
+      <p class="modal__sub">Describe what you need. Freelancers compete, and you pick the best work.</p>
+      <form class="stack" id="hostForm">
+        <label><span class="label">Title</span><input class="input" name="title" maxlength="80" required placeholder="E.g. Logo for an organic tea brand" /></label>
+        <div class="row-2">
+          <label><span class="label">Category</span><select class="select" name="category" id="hostCategory"></select></label>
+          <label><span class="label">Mode</span>
+            <select class="select" name="mode"><option value="public">Public (open to all)</option><option value="private">Private (invite only)</option></select>
+          </label>
+        </div>
+        <label><span class="label">Description</span><textarea class="textarea" name="desc" maxlength="600" required></textarea></label>
+        <label><span class="label">Expected deliverables</span><input class="input" name="deliverables" maxlength="200" placeholder="E.g. SVG + PNG logo, colour palette" /></label>
+        <div class="row-2">
+          <label><span class="label">Budget (₹)</span><input class="input" name="budget" type="number" min="500" step="500" required placeholder="15000" /></label>
+          <label><span class="label">Deadline</span><input class="input" name="deadline" type="date" required /></label>
+        </div>
+        <label><span class="label">Skills wanted (comma separated)</span><input class="input" name="skills" placeholder="Branding, Illustrator" /></label>
+        <p class="form-error" id="hostError" role="alert"></p>
+        <button class="btn btn--gold" type="submit">Publish contest</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
