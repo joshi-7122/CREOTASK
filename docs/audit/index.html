@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CreoTask walkthrough — 14 Nov 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,100..800&family=Cinzel:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/css/ds.css" />
+  <style>
+    .wt { padding-block: var(--s-12) var(--s-24); display: flex; flex-direction: column; gap: var(--s-16); }
+    .wt-head { display: flex; flex-direction: column; gap: var(--s-4); }
+    .wt-toc { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); font-size: var(--fs-sm); }
+    .wt section { display: flex; flex-direction: column; gap: var(--s-6); scroll-margin-top: 24px; }
+    .wt section > h2 { padding-bottom: var(--s-3); border-bottom: 1px solid var(--border); }
+    .wt-shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 460px), 1fr)); gap: var(--s-6); }
+    .wt-shots--phone { grid-template-columns: repeat(auto-fill, minmax(220px, 280px)); }
+    figure { margin: 0; display: flex; flex-direction: column; gap: var(--s-3); }
+    figure img { width: 100%; height: auto; display: block; border-radius: var(--r-md); border: 1px solid var(--border-strong); box-shadow: var(--shadow-2); background: var(--bg-deep); }
+    figcaption { font-size: var(--fs-sm); color: var(--text-2); max-width: 70ch; }
+    figcaption b { color: var(--text); font-weight: 650; display: block; margin-bottom: 2px; }
+    .wt-list { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: var(--s-2); color: var(--text-2); max-width: 80ch; }
+    .wt-list b { color: var(--text); }
+  </style>
+</head>
+<body class="ui">
+  <main class="ui-container wt">
+    <header class="wt-head">
+      <a class="ui-brand" href="../../index.html"><img src="../../assets/img/logo.svg" alt="" width="30" height="30" /><span>CREOTASK</span></a>
+      <h1 class="ui-display" style="font-size:clamp(2.2rem,5vw,3.6rem)">Walkthrough and audit</h1>
+      <p class="ui-lead">Every screen built so far, clicked through end to end on 14 November 2026: Phase 1 (accounts, profiles, skills, portfolio, security) and the Indigo &amp; Zari design system. Issues found during the walkthrough were fixed on the spot, and every screenshot shows the fixed version.</p>
+      <div class="ui-cluster">
+        <span class="ui-badge ui-badge--success ui-badge--dot">65 of 65 automated checks pass</span>
+        <span class="ui-badge ui-badge--accent">12 issues found and fixed in this audit</span>
+        <span class="ui-badge">Nothing committed yet</span>
+      </div>
+      <nav class="wt-toc" aria-label="Sections">
+        <a href="#fixed">What the audit fixed</a><a href="#landing">Landing page</a><a href="#auth">Sign-up and log-in</a>
+        <a href="#email">Email and password pages</a><a href="#shell">App shell</a><a href="#profile">Freelancer profile</a>
+        <a href="#prefs">Preferences and account</a><a href="#client">Client view</a><a href="#security">Security</a>
+        <a href="#phone">On a phone</a><a href="#system">Design system</a><a href="#next">Not done yet</a>
+      </nav>
+    </header>
+
+    <section id="fixed" aria-labelledby="h-fixed">
+      <h2 class="ui-h2" id="h-fixed">What this audit found and fixed</h2>
+      <ol class="wt-list">
+        <li><b>Section headings hid under the sticky header</b> when you used the landing page links. They now stop below it.</li>
+        <li><b>"CreoStart, for / your first projects"</b> wrapped awkwardly because its container was too narrow.</li>
+        <li><b>The marketplace subtitle claimed "verified" and "milestone-funded" contracts.</b> Neither is true yet, so it now just describes the projects.</li>
+        <li><b>"Resend link" showed the anonymous wording</b> ("If this email is registered…") to people who are signed in. It now names the address the link went to.</li>
+        <li><b>The verify-email error page said "request a new one" twice.</b> The second line now explains how links work.</li>
+        <li><b>Red outlines stayed on the reset form</b> after you corrected the field.</li>
+        <li><b>Tier requirements read like a database</b> ("Need avg rating ≥ 4 (have 0.0)"), which also contradicted "no history counts as neutral". They're now plain sentences, for example "Reach an average rating of 4.0 or higher (no reviews yet)".</li>
+        <li><b>The rights checkbox didn't turn red</b> when it was the reason a save failed.</li>
+        <li><b>Client profiles said "Clients compare evidence"</b>, which is wrong when you're the client.</li>
+        <li><b>Notices touched the email field</b> in the log-in dialog.</li>
+        <li><b>"You've been signed out" used the red danger style.</b> It's neutral blue now; red is kept for suspensions.</li>
+        <li><b>Unknown addresses showed a bare "Cannot GET" page.</b> They now show a branded 404 page, and a test covers it.</li>
+      </ol>
+    </section>
+
+    <section id="landing" aria-labelledby="h-landing">
+      <h2 class="ui-h2" id="h-landing">Landing page</h2>
+      <div class="wt-shots">
+        <figure><img src="img/01-landing-hero.jpg" alt="Landing page hero with the project thread" loading="lazy" /><figcaption><b>Hero</b>The headline, two role-specific actions, and the signature stitched thread showing how a project moves from brief to paid. The thread stitches in once on load.</figcaption></figure>
+        <figure><img src="img/02-landing-how.jpg" alt="How it works section" loading="lazy" /><figcaption><b>How it works</b>Two real sequences, hiring and freelancing, each with its own sign-up button. The buttons now line up.</figcaption></figure>
+        <figure><img src="img/03-landing-tiers.jpg" alt="Tier ladder" loading="lazy" /><figcaption><b>Tiers are earned, never bought</b>A rising ladder from Bronze to Platinum, noting that thresholds are still being calibrated.</figcaption></figure>
+        <figure><img src="img/04-landing-creostart.jpg" alt="CreoStart comparison table" loading="lazy" /><figcaption><b>CreoStart</b>Paid entry projects and unpaid practice challenges side by side, so nobody mistakes practice for paid work.</figcaption></figure>
+        <figure><img src="img/05-landing-closing.jpg" alt="Closing call to action and footer" loading="lazy" /><figcaption><b>Closing and footer</b>No XP, leaderboard, "gamified" or contest claims anywhere on the page.</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="auth" aria-labelledby="h-auth">
+      <h2 class="ui-h2" id="h-auth">Sign-up and log-in</h2>
+      <div class="wt-shots">
+        <figure><img src="img/06-signup-age.jpg" alt="Sign-up blocked without age confirmation" loading="lazy" /><figcaption><b>Age confirmation is required</b>Sign-up won't go through without it. The minimum age (18) comes from the server and is still an open decision for you. The demo accounts panel only appears in development.</figcaption></figure>
+        <figure><img src="img/07-login-suspended.jpg" alt="Suspended account notice" loading="lazy" /><figcaption><b>Suspended account</b>The person sees the reason category and how to appeal. It's only revealed after the correct password, and staff notes are never shown.</figcaption></figure>
+        <figure><img src="img/08-login-session.jpg" alt="Signed out notice" loading="lazy" /><figcaption><b>Session ended</b>Neutral wording when a session is revoked or expires, for example after "sign out other devices".</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="email" aria-labelledby="h-email">
+      <h2 class="ui-h2" id="h-email">Email verification and password reset</h2>
+      <div class="wt-shots">
+        <figure><img src="img/12-verify-error.jpg" alt="Invalid verification link" loading="lazy" /><figcaption><b>Bad or used link</b>Lets you request a new link right there. Links work once and expire after 24 hours.</figcaption></figure>
+        <figure><img src="img/13-verify-ok.jpg" alt="Email verified" loading="lazy" /><figcaption><b>Verified</b>Marketplace actions unlock: publishing, applying and accepting offers.</figcaption></figure>
+        <figure><img src="img/14-reset-notoken.jpg" alt="Incomplete reset link" loading="lazy" /><figcaption><b>Incomplete reset link</b>Explains what to do instead of showing a broken form.</figcaption></figure>
+        <figure><img src="img/15-reset-mismatch.jpg" alt="Passwords do not match" loading="lazy" /><figcaption><b>Mismatched passwords</b>A successful reset signs you out on every device.</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="shell" aria-labelledby="h-shell">
+      <h2 class="ui-h2" id="h-shell">App shell</h2>
+      <div class="wt-shots">
+        <figure><img src="img/09-app-unverified.jpg" alt="App with verify email banner" loading="lazy" /><figcaption><b>Unverified account</b>The banner explains exactly what's blocked and offers to resend the link. The server enforces it too: applying, publishing, offers and funding return "verify your email first".</figcaption></figure>
+        <figure><img src="img/10-account-menu.jpg" alt="Account menu" loading="lazy" /><figcaption><b>Account menu</b>Profile, account and security, role switch, and log out. Log out ends the session on the server, not just in the browser.</figcaption></figure>
+        <figure><img src="img/11-notifications.jpg" alt="Notifications menu" loading="lazy" /><figcaption><b>Notifications</b>The empty state says what will appear here. Links in notifications now open real pages in the app.</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="profile" aria-labelledby="h-profile">
+      <h2 class="ui-h2" id="h-profile">Freelancer profile</h2>
+      <div class="wt-shots">
+        <figure><img src="img/16-profile-new.jpg" alt="New freelancer profile" loading="lazy" /><figcaption><b>A brand-new freelancer</b>A completeness bar, a checklist of exactly what's missing, and an honest track record with zeros, not invented numbers.</figcaption></figure>
+        <figure><img src="img/17-edit-profile.jpg" alt="Edit profile dialog" loading="lazy" /><figcaption><b>Edit profile</b>A native dialog: focus stays inside, Esc closes it, and fields have visible labels.</figcaption></figure>
+        <figure><img src="img/18-add-work-rights.jpg" alt="Add work blocked without rights declaration" loading="lazy" /><figcaption><b>Display rights</b>Public work needs you to confirm you may show it. Otherwise mark it confidential, and it never appears publicly.</figcaption></figure>
+        <figure><img src="img/19-add-skill.jpg" alt="Add skill dialog" loading="lazy" /><figcaption><b>Add a skill</b>Suggestions come from the skills list. Typing "figma", "reactjs" or "Brand identity" saves as Figma, React or Branding.</figcaption></figure>
+        <figure><img src="img/20-profile-filled.jpg" alt="Profile with work and skills" loading="lazy" /><figcaption><b>Filled in</b>Work marked Public, skills marked Self-declared, and tier requirements in plain language.</figcaption></figure>
+        <figure><img src="img/21-evidence-error.jpg" alt="Evidence too short" loading="lazy" /><figcaption><b>Get verified</b>Evidence goes to a reviewer queue. Thin evidence is rejected with a clear reason.</figcaption></figure>
+        <figure><img src="img/22-skill-in-review.jpg" alt="Skill in review" loading="lazy" /><figcaption><b>In review</b>While under review the claim is locked, so a verified badge can never end up on an edited claim.</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="prefs" aria-labelledby="h-prefs">
+      <h2 class="ui-h2" id="h-prefs">Preferences and account</h2>
+      <div class="wt-shots">
+        <figure><img src="img/23-prefs-stale.jpg" alt="Stale availability warning" loading="lazy" /><figcaption><b>Stale availability</b>After 30 days without confirmation (a proposed value), clients see your availability as possibly out of date until you confirm it.</figcaption></figure>
+        <figure><img src="img/24-prefs-complete.jpg" alt="Preferences saved, profile 100%" loading="lazy" /><figcaption><b>Saved</b>Categories, engagement, timezone and links. The profile reaches 100% and the warning clears.</figcaption></figure>
+        <figure><img src="img/25-account.jpg" alt="Account and security tab" loading="lazy" /><figcaption><b>Account and security</b>Email status, roles, change password (which signs out other devices), and a list of signed-in devices you can sign out individually.</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="client" aria-labelledby="h-client">
+      <h2 class="ui-h2" id="h-client">Client view</h2>
+      <div class="wt-shots">
+        <figure><img src="img/26-client-profile.jpg" alt="Client profile" loading="lazy" /><figcaption><b>Same account, client role</b>Navigation changes to My projects, Find talent, Contracts and Payments. Client verification is shown honestly as waiting on the payment provider.</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="security" aria-labelledby="h-security">
+      <h2 class="ui-h2" id="h-security">Security</h2>
+      <div class="wt-shots">
+        <figure><img src="img/27-404.jpg" alt="Branded 404 at the database path" loading="lazy" /><figcaption><b>The database is no longer downloadable</b>Before Phase 1, opening <code>/server/data/creotask.db</code> downloaded the live database, password hashes included. It's now a 404, like any other non-public path.</figcaption></figure>
+      </div>
+      <ul class="wt-list">
+        <li>Public profiles return only allow-listed fields. KYC status and earnings are never included (checked live and covered by tests).</li>
+        <li>Sessions are stored on the server, so logout, password reset and suspension take effect immediately.</li>
+        <li>Login takes the same time and gives the same error whether or not an email exists, and the strict rate limit applies only to login-type requests.</li>
+        <li>Links you add must be http or https, so <code>javascript:</code> links are rejected.</li>
+        <li>Payments are switched off. A clearly labelled sandbox mode exists for development and can't be enabled in production.</li>
+      </ul>
+    </section>
+
+    <section id="phone" aria-labelledby="h-phone">
+      <h2 class="ui-h2" id="h-phone">On a phone (375 px)</h2>
+      <div class="wt-shots wt-shots--phone">
+        <figure><img src="img/28-mobile-app.jpg" alt="App on a phone" loading="lazy" /><figcaption><b>App</b>Navigation moves to a bottom tab bar.</figcaption></figure>
+        <figure><img src="img/29-mobile-profile.jpg" alt="Profile on a phone" loading="lazy" /><figcaption><b>Profile</b>A single column with no sideways scrolling.</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="system" aria-labelledby="h-system">
+      <h2 class="ui-h2" id="h-system">Design system</h2>
+      <div class="wt-shots">
+        <figure><img src="img/30-styleguide.jpg" alt="Style guide colours" loading="lazy" /><figcaption><b>Indigo &amp; Zari</b>Indigo-ink grounds with zari gold from your logo. Every colour is a named token, so a change applies everywhere.</figcaption></figure>
+        <figure><img src="img/31-styleguide-components.jpg" alt="Style guide buttons and fields" loading="lazy" /><figcaption><b>Components</b>Buttons, fields, badges, alerts, the thread, cards and dialogs, all in one reference at <code>/styleguide.html</code> (development only).</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="next" aria-labelledby="h-next">
+      <h2 class="ui-h2" id="h-next">Not done yet</h2>
+      <ul class="wt-list">
+        <li><b>Marketplace screens</b> (browse, my projects, applications, contracts, payments, admin) only have the new colours. Their layouts and pop-ups are redesigned in Phase 2.</li>
+        <li><b>Payments, KYC and client verification</b> wait on a payment provider and legal sign-off, by design.</li>
+        <li><b>File uploads</b> are still publicly served and unscanned. Nothing uses them yet; this must be fixed before file delivery is built (Phase 3).</li>
+        <li><b>Open decisions for you:</b> minimum age, launch categories, fee model, tier thresholds, and whether sign-up should hide that an email is already registered.</li>
+        <li><b>Nothing is committed yet.</b> Everything is on the <code>phase-1-foundation</code> branch.</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

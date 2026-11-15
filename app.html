@@ -3,99 +3,219 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CREOTASK</title>
-  <meta name="theme-color" content="#0b0b0d" />
-  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml" />
+  <title>CreoTask</title>
+  <meta name="theme-color" content="#050507" />
+  <link rel="icon" href="/assets/img/logo.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/styles.css" />
-  <link rel="stylesheet" href="assets/css/app.css" />
-  <script src="assets/js/store.js"></script>
-  <script src="assets/js/data.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Cinzel:wght@600&display=swap" rel="stylesheet" />
+  <!-- Legacy view styles: marketplace screens are redesigned in Phase 2 -->
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/app.css" />
+  <!-- Design system + app shell -->
+  <link rel="stylesheet" href="/assets/css/ds.css" />
+  <link rel="stylesheet" href="/assets/css/pages/shell.css" />
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/store.js"></script>
   <script>if (!Store.current()) location.replace("index.html?auth=signin");</script>
 </head>
-<body class="app-body">
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <symbol id="logo" viewBox="0 0 64 64"><g fill="currentColor"><path d="M32 1C33.82 19.6 33.56 47.5 32 63C30.44 47.5 30.18 19.6 32 1Z"/><path d="M26 15C27.54 28.2 27.32 48 26 59C24.68 48 24.46 28.2 26 15Z"/><path d="M38 15C39.54 28.2 39.32 48 38 59C36.68 48 36.46 28.2 38 15Z"/><path d="M31.45 33.6Q18.17 42.21 5 51Q18.83 43.29 32.55 35.4Z"/><path d="M31.45 35.4Q45.17 43.29 59 51Q45.83 42.21 32.55 33.6Z"/><path d="M25.48 41.83Q20.19 46.35 15 51Q20.81 47.15 26.52 43.17Z"/><path d="M37.48 43.17Q43.19 47.15 49 51Q43.81 46.35 38.52 41.83Z"/></g></symbol>
-  </svg>
+<body class="ui sh-body">
+  <a class="ui-skip" href="#view">Skip to content</a>
 
-  <header class="app-top">
-    <a class="brand" href="#home" aria-label="CREOTASK home">
-      <svg class="brand__mark"><use href="#logo"/></svg>
-      <span class="brand__name">CREOTASK</span>
-    </a>
-    <a class="xp-card" href="dashboard.html" title="Open your profile">
-      <div class="xp-card__avatar">
-        <span class="xp-card__face" id="xpAvatar"></span>
-        <span class="xp-card__level" id="xpLevel">1</span>
+  <header class="sh-top">
+    <div class="ui-container sh-top__inner">
+      <a class="ui-brand" href="#" id="homeLink" aria-label="CreoTask home">
+        <img src="/assets/img/logo.svg" alt="" width="28" height="28" />
+        <span>CREOTASK</span>
+      </a>
+
+      <nav class="sh-nav" id="mainDock" aria-label="Main"></nav>
+
+      <div class="sh-tools">
+        <button class="sh-role" id="roleSwitchBtn" type="button">
+          <span class="sh-role__label">Working as</span>
+          <span class="sh-role__value" id="roleBadge">—</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+
+        <div id="tierPillWrap"></div>
+
+        <div class="sh-pop">
+          <button class="ui-btn ui-btn--quiet ui-btn--icon sh-icon-btn" id="notifBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="notifMenu" aria-label="Notifications">
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="sh-dot" id="notifBadge" hidden></span>
+          </button>
+          <div class="ui-menu sh-notif" id="notifMenu" hidden>
+            <div class="ui-split sh-notif__head">
+              <b>Notifications</b>
+              <button class="ui-link-btn" id="markAllNotifsBtn" type="button">Mark all read</button>
+            </div>
+            <div id="notifList" class="sh-notif__list"></div>
+          </div>
+        </div>
+
+        <div class="sh-pop">
+          <button class="sh-account" id="accountBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="accountMenu" aria-label="Account menu">
+            <span class="ui-avatar ui-avatar--sm" id="headerAvatar" aria-hidden="true"></span>
+          </button>
+          <div class="ui-menu" id="accountMenu" hidden>
+            <div class="sh-account__who">
+              <b id="headerName">—</b>
+              <span class="ui-small ui-text-2" id="headerEmail"></span>
+            </div>
+            <div class="ui-menu__sep"></div>
+            <a class="ui-menu__item" href="dashboard.html">Profile</a>
+            <a class="ui-menu__item" href="dashboard.html#account">Account and security</a>
+            <button class="ui-menu__item" type="button" id="menuSwitchRole">Switch role</button>
+            <div class="ui-menu__sep"></div>
+            <button class="ui-menu__item" type="button" id="logoutBtn">Log out</button>
+          </div>
+        </div>
       </div>
-      <div class="xp-card__meta">
-        <div class="xp-card__label"><span>Exp</span><span id="xpText">0 / 500</span></div>
-        <div class="bar"><div class="bar__fill" id="xpBar" style="width:0%"></div></div>
-        <div class="xp-card__tier" id="xpTier"></div>
-      </div>
-    </a>
+    </div>
   </header>
 
-  <main class="app-main" id="view" tabindex="-1" aria-live="polite"></main>
+  <div class="ui-container sh-banners" id="accountBanner"></div>
+  <main class="ui-container sh-main app-main" id="view" tabindex="-1"></main>
 
-  <!-- Floating bottom navigation -->
-  <nav class="dock" aria-label="Main">
-    <a class="dock__item" href="#home" data-route="home">Home</a>
-    <a class="dock__item" href="#explore" data-route="explore">Explore</a>
-    <div class="dock__group">
-      <button class="dock__item" aria-haspopup="true" aria-expanded="false" data-menu="resources" data-route="contests academy">Resources</button>
-      <div class="dock__menu" id="menu-resources" role="menu">
-        <a role="menuitem" href="#contests">🏆 Contests<small>Compete for client projects</small></a>
-        <a role="menuitem" href="#academy">🎓 Academy<small>Courses to level up</small></a>
-      </div>
-    </div>
-    <div class="dock__group">
-      <button class="dock__item" aria-haspopup="true" aria-expanded="false" data-menu="connect" data-route="contact">Connect</button>
-      <div class="dock__menu" id="menu-connect" role="menu">
-        <a role="menuitem" href="#contact">✉️ Contact us<small>Support tickets &amp; FAQ</small></a>
-        <a role="menuitem" href="#explore">🤝 Find freelancers<small>Search &amp; shortlist talent</small></a>
-      </div>
-    </div>
-    <a class="dock__item" href="#pro" data-route="pro">Creotask Pro</a>
-  </nav>
+  <!-- Phone navigation -->
+  <nav class="sh-tabbar" id="mobileTabbar" aria-label="Main"></nav>
 
-  <!-- Contest detail -->
-  <div class="modal" id="contestModal" role="dialog" aria-modal="true" aria-labelledby="cmTitle" aria-hidden="true">
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Project Detail & Application Modal -->
+  <div class="modal" id="projectModal" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal__dialog modal__dialog--wide">
       <button class="modal__close" data-close aria-label="Close">&times;</button>
-      <div id="contestDetail"></div>
+      <div id="projectDetail"></div>
     </div>
   </div>
 
-  <!-- Host a contest -->
-  <div class="modal" id="hostModal" role="dialog" aria-modal="true" aria-labelledby="hostTitle" aria-hidden="true">
+  <!-- Create / Post Project Modal -->
+  <div class="modal" id="postProjectModal" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal__dialog modal__dialog--wide">
       <button class="modal__close" data-close aria-label="Close">&times;</button>
-      <h2 class="modal__title" id="hostTitle">Host a contest</h2>
-      <p class="modal__sub">Describe what you need. Freelancers compete, and you pick the best work.</p>
-      <form class="stack" id="hostForm">
-        <label><span class="label">Title</span><input class="input" name="title" maxlength="80" required placeholder="E.g. Logo for an organic tea brand" /></label>
+      <h2 class="modal__title">Post a Direct Project</h2>
+      <p class="modal__sub">Structured fixed-price INR brief with milestones and deliverables.</p>
+      <form class="stack" id="postProjectForm">
+        <label><span class="label">Project Title</span><input class="input" name="title" required placeholder="e.g. Modern Web Application in React & Node" maxlength="100" /></label>
+        
         <div class="row-2">
-          <label><span class="label">Category</span><select class="select" name="category" id="hostCategory"></select></label>
-          <label><span class="label">Mode</span>
-            <select class="select" name="mode"><option value="public">Public (open to all)</option><option value="private">Private (invite only)</option></select>
+          <label><span class="label">Category</span>
+            <select class="select" name="category" required>
+              <option value="Development">Development</option>
+              <option value="Design">Design</option>
+              <option value="Writing">Writing</option>
+              <option value="Video">Video</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Data & Analytics">Data & Analytics</option>
+            </select>
+          </label>
+          <label><span class="label">Timeline (Days)</span><input class="input" type="number" name="timeline_days" min="1" required placeholder="14" /></label>
+        </div>
+
+        <label><span class="label">Project Description & Scope</span><textarea class="textarea" name="description" required placeholder="Detailed brief, technical expectations, and background..." style="min-height:90px"></textarea></label>
+
+        <div class="row-2">
+          <label><span class="label">Deliverables Required</span><input class="input" name="deliverables" placeholder="e.g. Source code, Deployed link, Docs" /></label>
+          <label><span class="label">Acceptance Criteria</span><input class="input" name="acceptance_criteria" placeholder="e.g. Passes test suite, responsive" /></label>
+        </div>
+
+        <label><span class="label">Required Skills (comma separated)</span><input class="input" name="skills" required placeholder="React, Node.js, SQLite" /></label>
+
+        <div style="background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-weight:600;font-size:14px">Project Milestones</span>
+            <span style="font-size:12px;color:var(--muted)">Milestone sum must equal Total Budget</span>
+          </div>
+          <div id="milestonesList" class="stack" style="gap:10px">
+            <!-- Dynamic milestones -->
+          </div>
+          <button type="button" class="btn btn--sm btn--ghost" id="addMilestoneBtn" style="margin-top:8px">+ Add Milestone</button>
+        </div>
+
+        <div class="row-2" style="align-items:center">
+          <label><span class="label">Total Fixed Budget (₹ INR)</span><input class="input" type="number" name="budget" id="totalBudgetInput" min="500" step="100" required placeholder="15000" /></label>
+          <label style="display:flex;align-items:center;gap:10px;margin-top:18px;cursor:pointer">
+            <input type="checkbox" name="is_creostart" id="isCreostartInput" />
+            <span style="font-size:13px"><b style="color:var(--gold)">CreoStart Project</b> (Designated for emerging talent & freshers)</span>
           </label>
         </div>
-        <label><span class="label">Description</span><textarea class="textarea" name="desc" maxlength="600" required></textarea></label>
-        <label><span class="label">Expected deliverables</span><input class="input" name="deliverables" maxlength="200" placeholder="E.g. SVG + PNG logo, colour palette" /></label>
-        <div class="row-2">
-          <label><span class="label">Budget (₹)</span><input class="input" name="budget" type="number" min="500" step="500" required placeholder="15000" /></label>
-          <label><span class="label">Deadline</span><input class="input" name="deadline" type="date" required /></label>
-        </div>
-        <label><span class="label">Skills wanted (comma separated)</span><input class="input" name="skills" placeholder="Branding, Illustrator" /></label>
-        <p class="form-error" id="hostError" role="alert"></p>
-        <button class="btn btn--gold" type="submit">Publish contest</button>
+
+        <p class="form-error" id="postProjectError"></p>
+        <button class="btn btn--gold btn--block" type="submit" id="postProjectSubmit">Publish Project</button>
       </form>
     </div>
   </div>
 
-  <script src="assets/js/app.js"></script>
+  <!-- Review Applications Modal (Client View) -->
+  <div class="modal" id="applicationsModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal__dialog modal__dialog--wide" style="max-width:760px">
+      <button class="modal__close" data-close aria-label="Close">&times;</button>
+      <h2 class="modal__title" id="appsModalTitle">Project Applicants</h2>
+      <p class="modal__sub" id="appsModalSub">Compare candidates, verify skill evidence, and send offers.</p>
+      <div id="appsModalBody" class="stack" style="gap:14px;max-height:550px;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <!-- Send Offer Modal (Client View) -->
+  <div class="modal" id="sendOfferModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal__dialog">
+      <button class="modal__close" data-close aria-label="Close">&times;</button>
+      <h2 class="modal__title">Issue Official Offer</h2>
+      <p class="modal__sub">Terms are immutable once accepted. 72-hour default expiry.</p>
+      <form class="stack" id="sendOfferForm">
+        <input type="hidden" name="project_id" />
+        <input type="hidden" name="application_id" />
+        
+        <div style="background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px">
+          <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Transparent Financial Disclosure</div>
+          <table class="fee-table">
+            <tr><td>Agreed Project Budget (Gross)</td><td id="offerGross">₹0</td></tr>
+            <tr><td>Platform Take Rate (10%)</td><td id="offerFee" style="color:var(--muted)">-₹0</td></tr>
+            <tr><td>Estimated Tax Withholding</td><td id="offerTax" style="color:var(--muted)">₹0</td></tr>
+            <tr class="total-row"><td>Freelancer Net Payout</td><td id="offerNet">₹0</td></tr>
+          </table>
+        </div>
+
+        <label><span class="label">Offer Message</span><textarea class="textarea" name="message" placeholder="We liked your portfolio and would love to collaborate..." style="min-height:75px"></textarea></label>
+        <label><span class="label">Special Terms & Expectations</span><textarea class="textarea" name="terms" placeholder="IP ownership transfers upon milestone payment. Revisions capped at 2 in-scope iterations." style="min-height:75px"></textarea></label>
+
+        <p class="form-error" id="sendOfferError"></p>
+        <button class="btn btn--gold btn--block" type="submit">Send Offer (72h Expiry)</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Live Project Workspace Modal / View -->
+  <div class="modal" id="workspaceModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal__dialog modal__dialog--wide" style="max-width:920px;width:95%">
+      <button class="modal__close" data-close aria-label="Close">&times;</button>
+      <div id="workspaceContent"></div>
+    </div>
+  </div>
+
+  <!-- Tier Explanation & Progress Modal -->
+  <div class="modal" id="tierModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal__dialog modal__dialog--wide" style="max-width:680px">
+      <button class="modal__close" data-close aria-label="Close">&times;</button>
+      <h2 class="modal__title">CreoTask Four-Tier Progression</h2>
+      <p class="modal__sub">Evidence-based progression. Tiers are earned, never bought.</p>
+      <div id="tierModalBody"></div>
+    </div>
+  </div>
+
+  <!-- Admin Operations Console Modal -->
+  <div class="modal" id="adminModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal__dialog modal__dialog--wide" style="max-width:980px;width:96%">
+      <button class="modal__close" data-close aria-label="Close">&times;</button>
+      <h2 class="modal__title">CreoTask Operations & Trust Console</h2>
+      <p class="modal__sub">Administer skill verification, project moderation, disputes, and immutable financial ledger.</p>
+      <div id="adminModalBody"></div>
+    </div>
+  </div>
+
+  <script src="/assets/js/shell.js"></script>
+  <script src="/assets/js/app.js"></script>
 </body>
 </html>

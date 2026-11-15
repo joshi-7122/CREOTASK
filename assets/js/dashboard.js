@@ -1,460 +1,629 @@
 /* =========================================================
-   Dashboard — profile, portfolio, skill tree, analytics,
-   daily challenge, badges and leaderboard.
+   CREOTASK — Your profile (PROF-01…05, AUTH-02 account security)
+   All data comes from the API. Anything not built yet is said so
+   plainly rather than simulated.
    ========================================================= */
 (function () {
   "use strict";
 
   const $ = (id) => document.getElementById(id);
   const esc = UI.esc;
-  let me = Store.current();
-  if (!me) return; // guard in <head> already redirects
 
-  /* ---------- Static content ---------- */
-  const XP = { project: 50, skill: 20, challenge: 100 };
-  const SKILL_LEVELS = ["", "Beginner", "Novice", "Intermediate", "Advanced", "Expert"];
+  const state = { user: null, profile: null, completeness: null, tierInfo: null, meta: null, adminRole: null, sessions: [], shellReady: false };
+  const isFreelancer = () => state.user?.active_role === "freelancer";
 
-  const CHALLENGES = CreoData.CHALLENGES;
+  const PROF_LABEL = { beginner: "Beginner", intermediate: "Intermediate", advanced: "Advanced", expert: "Expert" };
+  const ENGAGEMENT_LABEL = { one_off: "One-off projects", ongoing: "Ongoing work", either: "Either" };
+  const CLIENT_TYPE_LABEL = {
+    individual: "An individual", startup: "A startup", small_business: "A small business", enterprise: "A large company",
+    agency: "An agency", nonprofit: "A non-profit", education: "An education institution",
+  };
+  const KYC_LABEL = { not_started: "Not started", pending: "In review", verified: "Verified", action_required: "Action needed" };
+  const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
+  const fmtDate = (ts) => ts ? new Date(ts).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }) : "—";
+  const fmtDateTime = (ts) => ts ? new Date(ts).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—";
 
-  const ACHIEVEMENTS = [
-    { id: "first-project", icon: "🎨", name: "First Project", desc: "Add your first portfolio item", test: (p) => p.portfolio.length >= 1 },
-    { id: "curator", icon: "🖼️", name: "Curator", desc: "Showcase 5 projects", test: (p) => p.portfolio.length >= 5 },
-    { id: "first-skill", icon: "🌱", name: "Skill Seeker", desc: "Add your first skill", test: (p) => p.skills.length >= 1 },
-    { id: "skill-builder", icon: "🌳", name: "Skill Builder", desc: "Grow a skill tree of 5", test: (p) => p.skills.length >= 5 },
-    { id: "master", icon: "🧠", name: "Master", desc: "Reach Expert in a skill", test: (p) => p.skills.some((s) => s.level >= 5) },
-    { id: "challenger", icon: "⚡", name: "Challenger", desc: "Complete a daily challenge", test: (p) => (p.challengeDates || []).length >= 1 },
-    { id: "on-fire", icon: "🔥", name: "On Fire", desc: "3-day challenge streak", test: (p) => streak(p) >= 3 },
-    { id: "contender", icon: "🎯", name: "Contender", desc: "Submit your first contest entry", test: (p) => Object.values(p.contests || {}).some((c) => c.submittedAt) },
-    { id: "scholar", icon: "🎓", name: "Scholar", desc: "Finish an Academy course", test: (p) => (p.courses || []).length >= 1 },
-    { id: "intro", icon: "👋", name: "Introduce Yourself", desc: "Add a photo and an About", test: (p) => !!(p.avatar && p.about) },
-    { id: "rising-star", icon: "⭐", name: "Rising Star", desc: "Reach level 3", test: (p) => Store.level(p.xp) >= 3 },
-    { id: "top-10", icon: "🏆", name: "Top 10", desc: "Enter the top 10 leaderboard", test: (p) => rankOf(p) <= 10 },
-  ];
-
-  /* ---------- Derived data ---------- */
-  function leaderboard(p) {
-    const rows = CreoData.CREATORS.map((c) => ({ name: c.name, city: c.city, xp: c.xp }));
-    rows.push({ name: p.name, city: p.location, xp: p.xp, avatar: p.avatar, me: true });
-    // Ties go to the current user — they earned it most recently.
-    return rows.sort((a, b) => b.xp - a.xp || (b.me ? 1 : 0) - (a.me ? 1 : 0));
-  }
-  function rankOf(p) { return leaderboard(p).findIndex((r) => r.me) + 1; }
-
-  function streak(p) {
-    const days = new Set(p.challengeDates || []);
-    let n = 0;
-    const d = new Date();
-    if (!days.has(Store.localDate(d))) d.setDate(d.getDate() - 1); // today not done yet keeps streak alive
-    while (days.has(Store.localDate(d))) { n++; d.setDate(d.getDate() - 1); }
-    return n;
-  }
-
-  function todaysChallenge() {
-    const start = new Date(new Date().getFullYear(), 0, 0);
-    const day = Math.floor((Date.now() - start) / 864e5);
-    return CHALLENGES[day % CHALLENGES.length];
-  }
-
-  /* ---------- Mutations ---------- */
-  const addXP = Store.award;
-  const log = Store.log;
-  function checkAchievements(p) {
-    const got = new Set(p.achievements.map((a) => a.id));
-    const fresh = [];
-    ACHIEVEMENTS.forEach((a) => {
-      if (!got.has(a.id) && a.test(p)) {
-        p.achievements.push({ id: a.id, at: Date.now() });
-        log(p, `Unlocked “${a.name}”`);
-        fresh.push(a);
+  function showFormError(form, err) {
+    const el = form.querySelector("[data-error]") || form.querySelector(".ui-error");
+    form.querySelectorAll("[aria-invalid]").forEach((i) => i.removeAttribute("aria-invalid"));
+    if (err?.fields) {
+      for (const name of Object.keys(err.fields)) {
+        const input = form.elements[name];
+        if (input && input.setAttribute) input.setAttribute("aria-invalid", "true");
       }
-    });
-    return fresh;
+    }
+    if (el) el.textContent = err ? err.message : "";
   }
 
-  /** Apply a change to the profile, persist, re-render, and celebrate new badges. */
-  function commit(fn, successMsg) {
-    const before = Store.level(me.xp);
-    let fresh = [];
-    try {
-      me = Store.update((p) => { fn(p); fresh = checkAchievements(p); });
-    } catch (err) {
-      UI.toast(err.message, "error");
-      return false;
-    }
-    render();
-    if (successMsg) UI.toast(successMsg, "success");
-    const after = Store.level(me.xp);
-    if (after > before) setTimeout(() => UI.toast(`Level up! You're now level ${after} 🎉`, "success"), 300);
-    fresh.forEach((a, i) => setTimeout(() => UI.toast(`${a.icon} Badge unlocked: ${a.name}`), 600 + i * 400));
+  // ── Load ───────────────────────────────────────────────
+  async function load() {
+    $("loadError").hidden = true;
+    let me;
+    try { me = await CreoAPI.auth.me(); }
+    catch (err) { $("loadErrorText").textContent = `Your profile didn't load. ${err.message}`; $("loadError").hidden = false; return false; }
+    if (!me || !me.user) { location.replace("index.html?auth=signin"); return false; }
+    Object.assign(state, { user: me.user, profile: me.profile, completeness: me.completeness, tierInfo: me.tier_info, adminRole: me.admin_role });
+    if (!state.meta) { try { state.meta = await CreoAPI.meta(); } catch { state.meta = null; } }
     return true;
   }
 
-  /* ---------- Rendering ---------- */
-  function avatarHTML(p, cls) {
-    return p.avatar ? `<img src="${esc(p.avatar)}" alt="" class="${cls || ""}">` : esc(UI.initials(p.name));
+  async function reload() {
+    if (!(await load())) return;
+    if (!state.shellReady) {
+      Shell.init({ user: state.user, profile: state.profile, adminRole: state.adminRole, paymentsMode: state.meta?.policy?.payments_mode });
+      state.shellReady = true;
+    } else {
+      Shell.refreshBanner(state.user);
+    }
+    render();
   }
 
-  const ago = (ts) => {
-    const s = Math.round((Date.now() - ts) / 1000);
-    if (s < 60) return "just now";
-    if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-    if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-    return `${Math.floor(s / 86400)}d ago`;
-  };
-
-  function emptyState(icon, title, text, action, label) {
-    return `<div class="empty">
-      <svg class="empty__icon"><use href="#${icon}"/></svg>
-      <h4>${title}</h4><p>${text}</p>
-      <button class="btn btn--sm" data-action="${action}">${label}</button>
-    </div>`;
+  // ── Render ─────────────────────────────────────────────
+  function render() {
+    document.querySelectorAll("[data-role-only]").forEach((el) => { el.hidden = el.dataset.roleOnly !== state.user.active_role; });
+    renderHead();
+    renderCompleteness();
+    renderAbout();
+    renderReadiness();
+    if (isFreelancer()) { renderPortfolio(); renderSkills(); renderTrack(); }
+    else renderClient();
+    renderPreferences();
+    renderAccount();
   }
 
-  function renderHeader() {
-    const lvl = Store.level(me.xp);
-    const into = me.xp % Store.XP_PER_LEVEL;
-    const pct = Math.round((into / Store.XP_PER_LEVEL) * 100);
-    $("xpAvatar").innerHTML = avatarHTML(me);
-    $("xpLevel").textContent = lvl;
-    const tier = CreoData.tierFor(me.xp);
-    $("xpTier").textContent = tier.name + (me.plan === "pro" ? " · Pro" : "");
-    $("xpTier").style.color = tier.color;
-    $("xpText").textContent = `${into} / ${Store.XP_PER_LEVEL}`;
-    $("xpBar").style.width = pct + "%";
-    $("xpBarWrap").setAttribute("aria-valuenow", pct);
-    $("notifList").innerHTML = me.activity.length
-      ? me.activity.slice(0, 15).map((a) => `<li><b>${esc(a.label)}</b>${a.xp ? ` · <span class="xp-plus">+${a.xp} XP</span>` : ""}<br>${ago(a.at)}</li>`).join("")
-      : `<li>No activity yet — add a project to get started.</li>`;
-    const seen = Number(sessionStorageGet("creotask:seen") || 0);
-    $("notifDot").hidden = !me.activity.length || me.activity[0].at <= seen;
+  function renderHead() {
+    const p = state.profile || {};
+    const name = p.display_name || state.user.email.split("@")[0];
+    document.title = `${name} — CreoTask`;
+    $("name").textContent = name;
+    $("avatar").textContent = UI.initials(name);
+    $("headline").textContent = isFreelancer() ? (p.headline || "") : (p.organization_name || "");
+    const loc = [p.location_city, p.location_state].filter(Boolean).join(", ");
+    $("location").textContent = loc || "No location added";
+    $("rating").textContent = p.total_reviews > 0
+      ? `Rated ${Number(p.avg_rating).toFixed(1)} from ${p.total_reviews} review${p.total_reviews === 1 ? "" : "s"}`
+      : "No reviews yet";
+    $("tierInline").innerHTML = isFreelancer()
+      ? `<span class="ui-tier ui-tier--${esc(p.tier || "bronze")}">${esc(cap(p.tier || "bronze"))}</span>`
+      : (p.verification_status === "verified" ? `<span class="ui-badge ui-badge--success ui-badge--dot">Verified client</span>` : "");
+    const pct = state.completeness?.percent ?? 0;
+    $("completePct").textContent = `${pct}%`;
+    $("completeBar").setAttribute("aria-valuenow", String(pct));
+    $("completeBar").firstElementChild.style.width = pct + "%";
   }
 
-  function renderSidebar() {
-    $("avatar").innerHTML = avatarHTML(me);
-    $("name").textContent = me.name;
-    $("location").textContent = me.location || "Add your city";
-    $("rating").innerHTML = me.reviews
-      ? `${me.rating.toFixed(1)} <small>(${me.reviews} reviews)</small>`
-      : `— <small>(no reviews yet)</small>`;
-    $("rankText").textContent = `#${rankOf(me)} Leaderboard`;
-    const about = $("about");
-    about.textContent = me.about || "Tell clients about yourself — tap the ⓘ to edit.";
-    about.classList.toggle("is-empty", !me.about);
+  function renderCompleteness() {
+    const c = state.completeness;
+    $("checklistCard").hidden = !c || c.complete;
+    if (!c || c.complete) return;
+    $("checklistSub").textContent = isFreelancer()
+      ? "Clients compare evidence. These are the gaps they'll notice first."
+      : "Freelancers decide whether to apply partly on this. These are the gaps they'll notice first.";
+    $("completenessBody").innerHTML = `<ul class="ui-checklist">${c.missing.map((m) => `<li>${esc(m.label)}</li>`).join("")}</ul>`;
+  }
 
-    const done = me.challengeDoneOn === Store.today();
-    $("challengeText").textContent = done ? "Challenge complete — come back tomorrow!" : todaysChallenge();
-    $("challengeBtn").textContent = done ? "Done ✓" : "Start";
-    $("challengeBtn").disabled = done;
-    $("challengeLock").innerHTML = `<use href="#${done ? "i-check" : "i-lock"}"/>`;
-    $("challengeLock").classList.toggle("is-done", done);
+  function renderAbout() {
+    const p = state.profile || {};
+    const el = $("about");
+    if (p.bio) { el.textContent = p.bio; el.removeAttribute("data-empty"); }
+    else {
+      el.textContent = isFreelancer()
+        ? "Add a short bio: what you do, who you do it for, and how you work."
+        : "Describe your organisation and the kind of work you hire for.";
+      el.setAttribute("data-empty", "");
+    }
+  }
+
+  function renderReadiness() {
+    const p = state.profile || {};
+    const badge = $("readinessStatus");
+    if (isFreelancer()) {
+      const kyc = p.kyc_status || "not_started";
+      $("readinessTitle").textContent = "Payout readiness";
+      badge.textContent = `Identity: ${KYC_LABEL[kyc] || kyc}`;
+      badge.className = "ui-badge " + (kyc === "verified" ? "ui-badge--success" : kyc === "action_required" ? "ui-badge--danger" : "");
+      $("readinessText").textContent = kyc === "verified"
+        ? "Your identity is verified. Payouts start once CreoTask's payment provider is approved."
+        : "You'll verify your identity before your first payout. That opens once CreoTask's payment provider is approved. Until then, anything you're owed is held for you, never lost.";
+    } else {
+      const v = p.verification_status || "unverified";
+      $("readinessTitle").textContent = "Client verification";
+      badge.textContent = v === "verified" ? "Verified" : v === "pending" ? "In review" : "Not verified";
+      badge.className = "ui-badge " + (v === "verified" ? "ui-badge--success" : "");
+      $("readinessText").textContent = v === "verified"
+        ? "Your client account is verified."
+        : "You'll verify your account before funding your first project. That opens once CreoTask's payment provider is approved.";
+    }
+  }
+
+  function portfolioRow(item) {
+    const badges = [];
+    if (item.status === "archived") badges.push(`<span class="ui-badge">Archived</span>`);
+    if (item.is_confidential) badges.push(`<span class="ui-badge ui-badge--info">Confidential</span>`);
+    else if (!item.rights_declared) badges.push(`<span class="ui-badge ui-badge--warning">Hidden until you confirm display rights</span>`);
+    else if (item.status === "active") badges.push(`<span class="ui-badge ui-badge--success ui-badge--dot">Public</span>`);
+    if (item.category) badges.push(`<span class="ui-badge">${esc(item.category)}</span>`);
+    const id = esc(item.id);
+    return `
+      <li class="ui-row ${item.status === "archived" ? "ui-row--muted" : ""}">
+        <div class="ui-row__main">
+          <span class="ui-row__title">${esc(item.title)}</span>
+          ${item.description ? `<span class="ui-row__meta">${esc(item.description)}</span>` : ""}
+          ${item.skills_used?.length ? `<span class="ui-row__meta">Skills: ${esc(item.skills_used.join(", "))}</span>` : ""}
+          ${item.external_url ? `<a class="pf-work__link" href="${esc(item.external_url)}" target="_blank" rel="noopener noreferrer">${esc(item.external_url)}</a>` : ""}
+          <div class="pf-work__badges">${badges.join("")}</div>
+        </div>
+        <div class="ui-row__actions">
+          ${item.status === "active"
+            ? `<button class="ui-link-btn" data-edit-portfolio="${id}" type="button" aria-label="Edit ${esc(item.title)}">Edit</button>
+               <button class="ui-link-btn ui-link-btn--muted" data-archive-portfolio="${id}" type="button" aria-label="Archive ${esc(item.title)}">Archive</button>`
+            : `<button class="ui-link-btn" data-restore-portfolio="${id}" type="button" aria-label="Restore ${esc(item.title)}">Restore</button>`}
+          <button class="ui-link-btn ui-link-btn--danger" data-delete-portfolio="${id}" type="button" aria-label="Remove ${esc(item.title)}">Remove</button>
+        </div>
+      </li>`;
   }
 
   function renderPortfolio() {
-    const n = me.portfolio.length;
-    $("portfolioCount").textContent = `${n} project${n === 1 ? "" : "s"} showcased`;
-    $("portfolioBody").innerHTML = n
-      ? `<div class="items">${me.portfolio.map((it) => `
-          <div class="item">
-            <h5>${esc(it.title)}</h5>
-            <button class="remove" data-remove-project="${esc(it.id)}" aria-label="Remove ${esc(it.title)}">&times;</button>
-            ${it.desc ? `<p>${esc(it.desc)}</p>` : ""}
-            ${it.tags.length ? `<div class="tags">${it.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div>` : ""}
-            ${it.link ? `<p><a href="${esc(it.link)}" target="_blank" rel="noopener noreferrer">View project ↗</a></p>` : ""}
-          </div>`).join("")}</div>
-          <div class="card__foot"><button class="btn btn--sm" data-action="add-project">Add project</button></div>`
-      : emptyState("i-hand", "No Portfolio Items yet", "Showcase your best work to attract more clients and opportunities", "add-project", "Add Your First Project");
-
-    $("skillsBody").innerHTML = me.skills.length
-      ? `<div>${me.skills.map((s) => `
-          <div class="skill">
-            <span class="skill__name">${esc(s.name)}</span>
-            <span class="skill__lvl">${SKILL_LEVELS[s.level]}</span>
-            <span class="skill__actions">
-              <button class="remove" data-level-up="${esc(s.id)}" aria-label="Level up ${esc(s.name)}" title="Level up" ${s.level >= 5 ? "disabled" : ""}>+</button>
-              <button class="remove" data-remove-skill="${esc(s.id)}" aria-label="Remove ${esc(s.name)}">&times;</button>
-            </span>
-            <div class="bar"><div class="bar__fill bar__fill--gold" style="width:${s.level * 20}%"></div></div>
-          </div>`).join("")}</div>
-          <div class="card__foot"><button class="btn btn--sm" data-action="add-skill">Add skill</button></div>`
-      : emptyState("i-target", "No Skills yet", "Showcase your best skills to attract more clients and opportunities", "add-skill", "Add Your Skills");
-
-    $("activityBody").innerHTML = me.activity.length
-      ? `<ul class="activity">${me.activity.slice(0, 6).map((a) => `
-          <li><span>${esc(a.label)}${a.xp ? ` <span class="xp-plus">+${a.xp} XP</span>` : ""}</span><time>${ago(a.at)}</time></li>`).join("")}</ul>`
-      : `<div class="empty"><p>Your activity will show up here.</p></div>`;
+    const items = state.profile?.portfolio || [];
+    const active = items.filter((i) => i.status === "active");
+    const archived = items.filter((i) => i.status === "archived");
+    const pub = active.filter((i) => i.is_public).length;
+    const parts = [`${pub} public`];
+    if (active.length - pub) parts.push(`${active.length - pub} private`);
+    if (archived.length) parts.push(`${archived.length} archived`);
+    $("portfolioCount").textContent = items.length ? parts.join(", ") : "Nothing added yet";
+    const body = $("portfolioBody");
+    if (!items.length) {
+      body.innerHTML = `
+        <div class="ui-empty">
+          <span class="ui-empty__title">Add your first piece of work</span>
+          <p>Paid, personal or practice work all count. Clients compare real samples, not just ratings.</p>
+          <button class="ui-btn ui-btn--primary ui-btn--sm" data-action="add-project" type="button">Add work</button>
+        </div>`;
+      return;
+    }
+    body.innerHTML = `<ul class="ui-rows">${[...active, ...archived].map(portfolioRow).join("")}</ul>`;
   }
 
-  function renderAnalytics() {
-    const earned = new Map(me.achievements.map((a) => [a.id, a.at]));
-    $("achCount").textContent = `${earned.size} of ${ACHIEVEMENTS.length} achievements unlocked`;
-    $("achBody").innerHTML = earned.size
-      ? ACHIEVEMENTS.filter((a) => earned.has(a.id))
-          .sort((a, b) => earned.get(b.id) - earned.get(a.id))
-          .map((a) => `<div class="ach"><div class="ach__icon">${a.icon}</div><div><h5>${a.name}</h5><p>${a.desc} · ${ago(earned.get(a.id))}</p></div></div>`).join("")
-      : emptyState("i-hand", "No Achievements yet", "Add projects, grow skills and finish daily challenges to unlock achievements", "add-project", "Add Your First Project");
-
-    // 7-day XP chart
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(); d.setDate(d.getDate() - i);
-      const key = Store.localDate(d);
-      days.push({ key, label: d.toLocaleDateString(undefined, { weekday: "short" }), xp: me.xpLog[key] || 0, today: i === 0 });
+  function renderSkills() {
+    const skills = state.profile?.skills || [];
+    const body = $("skillsBody");
+    if (!skills.length) {
+      body.innerHTML = `
+        <div class="ui-empty">
+          <span class="ui-empty__title">Add the skills you want to be hired for</span>
+          <p>Pick from the suggestions where you can, so clients searching for that skill find you.</p>
+          <button class="ui-btn ui-btn--primary ui-btn--sm" data-action="add-skill" type="button">Add skill</button>
+        </div>`;
+      return;
     }
-    const max = Math.max(100, ...days.map((d) => d.xp));
-    const week = days.reduce((s, d) => s + d.xp, 0);
-    $("progressBody").innerHTML = `
-      <div class="chart" role="img" aria-label="XP per day for the last 7 days: ${days.map((d) => `${d.label} ${d.xp}`).join(", ")}">
-        ${days.map((d) => `<div class="chart__col">
-          <span class="chart__val">${d.xp || ""}</span>
-          <div class="chart__bar ${d.xp ? "" : "is-zero"}" style="height:${Math.max(2, (d.xp / max) * 100)}%"></div>
-          <span class="chart__day ${d.today ? "is-today" : ""}">${d.label}</span>
-        </div>`).join("")}
+    const statusBadge = (s) => ({
+      verified: `<span class="ui-badge ui-badge--success">Verified</span>`,
+      pending_verification: `<span class="ui-badge ui-badge--warning">In review</span>`,
+      rejected: `<span class="ui-badge ui-badge--danger">Not verified</span>`,
+    }[s.verification_status] || `<span class="ui-badge">Self-declared</span>`);
+    body.innerHTML = `<ul class="ui-rows">${skills.map((s) => `
+      <li class="ui-row">
+        <div class="ui-row__main">
+          <span class="ui-row__title pf-skill__name">${esc(s.name)} ${statusBadge(s)}</span>
+          <span class="ui-row__meta">${PROF_LABEL[s.proficiency] || esc(s.proficiency)}${s.years_exp ? `, ${s.years_exp} year${s.years_exp === 1 ? "" : "s"}` : ""}</span>
+        </div>
+        <div class="ui-row__actions">
+          ${["self_declared", "rejected"].includes(s.verification_status)
+            ? `<button class="ui-link-btn" data-verify-skill="${esc(s.id)}" data-skill-name="${esc(s.name)}" type="button">${s.verification_status === "rejected" ? "Send new evidence" : "Get verified"}</button>` : ""}
+          ${s.verification_status === "self_declared"
+            ? `<button class="ui-link-btn ui-link-btn--danger" data-delete-skill="${esc(s.id)}" type="button" aria-label="Remove ${esc(s.name)}">Remove</button>` : ""}
+        </div>
+      </li>`).join("")}</ul>`;
+  }
+
+  function renderTrack() {
+    const p = state.profile || {};
+    const t = state.tierInfo || {};
+    const unmet = t.unmet_criteria || [];
+    $("trackBody").innerHTML = `
+      <div class="pf-stats">
+        <div><b class="ui-num">${p.total_projects_completed || 0}</b><span>Paid projects</span></div>
+        <div><b class="ui-num">${p.total_unique_clients || 0}</b><span>Clients</span></div>
+        <div><b class="ui-num">${p.total_projects_completed ? Math.round((p.on_time_rate ?? 1) * 100) + "%" : "—"}</b><span>On time</span></div>
       </div>
-      <div class="stats">
-        <div class="stat"><b>${week}</b><span>XP this week</span></div>
-        <div class="stat"><b>${streak(me)}</b><span>Day streak</span></div>
-        <div class="stat"><b>${Store.level(me.xp)}</b><span>Level</span></div>
+      <div class="pf-next">
+        ${t.next_tier
+          ? `<p class="ui-small">To reach <span class="ui-tier ui-tier--${esc(t.next_tier)}">${esc(cap(t.next_tier))}</span></p>
+             <ul class="ui-checklist">${unmet.map((u) => `<li>${esc(u)}</li>`).join("")}</ul>`
+          : `<p class="ui-small">You're at the highest tier.</p>`}
+        <p class="ui-xs ui-text-3">No history yet counts as neutral, not negative. Thresholds are pilot values and may change before launch.</p>
       </div>`;
-
-    $("badgesBody").innerHTML = `<div class="badges">${ACHIEVEMENTS.map((a) => `
-      <div class="badge ${earned.has(a.id) ? "is-earned" : ""}" title="${esc(a.desc)}">
-        <div class="badge__icon" aria-hidden="true">${a.icon}</div>${a.name}
-        <span class="sr-only">${earned.has(a.id) ? "(earned)" : "(locked)"}</span>
-      </div>`).join("")}</div>`;
   }
 
-  function renderLeaderboard() {
-    $("lbBody").innerHTML = leaderboard(me).map((r, i) => `
-      <tr class="${r.me ? "is-me" : ""}">
-        <td class="lb__rank ${i < 3 ? "r" + (i + 1) : ""}">${i + 1}</td>
-        <td><div class="lb__user">
-          <span class="lb__avatar">${r.avatar ? `<img src="${esc(r.avatar)}" alt="">` : esc(UI.initials(r.name))}</span>
-          <span><div class="lb__name">${esc(r.name)}${r.me ? " (you)" : ""}</div><div class="lb__city">${esc(r.city || "")}</div></span>
-        </div></td>
-        <td class="num">${Store.level(r.xp)}</td>
-        <td class="num">${r.xp.toLocaleString()}</td>
-      </tr>`).join("");
+  function renderClient() {
+    const p = state.profile || {};
+    $("clientBody").innerHTML = `
+      <dl class="ui-kv">
+        <dt>Who's hiring</dt><dd>${esc(CLIENT_TYPE_LABEL[p.organization_type] || "Not set")}</dd>
+        <dt>Organisation</dt><dd>${esc(p.organization_name || "Not set")}</dd>
+        <dt>Website</dt><dd>${p.website_url ? `<a href="${esc(p.website_url)}" target="_blank" rel="noopener noreferrer">${esc(p.website_url)}</a>` : "Not set"}</dd>
+        <dt>Projects posted</dt><dd class="ui-num">${p.total_projects_posted || 0}</dd>
+      </dl>`;
   }
 
-  function render() {
-    renderHeader();
-    renderSidebar();
-    renderPortfolio();
-    renderAnalytics();
-    renderLeaderboard();
+  // ── Preferences (PROF-04) ──────────────────────────────
+  function timezoneOptions(selected) {
+    let zones = [];
+    try { zones = Intl.supportedValuesOf("timeZone"); } catch { zones = ["Asia/Kolkata", "UTC"]; }
+    if (selected && !zones.includes(selected)) zones.unshift(selected);
+    return zones.map((z) => `<option value="${esc(z)}" ${z === selected ? "selected" : ""}>${esc(z.replace(/_/g, " "))}</option>`).join("");
   }
 
-  /* ---------- Tabs ---------- */
-  const tabs = [...document.querySelectorAll('[role="tab"]')];
-  function selectTab(tab, focus) {
-    tabs.forEach((t) => {
-      const on = t === tab;
-      t.setAttribute("aria-selected", on);
-      t.tabIndex = on ? 0 : -1;
-      $(t.getAttribute("aria-controls")).classList.toggle("is-active", on);
-    });
-    if (focus) tab.focus();
-    history.replaceState(null, "", "#" + tab.id.replace("tab-", ""));
+  function urlField(name, label, value) {
+    return `<div class="ui-field"><label class="ui-label" for="pref-${name}">${label} <span class="ui-optional">(optional)</span></label>
+      <input class="ui-input" id="pref-${name}" name="${name}" type="url" placeholder="https://" value="${esc(value || "")}" /></div>`;
   }
-  tabs.forEach((t, i) => {
-    t.addEventListener("click", () => selectTab(t));
-    t.addEventListener("keydown", (e) => {
-      const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
-      if (d) selectTab(tabs[(i + d + tabs.length) % tabs.length], true);
-    });
-  });
-  const fromHash = $("tab-" + location.hash.slice(1));
-  if (fromHash) selectTab(fromHash);
 
-  /* ---------- Modals & forms ---------- */
-  UI.bindModals();
-  const profileModal = $("profileModal");
-  const projectModal = $("projectModal");
-  const skillModal = $("skillModal");
-  const challengeModal = $("challengeModal");
-  let pendingAvatar = null;
+  function renderPreferences() {
+    const p = state.profile || {};
+    const form = $("prefsForm");
+    const tz = `<div class="ui-field"><label class="ui-label" for="pref-tz">Timezone</label><select class="ui-select" id="pref-tz" name="timezone">${timezoneOptions(p.timezone)}</select><p class="ui-hint">Deadlines and messages are shown in this timezone.</p></div>`;
+    const actions = `<p class="ui-error" data-error role="alert"></p><div class="ui-cluster" style="justify-content:flex-end"><button class="ui-btn ui-btn--primary" type="submit">Save preferences</button></div>`;
+    if (!isFreelancer()) {
+      $("staleNote").hidden = true;
+      $("prefsSub").textContent = "Used to show deadlines and messages at the right local time.";
+      form.innerHTML = tz + actions;
+      return;
+    }
+    $("staleNote").hidden = !p.availability_stale;
+    const cats = state.meta?.categories || [];
+    const mine = p.work_categories || [];
+    const max = state.meta?.policy?.max_work_categories || 5;
+    form.innerHTML = `
+      <div class="ui-row-2">
+        <div class="ui-field"><label class="ui-label" for="pref-avail">Availability</label>
+          <select class="ui-select" id="pref-avail" name="availability">
+            ${["available", "limited", "unavailable"].map((a) => `<option value="${a}" ${p.availability === a ? "selected" : ""}>${cap(a)}</option>`).join("")}
+          </select>
+          <p class="ui-hint">Last confirmed ${fmtDate(p.availability_updated_at)}.</p>
+        </div>
+        <div class="ui-field"><label class="ui-label" for="pref-cap">Hours per week <span class="ui-optional">(optional)</span></label>
+          <input class="ui-input" id="pref-cap" name="weekly_capacity_hours" type="number" min="1" max="80" value="${p.weekly_capacity_hours ?? ""}" />
+        </div>
+      </div>
+      <fieldset class="ui-chips" aria-describedby="catHint">
+        <legend class="ui-label">Work categories, up to ${max}</legend>
+        ${cats.map((c) => `<label class="ui-chip"><input type="checkbox" name="work_categories" value="${esc(c)}" ${mine.includes(c) ? "checked" : ""} /><span>${esc(c)}</span></label>`).join("")}
+      </fieldset>
+      <p class="ui-hint" id="catHint">Launch categories are still being chosen, so this list may get shorter.</p>
+      <div class="ui-row-2">
+        <div class="ui-field"><label class="ui-label" for="pref-eng">Preferred engagement</label>
+          <select class="ui-select" id="pref-eng" name="engagement_preference">
+            ${Object.entries(ENGAGEMENT_LABEL).map(([k, v]) => `<option value="${k}" ${p.engagement_preference === k ? "selected" : ""}>${v}</option>`).join("")}
+          </select>
+        </div>
+        ${tz}
+      </div>
+      <div class="ui-row-2">${urlField("portfolio_url", "Portfolio site", p.portfolio_url)}${urlField("linkedin_url", "LinkedIn", p.linkedin_url)}</div>
+      <div class="ui-row-2">${urlField("github_url", "GitHub", p.github_url)}${urlField("website_url", "Website", p.website_url)}</div>
+      <label class="ui-check"><input type="checkbox" name="hidden_profile" ${p.public_visibility === "hidden" ? "checked" : ""} />
+        <span><b>Hide my profile</b> from search and public view.</span></label>
+      ${actions}`;
+  }
 
-  function openProfile() {
+  function prefsPayload(form) {
+    if (!isFreelancer()) return { timezone: form.timezone.value };
+    const urlOrNull = (v) => (v.trim() ? v.trim() : null);
+    return {
+      availability: form.availability.value,
+      weekly_capacity_hours: form.weekly_capacity_hours.value ? Number(form.weekly_capacity_hours.value) : null,
+      work_categories: [...form.querySelectorAll('input[name="work_categories"]:checked')].map((i) => i.value),
+      engagement_preference: form.engagement_preference.value,
+      timezone: form.timezone.value,
+      portfolio_url: urlOrNull(form.portfolio_url.value),
+      linkedin_url: urlOrNull(form.linkedin_url.value),
+      github_url: urlOrNull(form.github_url.value),
+      website_url: urlOrNull(form.website_url.value),
+      public_visibility: form.hidden_profile.checked ? "hidden" : "public",
+    };
+  }
+
+  // ── Account (AUTH-02) ──────────────────────────────────
+  function renderAccount() {
+    const u = state.user;
+    const roles = (u.roles || []).map(cap);
+    const other = u.active_role === "freelancer" ? "client" : "freelancer";
+    $("accountBody").innerHTML = `
+      <dl class="ui-kv">
+        <dt>Email</dt><dd>${esc(u.email)}</dd>
+        <dt>Email status</dt><dd>${u.email_verified
+          ? `<span class="ui-badge ui-badge--success">Verified ${fmtDate(u.email_verified_at)}</span>`
+          : `<span class="ui-badge ui-badge--warning">Not verified</span> <button class="ui-link-btn" type="button" data-action="resend-verify">Resend link</button>`}</dd>
+        <dt>Your roles</dt><dd>${esc(roles.join(" and ") || "None")}</dd>
+        <dt>Working as</dt><dd>${cap(u.active_role)} <button class="ui-link-btn" type="button" data-action="switch-role">Switch to ${other}</button></dd>
+        <dt>Member since</dt><dd>${fmtDate(u.created_at)}</dd>
+      </dl>`;
+    loadSessions();
+  }
+
+  function describeAgent(ua) {
+    if (!ua) return "Unknown device";
+    const browser = /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Firefox\//.test(ua) ? "Firefox" : /Safari\//.test(ua) ? "Safari" : /node|undici|curl/i.test(ua) ? "Script or API client" : "Browser";
+    const os = /iPhone|iPad/.test(ua) ? "iOS" : /Android/.test(ua) ? "Android" : /Mac OS X/.test(ua) ? "macOS" : /Windows/.test(ua) ? "Windows" : /Linux/.test(ua) ? "Linux" : "";
+    return os ? `${browser} on ${os}` : browser;
+  }
+
+  async function loadSessions() {
+    const body = $("sessionsBody");
+    try { state.sessions = (await CreoAPI.auth.sessions()).sessions || []; }
+    catch (err) { body.innerHTML = `<p class="ui-error">${esc(err.message)}</p>`; return; }
+    $("logoutAllBtn").disabled = !state.sessions.some((s) => !s.current);
+    body.innerHTML = `<ul class="ui-rows">${state.sessions.map((s) => `
+      <li class="ui-row">
+        <div class="ui-row__main">
+          <span class="ui-row__title">${esc(describeAgent(s.user_agent))} ${s.current ? `<span class="ui-badge ui-badge--accent">This device</span>` : ""}</span>
+          <span class="ui-row__meta">Signed in ${fmtDateTime(s.created_at)}. Last active ${fmtDateTime(s.last_seen_at)}.</span>
+        </div>
+        ${s.current ? "" : `<div class="ui-row__actions"><button class="ui-link-btn ui-link-btn--danger" type="button" data-revoke-session="${esc(s.id)}">Sign out</button></div>`}
+      </li>`).join("")}</ul>`;
+  }
+
+  // ── Dialogs ────────────────────────────────────────────
+  function openProfileModal() {
+    const p = state.profile || {};
     const f = $("profileForm");
-    f.name.value = me.name;
-    f.location.value = me.location || "";
-    f.about.value = me.about || "";
-    pendingAvatar = me.avatar || "";
-    $("avatarPreview").innerHTML = avatarHTML({ ...me, avatar: pendingAvatar });
-    UI.openModal(profileModal);
+    showFormError(f, null);
+    f.querySelectorAll("[data-role-only]").forEach((el) => { el.hidden = el.dataset.roleOnly !== state.user.active_role; });
+    f.display_name.value = p.display_name || "";
+    f.headline.value = p.headline || "";
+    f.location_city.value = p.location_city || "";
+    f.location_state.value = p.location_state || "";
+    f.bio.value = p.bio || "";
+    const types = state.meta?.client_types || Object.keys(CLIENT_TYPE_LABEL);
+    f.organization_type.innerHTML = `<option value="">Choose one</option>` + types.map((t) => `<option value="${t}" ${p.organization_type === t ? "selected" : ""}>${esc(CLIENT_TYPE_LABEL[t] || t)}</option>`).join("");
+    f.organization_name.value = p.organization_name || "";
+    f.website_url.value = p.website_url || "";
+    $("bioLabel").textContent = isFreelancer() ? "Bio" : "About your organisation";
+    $("bioHint").textContent = isFreelancer()
+      ? "Aim for at least 80 characters: what you do, who for, and how you work."
+      : "Aim for at least 40 characters: what you do and what you hire for.";
+    UI.openModal($("profileModal"));
   }
 
-  document.addEventListener("click", (e) => {
-    const a = e.target.closest("[data-action]");
-    if (a) {
-      const act = a.dataset.action;
-      if (act === "add-project") { $("projectForm").reset(); UI.openModal(projectModal); }
-      if (act === "add-skill") { $("skillForm").reset(); UI.openModal(skillModal); }
+  function openPortfolioModal(item) {
+    const f = $("projectForm");
+    f.reset();
+    showFormError(f, null);
+    f.category.innerHTML = `<option value="">None</option>` + (state.meta?.categories || []).map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
+    $("projectTitle").textContent = item ? "Edit work" : "Add work";
+    f.id.value = item?.id || "";
+    if (item) {
+      f.title.value = item.title || "";
+      f.description.value = item.description || "";
+      f.category.value = item.category || "";
+      f.external_url.value = item.external_url || "";
+      f.skills_used.value = (item.skills_used || []).join(", ");
+      f.is_confidential.checked = !!item.is_confidential;
+      f.rights_declared.checked = !!item.rights_declared;
     }
-    const rp = e.target.closest("[data-remove-project]");
-    if (rp) {
-      const id = rp.dataset.removeProject;
-      commit((p) => {
-        const it = p.portfolio.find((x) => x.id === id);
-        p.portfolio = p.portfolio.filter((x) => x.id !== id);
-        if (it) addXP(p, -XP.project, `Removed project “${it.title}”`);
-      });
-    }
-    const rs = e.target.closest("[data-remove-skill]");
-    if (rs) {
-      const id = rs.dataset.removeSkill;
-      commit((p) => {
-        const s = p.skills.find((x) => x.id === id);
-        p.skills = p.skills.filter((x) => x.id !== id);
-        if (s) addXP(p, -XP.skill, `Removed skill “${s.name}”`);
-      });
-    }
-    const lu = e.target.closest("[data-level-up]");
-    if (lu) {
-      const id = lu.dataset.levelUp;
-      commit((p) => {
-        const s = p.skills.find((x) => x.id === id);
-        if (s && s.level < 5) { s.level++; addXP(p, 10, `${s.name} → ${SKILL_LEVELS[s.level]}`); }
-      });
-    }
-  });
-
-  $("editAvatarBtn").addEventListener("click", openProfile);
-  $("aboutBtn").addEventListener("click", openProfile);
-  $("rankTag").addEventListener("click", () => selectTab($("tab-leaderboard"), true));
-
-  $("avatarInput").addEventListener("change", async (e) => {
-    const file = e.target.files[0];
-    e.target.value = "";
-    if (!file) return;
-    if (!file.type.startsWith("image/")) { UI.toast("Please choose an image file.", "error"); return; }
-    try {
-      pendingAvatar = await resizeImage(file, 256);
-      $("avatarPreview").innerHTML = `<img src="${pendingAvatar}" alt="">`;
-    } catch {
-      UI.toast("Couldn't read that image.", "error");
-    }
-  });
-  $("avatarRemove").addEventListener("click", () => {
-    pendingAvatar = "";
-    $("avatarPreview").textContent = UI.initials($("profileForm").name.value || me.name);
-  });
-
-  $("profileForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const f = e.target;
-    const name = f.name.value.trim();
-    if (!name) { f.name.focus(); return; }
-    const ok = commit((p) => {
-      p.name = name;
-      p.location = f.location.value.trim();
-      p.about = f.about.value.trim();
-      p.avatar = pendingAvatar;
-      log(p, "Updated profile");
-    }, "Profile saved");
-    if (ok) UI.closeModal(profileModal);
-  });
-
-  $("projectForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const f = e.target;
-    const title = f.title.value.trim();
-    const link = f.link.value.trim();
-    if (!title) { f.title.focus(); return; }
-    if (link && !/^https?:\/\//i.test(link)) { UI.toast("Links must start with http:// or https://", "error"); return; }
-    const ok = commit((p) => {
-      p.portfolio.unshift({
-        id: uid(), title, desc: f.desc.value.trim(), link,
-        tags: f.tags.value.split(",").map((t) => t.trim()).filter(Boolean).slice(0, 6),
-        at: Date.now(),
-      });
-      addXP(p, XP.project, `Added project “${title}”`);
-    }, `Project added · +${XP.project} XP`);
-    if (ok) UI.closeModal(projectModal);
-  });
-
-  $("skillForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const f = e.target;
-    const name = f.name.value.trim();
-    if (!name) { f.name.focus(); return; }
-    if (me.skills.some((s) => s.name.toLowerCase() === name.toLowerCase())) {
-      UI.toast(`${name} is already in your skill tree.`, "error"); return;
-    }
-    const ok = commit((p) => {
-      p.skills.push({ id: uid(), name, level: Number(f.level.value) });
-      addXP(p, XP.skill, `Added skill “${name}”`);
-    }, `Skill added · +${XP.skill} XP`);
-    if (ok) UI.closeModal(skillModal);
-  });
-
-  $("challengeBtn").addEventListener("click", () => {
-    $("challengeDetail").textContent = todaysChallenge();
-    UI.openModal(challengeModal);
-  });
-  $("challengeComplete").addEventListener("click", () => {
-    const today = Store.today();
-    if (me.challengeDoneOn === today) return;
-    commit((p) => {
-      p.challengeDoneOn = today;
-      p.challengeDates = [...new Set([...(p.challengeDates || []), today])].slice(-60);
-      addXP(p, XP.challenge, "Completed the daily challenge");
-    }, `Challenge complete · +${XP.challenge} XP`);
-    UI.closeModal(challengeModal);
-  });
-
-  // Notifications dropdown
-  const notifBtn = $("notifBtn");
-  const notifPanel = $("notifPanel");
-  notifBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const open = notifPanel.classList.toggle("is-open");
-    notifBtn.setAttribute("aria-expanded", open);
-    if (open && me.activity[0]) { sessionStorageSet("creotask:seen", me.activity[0].at); $("notifDot").hidden = true; }
-  });
-  document.addEventListener("click", (e) => {
-    if (!notifPanel.contains(e.target)) { notifPanel.classList.remove("is-open"); notifBtn.setAttribute("aria-expanded", "false"); }
-  });
-
-  $("logoutBtn").addEventListener("click", () => { Store.signOut(); location.href = "index.html"; });
-
-  /* ---------- Countdown to the next daily challenge ---------- */
-  let lastDay = Store.today();
-  function tick() {
-    const now = new Date();
-    const end = new Date(now); end.setHours(24, 0, 0, 0);
-    const s = Math.max(0, Math.floor((end - now) / 1000));
-    const z = (n) => String(n).padStart(2, "0");
-    $("timeLeft").textContent = `${z(Math.floor(s / 3600))}:${z(Math.floor((s % 3600) / 60))}:${z(s % 60)}`;
-    if (Store.today() !== lastDay) { lastDay = Store.today(); render(); }
+    syncRightsRow();
+    UI.openModal($("projectModal"));
   }
-  tick();
-  setInterval(tick, 1000);
 
-  /* ---------- Utils ---------- */
-  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-  function sessionStorageGet(k) { try { return sessionStorage.getItem(k); } catch { return null; } }
-  function sessionStorageSet(k, v) { try { sessionStorage.setItem(k, v); } catch { /* ignore */ } }
+  function syncRightsRow() {
+    const f = $("projectForm");
+    const conf = f.is_confidential.checked;
+    $("rightsRow").setAttribute("aria-disabled", conf ? "true" : "false");
+    f.rights_declared.disabled = conf;
+  }
 
-  function resizeImage(file, size) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onload = () => {
-        const c = document.createElement("canvas");
-        c.width = c.height = size;
-        const side = Math.min(img.width, img.height);
-        c.getContext("2d").drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
-        URL.revokeObjectURL(url);
-        resolve(c.toDataURL("image/jpeg", 0.85));
+  let catalogTimer = null;
+  function wireSkillSuggestions() {
+    const input = $("skillForm").name;
+    const list = $("skillSuggestions");
+    const fill = async (q) => {
+      try {
+        const r = await CreoAPI.profiles.skillCatalog(q);
+        list.innerHTML = r.skills.map((s) => `<option value="${esc(s.name)}">${esc(s.category)}</option>`).join("");
+      } catch { /* suggestions are optional */ }
+    };
+    input.addEventListener("input", () => { clearTimeout(catalogTimer); catalogTimer = setTimeout(() => fill(input.value.trim()), 180); });
+    fill("");
+  }
+
+  // ── Events ─────────────────────────────────────────────
+  function bindTabs() {
+    const tabs = [...document.querySelectorAll(".ui-tab")];
+    const activate = (tab, focus) => {
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute("aria-selected", String(on));
+        t.tabIndex = on ? 0 : -1;
+        $(t.getAttribute("aria-controls"))?.classList.toggle("is-active", on);
+      });
+      if (focus) tab.focus();
+      history.replaceState(null, "", tab.id === "tab-profile" ? location.pathname : `#${tab.id.slice(4)}`);
+    };
+    tabs.forEach((tab, i) => {
+      tab.addEventListener("click", () => activate(tab));
+      tab.addEventListener("keydown", (e) => {
+        if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+        activate(tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length], true);
+      });
+    });
+    const start = tabs.find((t) => `#${t.id.slice(4)}` === location.hash);
+    if (start) activate(start);
+  }
+
+  function on(id, ev, fn) { $(id).addEventListener(ev, fn); }
+
+  function bindEvents() {
+    bindTabs();
+    wireSkillSuggestions();
+    on("retryBtn", "click", reload);
+    $("projectForm").is_confidential.addEventListener("change", syncRightsRow);
+
+    on("profileForm", "submit", async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      const val = (v) => (v.trim() ? v.trim() : null);
+      const payload = { display_name: f.display_name.value.trim(), location_city: val(f.location_city.value), location_state: val(f.location_state.value), bio: val(f.bio.value) };
+      if (isFreelancer()) payload.headline = val(f.headline.value);
+      else Object.assign(payload, { organization_type: f.organization_type.value || null, organization_name: val(f.organization_name.value), website_url: val(f.website_url.value) });
+      await UI.busy(f.querySelector('[type="submit"]'), async () => {
+        try {
+          if (isFreelancer()) await CreoAPI.profiles.updateFreelancer(payload);
+          else await CreoAPI.profiles.updateClient(payload);
+          UI.closeModal($("profileModal"));
+          UI.toast("Profile saved.", "success");
+          await reload();
+        } catch (err) { showFormError(f, err); }
+      });
+    });
+
+    on("projectForm", "submit", async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      const itemId = f.id.value;
+      const payload = {
+        title: f.title.value.trim(),
+        description: f.description.value.trim() || null,
+        category: f.category.value || null,
+        external_url: f.external_url.value.trim() || null,
+        skills_used: f.skills_used.value.split(",").map((t) => t.trim()).filter(Boolean),
+        is_confidential: f.is_confidential.checked,
+        rights_declared: f.is_confidential.checked ? false : f.rights_declared.checked,
       };
-      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("bad image")); };
-      img.src = url;
+      if (payload.title.length < 3) { showFormError(f, { message: "Add a title of at least 3 characters.", fields: { title: 1 } }); f.title.focus(); return; }
+      if (!payload.is_confidential && !payload.rights_declared) {
+        showFormError(f, { message: "Confirm you have the right to show this publicly, or keep it confidential.", fields: { rights_declared: 1 } });
+        return;
+      }
+      await UI.busy($("projectSubmit"), async () => {
+        try {
+          if (itemId) await CreoAPI.profiles.updatePortfolio(itemId, payload);
+          else await CreoAPI.profiles.addPortfolio(payload);
+          UI.closeModal($("projectModal"));
+          UI.toast(itemId ? "Work updated." : "Work added.", "success");
+          await reload();
+        } catch (err) { showFormError(f, err); }
+      });
+    });
+
+    on("skillForm", "submit", async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      await UI.busy(f.querySelector('[type="submit"]'), async () => {
+        try {
+          const r = await CreoAPI.profiles.addSkill({ name: f.name.value.trim(), proficiency: f.proficiency.value, years_exp: f.years_exp.value ? Number(f.years_exp.value) : undefined });
+          UI.closeModal($("skillModal"));
+          UI.toast(r.mapped_to_catalog ? `${r.skill.name} added.` : `${r.skill.name} added. It isn't in our skill list yet, so fewer clients may find it.`, "success");
+          await reload();
+        } catch (err) { showFormError(f, err); }
+      });
+    });
+
+    on("evidenceForm", "submit", async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      const links = f.external_links.value.split(/\s+/).map((l) => l.trim()).filter(Boolean);
+      await UI.busy(f.querySelector('[type="submit"]'), async () => {
+        try {
+          const r = await CreoAPI.profiles.verifySkill(f.skill_id.value, { evidence_note: f.evidence_note.value.trim(), external_links: links });
+          UI.closeModal($("evidenceModal"));
+          UI.toast(r.message, "success");
+          await reload();
+        } catch (err) { showFormError(f, err); }
+      });
+    });
+
+    on("prefsForm", "submit", async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      const payload = prefsPayload(f);
+      const max = state.meta?.policy?.max_work_categories || 5;
+      if (payload.work_categories && payload.work_categories.length > max) { showFormError(f, { message: `Choose up to ${max} categories.` }); return; }
+      await UI.busy(f.querySelector('[type="submit"]'), async () => {
+        try {
+          if (isFreelancer()) await CreoAPI.profiles.updateFreelancer(payload);
+          else await CreoAPI.profiles.updateClient(payload);
+          UI.toast("Preferences saved.", "success");
+          await reload();
+        } catch (err) { showFormError(f, err); }
+      });
+    });
+
+    on("confirmAvailBtn", "click", (e) => UI.busy(e.target, async () => {
+      try { await CreoAPI.profiles.updateFreelancer({ availability: state.profile.availability }); UI.toast("Availability confirmed.", "success"); await reload(); }
+      catch (err) { UI.toast(err.message, "error"); }
+    }));
+
+    on("passwordForm", "submit", async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      $("passwordError").textContent = "";
+      await UI.busy(f.querySelector('[type="submit"]'), async () => {
+        try { const r = await CreoAPI.auth.changePassword(f.current_password.value, f.new_password.value); f.reset(); UI.toast(r.message, "success"); loadSessions(); }
+        catch (err) { $("passwordError").textContent = err.message; }
+      });
+    });
+
+    on("logoutAllBtn", "click", (e) => UI.busy(e.target, async () => {
+      try { UI.toast((await CreoAPI.auth.logoutAll()).message, "success"); loadSessions(); }
+      catch (err) { UI.toast(err.message, "error"); }
+    }));
+
+    document.addEventListener("click", async (e) => {
+      const t = e.target.closest("#profileMain button, #profileMain a");
+      if (!t) return;
+      const d = t.dataset;
+      const run = (fn, ok) => UI.busy(t, async () => { try { await fn(); if (ok) UI.toast(ok); await reload(); } catch (err) { UI.toast(err.message, "error"); } });
+
+      if (d.action === "add-skill") { $("skillForm").reset(); showFormError($("skillForm"), null); UI.openModal($("skillModal")); }
+      if (d.action === "add-project") openPortfolioModal(null);
+      if (d.action === "edit-profile") openProfileModal();
+      if (d.action === "resend-verify") {
+        await UI.busy(t, async () => {
+          try { await CreoAPI.auth.resendVerification(state.user.email); UI.toast(`We've sent a new verification link to ${state.user.email}. Older links no longer work.`, "success"); }
+          catch (err) { UI.toast(err.message, "error"); }
+        });
+      }
+      if (d.action === "switch-role") {
+        const next = state.user.active_role === "freelancer" ? "client" : "freelancer";
+        await UI.busy(t, async () => {
+          try { await CreoAPI.auth.switchRole(next); location.reload(); }
+          catch (err) { UI.toast(err.message, "error"); }
+        });
+      }
+      if (d.editPortfolio) openPortfolioModal((state.profile.portfolio || []).find((i) => i.id === d.editPortfolio));
+      if (d.archivePortfolio) run(() => CreoAPI.profiles.archivePortfolio(d.archivePortfolio), "Archived. It's no longer shown publicly.");
+      if (d.restorePortfolio) run(() => CreoAPI.profiles.restorePortfolio(d.restorePortfolio), "Restored.");
+      if (d.deletePortfolio) {
+        if (!confirm("Remove this work permanently? Archive it instead if you might want it back.")) return;
+        run(() => CreoAPI.profiles.deletePortfolio(d.deletePortfolio), "Work removed.");
+      }
+      if (d.deleteSkill) {
+        if (!confirm("Remove this skill from your profile?")) return;
+        run(() => CreoAPI.profiles.deleteSkill(d.deleteSkill), "Skill removed.");
+      }
+      if (d.verifySkill) {
+        const f = $("evidenceForm");
+        f.reset(); showFormError(f, null);
+        f.skill_id.value = d.verifySkill;
+        $("evidenceTitle").textContent = `Get ${d.skillName || "this skill"} verified`;
+        UI.openModal($("evidenceModal"));
+      }
+      if (d.revokeSession) {
+        await UI.busy(t, async () => {
+          try { await CreoAPI.auth.revokeSession(d.revokeSession); UI.toast("Device signed out."); loadSessions(); }
+          catch (err) { UI.toast(err.message, "error"); }
+        });
+      }
     });
   }
 
-  // Older saved profiles may predate some fields.
-  me = Store.update((p) => { p.challengeDates = p.challengeDates || []; checkAchievements(p); }) || me;
-  render();
+  async function init() {
+    UI.bindModals();
+    bindEvents();
+    await reload();
+  }
+
+  init();
 })();

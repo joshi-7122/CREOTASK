@@ -1,0 +1,7 @@
+/* Standalone auth pages (verify email, reset password) */
+.auth-page { min-height: 100dvh; display: grid; place-items: center; padding: var(--s-6) var(--s-4);
+  background: radial-gradient(700px 380px at 50% 0%, rgba(201, 164, 100, 0.10), transparent 70%), var(--bg); }
+.auth-panel { width: min(440px, 100%); display: flex; flex-direction: column; gap: var(--s-6); }
+.auth-panel .ui-card__body { display: flex; flex-direction: column; gap: var(--s-5); padding: var(--s-8); }
+.auth-status { display: flex; flex-direction: column; gap: var(--s-3); align-items: flex-start; }
+@media (max-width: 480px) { .auth-panel .ui-card__body { padding: var(--s-6); } }

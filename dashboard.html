@@ -3,267 +3,273 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard — CREOTASK</title>
-  <meta name="theme-color" content="#0b0b0d" />
-  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml" />
+  <title>Your profile — CreoTask</title>
+  <meta name="theme-color" content="#050507" />
+  <link rel="icon" href="/assets/img/logo.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/styles.css" />
-  <link rel="stylesheet" href="assets/css/dashboard.css" />
-  <script src="assets/js/store.js"></script>
-  <script src="assets/js/data.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Cinzel:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/ds.css" />
+  <link rel="stylesheet" href="/assets/css/pages/shell.css" />
+  <link rel="stylesheet" href="/assets/css/pages/profile.css" />
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/store.js"></script>
   <script>if (!Store.current()) location.replace("index.html?auth=signin");</script>
 </head>
-<body class="dash-body">
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <symbol id="logo" viewBox="0 0 64 64"><g fill="currentColor"><path d="M32 1C33.82 19.6 33.56 47.5 32 63C30.44 47.5 30.18 19.6 32 1Z"/><path d="M26 15C27.54 28.2 27.32 48 26 59C24.68 48 24.46 28.2 26 15Z"/><path d="M38 15C39.54 28.2 39.32 48 38 59C36.68 48 36.46 28.2 38 15Z"/><path d="M31.45 33.6Q18.17 42.21 5 51Q18.83 43.29 32.55 35.4Z"/><path d="M31.45 35.4Q45.17 43.29 59 51Q45.83 42.21 32.55 33.6Z"/><path d="M25.48 41.83Q20.19 46.35 15 51Q20.81 47.15 26.52 43.17Z"/><path d="M37.48 43.17Q43.19 47.15 49 51Q43.81 46.35 38.52 41.83Z"/></g></symbol>
-    <symbol id="i-edit" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="15" height="15" rx="3"/><path d="M8 13l3-1 8-8 2 2-8 8-1 3z"/></g></symbol>
-    <symbol id="i-target" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></g></symbol>
-    <symbol id="i-star" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/></symbol>
-    <symbol id="i-info" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></g></symbol>
-    <symbol id="i-bolt" viewBox="0 0 24 24"><path fill="currentColor" d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
-    <symbol id="i-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></g></symbol>
-    <symbol id="i-check" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></g></symbol>
-    <symbol id="i-hand" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4.5a1.5 1.5 0 0 1 3 0V11M14 10.5V6a1.5 1.5 0 0 1 3 0v7c0 4-2.5 8-7 8-3 0-4.5-1.5-6-4l-2-3.5a1.5 1.5 0 0 1 2.5-1.6L8 14"/></g></symbol>
-    <symbol id="i-bell" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></g></symbol>
-    <symbol id="i-crown" viewBox="0 0 24 24"><path fill="currentColor" d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 11H5z"/></symbol>
-  </svg>
+<body class="ui sh-body">
+  <a class="ui-skip" href="#profileMain">Skip to content</a>
 
-  <div class="dash">
-    <header class="dash-top">
-      <a class="brand" href="app.html" aria-label="CREOTASK home">
-        <svg class="brand__mark"><use href="#logo"/></svg>
-        <span class="brand__name">CREOTASK</span>
+  <header class="sh-top">
+    <div class="ui-container sh-top__inner">
+      <a class="ui-brand" href="#" id="homeLink" aria-label="CreoTask home">
+        <img src="/assets/img/logo.svg" alt="" width="28" height="28" />
+        <span>CREOTASK</span>
       </a>
-      <div class="dash-top__right">
-        <div class="xp-card" title="Experience">
-          <div class="xp-card__avatar">
-            <span class="xp-card__face" id="xpAvatar"></span>
-            <span class="xp-card__level" id="xpLevel" aria-label="Level">1</span>
-          </div>
-          <div class="xp-card__meta">
-            <div class="xp-card__label"><span>Exp</span><span id="xpText">0 / 500</span></div>
-            <div class="bar" role="progressbar" aria-label="Experience to next level" aria-valuemin="0" aria-valuemax="100" id="xpBarWrap"><div class="bar__fill" id="xpBar" style="width:0%"></div></div>
-            <div class="xp-card__tier" id="xpTier"></div>
+
+      <nav class="sh-nav" id="mainDock" aria-label="Main"></nav>
+
+      <div class="sh-tools">
+        <button class="sh-role" id="roleSwitchBtn" type="button">
+          <span class="sh-role__label">Working as</span>
+          <span class="sh-role__value" id="roleBadge">—</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+
+        <div id="tierPillWrap"></div>
+
+        <div class="sh-pop">
+          <button class="ui-btn ui-btn--quiet ui-btn--icon sh-icon-btn" id="notifBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="notifMenu" aria-label="Notifications">
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="sh-dot" id="notifBadge" hidden></span>
+          </button>
+          <div class="ui-menu sh-notif" id="notifMenu" hidden>
+            <div class="ui-split sh-notif__head">
+              <b>Notifications</b>
+              <button class="ui-link-btn" id="markAllNotifsBtn" type="button">Mark all read</button>
+            </div>
+            <div id="notifList" class="sh-notif__list"></div>
           </div>
         </div>
-        <button class="icon-btn" id="notifBtn" aria-label="Notifications" aria-expanded="false" style="position:relative">
-          <svg class="icon"><use href="#i-bell"/></svg>
-          <span class="badge-dot" id="notifDot" hidden></span>
-        </button>
-        <div class="notif" id="notifPanel" role="region" aria-label="Notifications">
-          <h4>Recent activity</h4>
-          <ul id="notifList"></ul>
+
+        <div class="sh-pop">
+          <button class="sh-account" id="accountBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="accountMenu" aria-label="Account menu">
+            <span class="ui-avatar ui-avatar--sm" id="headerAvatar" aria-hidden="true"></span>
+          </button>
+          <div class="ui-menu" id="accountMenu" hidden>
+            <div class="sh-account__who">
+              <b id="headerName">—</b>
+              <span class="ui-small ui-text-2" id="headerEmail"></span>
+            </div>
+            <div class="ui-menu__sep"></div>
+            <a class="ui-menu__item" href="dashboard.html">Profile</a>
+            <a class="ui-menu__item" href="dashboard.html#account">Account and security</a>
+            <button class="ui-menu__item" type="button" id="menuSwitchRole">Switch role</button>
+            <div class="ui-menu__sep"></div>
+            <button class="ui-menu__item" type="button" id="logoutBtn">Log out</button>
+          </div>
         </div>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <div class="dash-main">
-      <!-- ============ Sidebar ============ -->
-      <aside class="dash-side" aria-label="Profile">
-        <div class="avatar-wrap">
-          <div class="avatar" id="avatar"></div>
-          <button class="rank-tag" id="rankTag" title="View leaderboard">
-            <svg class="icon" style="width:12px;height:12px"><use href="#i-crown"/></svg>
-            <span id="rankText">#— Leaderboard</span>
-          </button>
-          <button class="avatar-edit" id="editAvatarBtn" aria-label="Edit profile">
-            <svg class="icon"><use href="#i-edit"/></svg>
-          </button>
+  <div class="ui-container sh-banners" id="accountBanner"></div>
+    <main class="ui-container sh-main pf" id="profileMain" tabindex="-1">
+    <div class="ui-alert ui-alert--danger" id="loadError" role="alert" hidden>
+      <span id="loadErrorText">Your profile didn't load.</span>
+      <button class="ui-btn ui-btn--sm" id="retryBtn" type="button">Try again</button>
+    </div>
+
+    <section class="pf-head" aria-labelledby="name">
+      <span class="ui-avatar ui-avatar--lg" id="avatar" aria-hidden="true"></span>
+      <div class="pf-head__who">
+        <h1 class="ui-h1" id="name"><span class="ui-skeleton ui-skeleton--line" style="width:12ch"></span></h1>
+        <p class="pf-head__headline" id="headline"></p>
+        <p class="pf-head__meta ui-small ui-text-2">
+          <span id="location"></span>
+          <span id="rating"></span>
+          <span id="tierInline"></span>
+        </p>
+      </div>
+      <div class="pf-head__side">
+        <div class="pf-complete" id="completeBox">
+          <div class="ui-split"><span class="ui-small ui-text-2">Profile complete</span><b class="ui-num" id="completePct">—</b></div>
+          <div class="ui-progress ui-progress--stitch" role="progressbar" aria-label="Profile completeness" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="completeBar"><span style="width:0%"></span></div>
         </div>
+        <button class="ui-btn" type="button" data-action="edit-profile">Edit profile</button>
+      </div>
+    </section>
 
-        <section class="side-card side-card--name">
-          <h1 class="name-display" id="name"></h1>
-          <div class="meta-line"><svg class="icon" style="width:14px;height:14px"><use href="#i-target"/></svg><span id="location"></span></div>
-          <div class="meta-line rating">
-            <svg class="icon" style="width:18px;height:18px"><use href="#i-star"/></svg>
-            <span id="rating"></span>
-          </div>
-        </section>
+    <div class="ui-tabs" role="tablist" aria-label="Profile sections">
+      <button class="ui-tab" role="tab" id="tab-profile" aria-controls="panel-profile" aria-selected="true">Profile</button>
+      <button class="ui-tab" role="tab" id="tab-preferences" aria-controls="panel-preferences" aria-selected="false" tabindex="-1">Work preferences</button>
+      <button class="ui-tab" role="tab" id="tab-account" aria-controls="panel-account" aria-selected="false" tabindex="-1">Account and security</button>
+    </div>
 
-        <section class="side-card">
-          <div class="side-card__head">
-            <h3>About <button class="mini-btn" id="aboutBtn" aria-label="Edit about"><svg class="icon" style="width:16px;height:16px"><use href="#i-info"/></svg></button></h3>
-          </div>
-          <p class="about-text" id="about"></p>
-        </section>
+    <!-- Profile -->
+    <section class="ui-tabpanel is-active pf-grid" id="panel-profile" role="tabpanel" aria-labelledby="tab-profile">
+      <div class="pf-col">
+        <article class="ui-card" id="checklistCard">
+          <div class="ui-card__head"><div><h2 class="ui-card__title">Finish your profile</h2><p class="ui-card__sub" id="checklistSub">Clients compare evidence. These are the gaps they'll notice first.</p></div></div>
+          <div class="ui-card__body" id="completenessBody"><span class="ui-skeleton ui-skeleton--block"></span></div>
+        </article>
 
-        <section class="side-card">
-          <div class="side-card__head" style="border:0;margin:0;padding:0">
-            <h3>Daily Challenges <svg class="icon" style="width:16px;height:16px;color:var(--gold)"><use href="#i-bolt"/></svg></h3>
-            <svg class="icon lock" id="challengeLock" aria-hidden="true"><use href="#i-lock"/></svg>
+        <article class="ui-card" data-role-only="freelancer">
+          <div class="ui-card__head">
+            <div><h2 class="ui-card__title">Portfolio</h2><p class="ui-card__sub" id="portfolioCount">Loading</p></div>
+            <button class="ui-btn ui-btn--sm" data-action="add-project" type="button">Add work</button>
           </div>
-          <p class="challenge-text" id="challengeText"></p>
-          <div class="challenge-row">
-            <span class="time-left">Time Left: <span id="timeLeft">--:--:--</span></span>
-            <button class="btn btn--light btn--sm" id="challengeBtn">Start</button>
-          </div>
-        </section>
+          <div class="ui-card__body" id="portfolioBody"><span class="ui-skeleton ui-skeleton--block"></span></div>
+        </article>
 
-        <button class="btn btn--block" id="logoutBtn">Logout</button>
+        <article class="ui-card" data-role-only="freelancer">
+          <div class="ui-card__head">
+            <div><h2 class="ui-card__title">Skills</h2><p class="ui-card__sub">Verified means a reviewer checked your evidence. Self-declared is your own claim.</p></div>
+            <button class="ui-btn ui-btn--sm" data-action="add-skill" type="button">Add skill</button>
+          </div>
+          <div class="ui-card__body" id="skillsBody"><span class="ui-skeleton ui-skeleton--block"></span></div>
+        </article>
+
+        <article class="ui-card" data-role-only="client">
+          <div class="ui-card__head">
+            <div><h2 class="ui-card__title">What freelancers see</h2><p class="ui-card__sub">Shown on your projects before anyone applies.</p></div>
+            <button class="ui-btn ui-btn--sm" data-action="edit-profile" type="button">Edit</button>
+          </div>
+          <div class="ui-card__body" id="clientBody"></div>
+        </article>
+      </div>
+
+      <aside class="pf-col">
+        <article class="ui-card">
+          <div class="ui-card__head"><h2 class="ui-card__title">About</h2><button class="ui-link-btn" data-action="edit-profile" type="button">Edit</button></div>
+          <div class="ui-card__body"><p class="pf-about" id="about"></p></div>
+        </article>
+
+        <article class="ui-card" data-role-only="freelancer">
+          <div class="ui-card__head"><div><h2 class="ui-card__title">Track record</h2><p class="ui-card__sub">Tiers are earned from evidence and can't be bought.</p></div></div>
+          <div class="ui-card__body" id="trackBody"></div>
+        </article>
+
+        <article class="ui-card">
+          <div class="ui-card__head"><h2 class="ui-card__title" id="readinessTitle">Payout readiness</h2><span class="ui-badge" id="readinessStatus">—</span></div>
+          <div class="ui-card__body"><p class="ui-small ui-text-2" id="readinessText"></p></div>
+        </article>
       </aside>
+    </section>
 
-      <!-- ============ Content ============ -->
-      <main class="dash-content">
-        <div class="tabs" role="tablist" aria-label="Dashboard sections">
-          <button class="tab" role="tab" id="tab-portfolio" aria-controls="panel-portfolio" aria-selected="true">Portfolio</button>
-          <button class="tab" role="tab" id="tab-analytics" aria-controls="panel-analytics" aria-selected="false" tabindex="-1">Analytics</button>
-          <button class="tab" role="tab" id="tab-leaderboard" aria-controls="panel-leaderboard" aria-selected="false" tabindex="-1">LeaderBoard</button>
-        </div>
-
-        <!-- Portfolio -->
-        <section class="panel grid-portfolio is-active" id="panel-portfolio" role="tabpanel" aria-labelledby="tab-portfolio">
-          <article class="card">
-            <div class="card__head">
-              <div>
-                <h2 class="card__title"><svg class="icon"><use href="#i-hand"/></svg>Featured Work</h2>
-                <p class="card__sub" id="portfolioCount">0 projects showcased</p>
-              </div>
-            </div>
-            <div class="card__body" id="portfolioBody"></div>
-          </article>
-
-          <article class="card">
-            <div class="card__head">
-              <div>
-                <h2 class="card__title"><svg class="icon"><use href="#i-target"/></svg>Skill Tree</h2>
-                <p class="card__sub">Grow your skill and unlock new opportunities</p>
-              </div>
-            </div>
-            <div class="card__body" id="skillsBody"></div>
-          </article>
-
-          <article class="card card--wide" style="min-height:180px">
-            <div class="card__head">
-              <div>
-                <h2 class="card__title">Recent Activity</h2>
-                <p class="card__sub">Every action earns XP</p>
-              </div>
-            </div>
-            <div class="card__body" id="activityBody"></div>
-          </article>
-        </section>
-
-        <!-- Analytics -->
-        <section class="panel grid-analytics" id="panel-analytics" role="tabpanel" aria-labelledby="tab-analytics">
-          <article class="card card--tall">
-            <div class="card__head">
-              <div>
-                <h2 class="card__title"><svg class="icon"><use href="#i-hand"/></svg>Achievement</h2>
-                <p class="card__sub" id="achCount">0 achievements unlocked</p>
-              </div>
-            </div>
-            <div class="card__body" id="achBody"></div>
-          </article>
-
-          <article class="card">
-            <div class="card__head">
-              <div>
-                <h2 class="card__title"><svg class="icon"><use href="#i-target"/></svg>Daily Progress</h2>
-                <p class="card__sub">XP earned over the last 7 days</p>
-              </div>
-            </div>
-            <div class="card__body" id="progressBody"></div>
-          </article>
-
-          <article class="card">
-            <div class="card__head">
-              <div>
-                <h2 class="card__title"><svg class="icon"><use href="#i-target"/></svg>Badges</h2>
-                <p class="card__sub">Grow your skill and unlock new opportunities</p>
-              </div>
-            </div>
-            <div class="card__body" id="badgesBody"></div>
-          </article>
-        </section>
-
-        <!-- Leaderboard -->
-        <section class="panel" id="panel-leaderboard" role="tabpanel" aria-labelledby="tab-leaderboard">
-          <article class="card" style="min-height:440px">
-            <h2 class="lb-title">Leaderboard</h2>
-            <div class="lb-wrap">
-              <table class="lb">
-                <thead><tr><th>#</th><th>Creator</th><th class="num">Level</th><th class="num">XP</th></tr></thead>
-                <tbody id="lbBody"></tbody>
-              </table>
-            </div>
-          </article>
-        </section>
-      </main>
-    </div>
-  </div>
-
-  <!-- ============ Modals ============ -->
-  <div class="modal" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileTitle" aria-hidden="true">
-    <div class="modal__dialog">
-      <button class="modal__close" data-close aria-label="Close">&times;</button>
-      <h2 class="modal__title" id="profileTitle">Edit profile</h2>
-      <p class="modal__sub">This is what clients see first.</p>
-      <form class="stack" id="profileForm">
-        <div class="avatar-picker">
-          <div class="avatar" id="avatarPreview"></div>
-          <div class="stack" style="gap:6px">
-            <label class="btn btn--sm" style="cursor:pointer">Upload photo<input type="file" accept="image/*" id="avatarInput" hidden /></label>
-            <button type="button" class="btn btn--sm btn--ghost" id="avatarRemove">Remove</button>
+    <!-- Preferences -->
+    <section class="ui-tabpanel" id="panel-preferences" role="tabpanel" aria-labelledby="tab-preferences">
+      <article class="ui-card pf-narrow">
+        <div class="ui-card__head"><div><h2 class="ui-card__title">Availability and preferences</h2><p class="ui-card__sub" id="prefsSub">Used to match you with projects. Keep availability current so clients aren't misled.</p></div></div>
+        <div class="ui-card__body ui-stack" style="--stack: var(--s-5)">
+          <div class="ui-alert ui-alert--warning" id="staleNote" role="status" hidden>
+            <span>Your availability hasn't been confirmed recently, so clients see it as possibly out of date.</span>
+            <button class="ui-btn ui-btn--sm" id="confirmAvailBtn" type="button">It's still accurate</button>
           </div>
+          <form class="ui-stack" style="--stack: var(--s-5)" id="prefsForm" novalidate></form>
         </div>
-        <label><span class="label">Full name</span><input class="input" name="name" maxlength="40" required /></label>
-        <label><span class="label">Location</span><input class="input" name="location" maxlength="40" /></label>
-        <label><span class="label">About</span><textarea class="textarea" name="about" maxlength="400" placeholder="What do you do best? Who do you love working with?"></textarea></label>
-        <button class="btn btn--light" type="submit">Save changes</button>
-      </form>
-    </div>
-  </div>
+      </article>
+    </section>
 
-  <div class="modal" id="projectModal" role="dialog" aria-modal="true" aria-labelledby="projectTitle" aria-hidden="true">
-    <div class="modal__dialog">
-      <button class="modal__close" data-close aria-label="Close">&times;</button>
-      <h2 class="modal__title" id="projectTitle">Add a project</h2>
-      <p class="modal__sub">Showcase your best work · <span class="xp-plus">+50 XP</span></p>
-      <form class="stack" id="projectForm">
-        <label><span class="label">Title</span><input class="input" name="title" maxlength="60" required placeholder="E.g. Brand identity for a café" /></label>
-        <label><span class="label">Description</span><textarea class="textarea" name="desc" maxlength="300" placeholder="What was the brief and what did you deliver?"></textarea></label>
-        <label><span class="label">Link (optional)</span><input class="input" name="link" type="url" placeholder="https://" /></label>
-        <label><span class="label">Tags (comma separated)</span><input class="input" name="tags" placeholder="Design, Branding" /></label>
-        <button class="btn btn--light" type="submit">Add project</button>
-      </form>
-    </div>
-  </div>
+    <!-- Account -->
+    <section class="ui-tabpanel pf-grid" id="panel-account" role="tabpanel" aria-labelledby="tab-account">
+      <div class="pf-col">
+        <article class="ui-card">
+          <div class="ui-card__head"><h2 class="ui-card__title">Account</h2></div>
+          <div class="ui-card__body" id="accountBody"></div>
+        </article>
+        <article class="ui-card">
+          <div class="ui-card__head">
+            <div><h2 class="ui-card__title">Signed-in devices</h2><p class="ui-card__sub">Sign out anything you don't recognise.</p></div>
+            <button class="ui-btn ui-btn--sm" id="logoutAllBtn" type="button">Sign out other devices</button>
+          </div>
+          <div class="ui-card__body" id="sessionsBody"><span class="ui-skeleton ui-skeleton--block"></span></div>
+        </article>
+      </div>
+      <aside class="pf-col">
+        <article class="ui-card">
+          <div class="ui-card__head"><div><h2 class="ui-card__title">Change password</h2><p class="ui-card__sub">Your other devices are signed out when you change it.</p></div></div>
+          <div class="ui-card__body">
+            <form class="ui-stack" id="passwordForm" novalidate>
+              <div class="ui-field"><label class="ui-label" for="curPw">Current password</label><input class="ui-input" id="curPw" type="password" name="current_password" autocomplete="current-password" required /></div>
+              <div class="ui-field"><label class="ui-label" for="newPw">New password</label><input class="ui-input" id="newPw" type="password" name="new_password" autocomplete="new-password" required aria-describedby="pwHint" /><p class="ui-hint" id="pwHint">At least 8 characters, with a letter and a number.</p></div>
+              <p class="ui-error" id="passwordError" role="alert"></p>
+              <button class="ui-btn" type="submit">Change password</button>
+            </form>
+          </div>
+        </article>
+      </aside>
+    </section>
+  </main>
 
-  <div class="modal" id="skillModal" role="dialog" aria-modal="true" aria-labelledby="skillTitle" aria-hidden="true">
-    <div class="modal__dialog">
-      <button class="modal__close" data-close aria-label="Close">&times;</button>
-      <h2 class="modal__title" id="skillTitle">Add a skill</h2>
-      <p class="modal__sub">Grow your skill tree · <span class="xp-plus">+20 XP</span></p>
-      <form class="stack" id="skillForm">
-        <label><span class="label">Skill</span><input class="input" name="name" maxlength="30" required placeholder="E.g. React, Figma, Copywriting" list="skillSuggestions" /></label>
-        <datalist id="skillSuggestions">
-          <option value="UI/UX Design"></option><option value="React"></option><option value="Node.js"></option>
-          <option value="Python"></option><option value="Figma"></option><option value="Video Editing"></option>
-          <option value="Copywriting"></option><option value="SEO"></option><option value="Illustration"></option>
-        </datalist>
-        <label><span class="label">Level</span>
-          <select class="select" name="level">
-            <option value="1">Beginner</option><option value="2">Novice</option><option value="3" selected>Intermediate</option>
-            <option value="4">Advanced</option><option value="5">Expert</option>
-          </select>
-        </label>
-        <button class="btn btn--light" type="submit">Add skill</button>
-      </form>
-    </div>
-  </div>
+  <!-- Phone navigation -->
+  <nav class="sh-tabbar" id="mobileTabbar" aria-label="Main"></nav>
 
-  <div class="modal" id="challengeModal" role="dialog" aria-modal="true" aria-labelledby="challengeTitle" aria-hidden="true">
-    <div class="modal__dialog">
-      <button class="modal__close" data-close aria-label="Close">&times;</button>
-      <h2 class="modal__title" id="challengeTitle">Today's challenge</h2>
-      <p class="modal__sub">Complete it before the timer runs out · <span class="xp-plus">+100 XP</span></p>
-      <p id="challengeDetail" style="margin:0 0 18px;font-size:16px"></p>
-      <button class="btn btn--gold btn--block" id="challengeComplete">Mark as complete</button>
-    </div>
-  </div>
+  <!-- Dialogs -->
+  <dialog class="ui-dialog" id="profileModal" aria-labelledby="profileTitle">
+    <div class="ui-dialog__head"><div><h2 class="ui-dialog__title" id="profileTitle">Edit profile</h2><p class="ui-dialog__sub">This is what people see first.</p></div>
+      <button class="ui-btn ui-btn--quiet ui-btn--icon ui-btn--sm" type="button" data-close aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
+    <form class="ui-dialog__body ui-stack" id="profileForm" novalidate>
+      <div class="ui-field"><label class="ui-label" for="pfName">Name</label><input class="ui-input" id="pfName" name="display_name" maxlength="60" required /></div>
+      <div class="ui-field" data-role-only="freelancer"><label class="ui-label" for="pfHeadline">Headline</label><input class="ui-input" id="pfHeadline" name="headline" maxlength="120" placeholder="For example: Brand designer for D2C startups" /></div>
+      <div class="ui-row-2">
+        <div class="ui-field"><label class="ui-label" for="pfCity">City</label><input class="ui-input" id="pfCity" name="location_city" maxlength="60" /></div>
+        <div class="ui-field"><label class="ui-label" for="pfState">State</label><input class="ui-input" id="pfState" name="location_state" maxlength="60" /></div>
+      </div>
+      <div class="ui-field" data-role-only="client"><label class="ui-label" for="pfType">Who's hiring</label><select class="ui-select" id="pfType" name="organization_type"></select></div>
+      <div class="ui-field" data-role-only="client"><label class="ui-label" for="pfOrg">Organisation name <span class="ui-optional">(optional)</span></label><input class="ui-input" id="pfOrg" name="organization_name" maxlength="100" /></div>
+      <div class="ui-field" data-role-only="client"><label class="ui-label" for="pfSite">Website <span class="ui-optional">(optional)</span></label><input class="ui-input" id="pfSite" name="website_url" type="url" placeholder="https://" /></div>
+      <div class="ui-field"><label class="ui-label" for="pfBio" id="bioLabel">About</label><textarea class="ui-textarea" id="pfBio" name="bio" maxlength="2000" rows="5"></textarea><p class="ui-hint" id="bioHint">Aim for at least 80 characters: what you do, who for, and how you work.</p></div>
+      <p class="ui-error" data-error role="alert"></p>
+      <div class="ui-cluster" style="justify-content:flex-end"><button class="ui-btn ui-btn--quiet" type="button" data-close>Cancel</button><button class="ui-btn ui-btn--primary" type="submit">Save profile</button></div>
+    </form>
+  </dialog>
 
-  <script src="assets/js/dashboard.js"></script>
+  <dialog class="ui-dialog ui-dialog--wide" id="projectModal" aria-labelledby="projectTitle">
+    <div class="ui-dialog__head"><div><h2 class="ui-dialog__title" id="projectTitle">Add work</h2><p class="ui-dialog__sub">Show real work. Only share client work you have permission to display.</p></div>
+      <button class="ui-btn ui-btn--quiet ui-btn--icon ui-btn--sm" type="button" data-close aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
+    <form class="ui-dialog__body ui-stack" id="projectForm" novalidate>
+      <input type="hidden" name="id" />
+      <div class="ui-field"><label class="ui-label" for="pTitle">Title</label><input class="ui-input" id="pTitle" name="title" maxlength="120" required placeholder="For example: Brand identity for a tea brand" /></div>
+      <div class="ui-field"><label class="ui-label" for="pDesc">Description <span class="ui-optional">(optional)</span></label><textarea class="ui-textarea" id="pDesc" name="description" maxlength="2000" rows="4" placeholder="What was the brief, what did you do, and what was the result?"></textarea></div>
+      <div class="ui-row-2">
+        <div class="ui-field"><label class="ui-label" for="pCat">Category <span class="ui-optional">(optional)</span></label><select class="ui-select" id="pCat" name="category"></select></div>
+        <div class="ui-field"><label class="ui-label" for="pLink">Link <span class="ui-optional">(optional)</span></label><input class="ui-input" id="pLink" name="external_url" type="url" placeholder="https://" /></div>
+      </div>
+      <div class="ui-field"><label class="ui-label" for="pSkills">Skills used <span class="ui-optional">(comma separated)</span></label><input class="ui-input" id="pSkills" name="skills_used" placeholder="Figma, Branding" /></div>
+      <label class="ui-check"><input type="checkbox" name="is_confidential" /><span><b>Keep this confidential.</b> It stays private and never appears on your public profile.</span></label>
+      <label class="ui-check" id="rightsRow"><input type="checkbox" name="rights_declared" /><span><b>I have the right to show this publicly.</b> It's my own work, or the client has given permission.</span></label>
+      <p class="ui-error" data-error role="alert"></p>
+      <div class="ui-cluster" style="justify-content:flex-end"><button class="ui-btn ui-btn--quiet" type="button" data-close>Cancel</button><button class="ui-btn ui-btn--primary" type="submit" id="projectSubmit">Save work</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="ui-dialog" id="skillModal" aria-labelledby="skillTitle">
+    <div class="ui-dialog__head"><div><h2 class="ui-dialog__title" id="skillTitle">Add a skill</h2><p class="ui-dialog__sub">New skills start as self-declared. You can submit evidence to get them verified.</p></div>
+      <button class="ui-btn ui-btn--quiet ui-btn--icon ui-btn--sm" type="button" data-close aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
+    <form class="ui-dialog__body ui-stack" id="skillForm" novalidate>
+      <div class="ui-field"><label class="ui-label" for="sName">Skill</label><input class="ui-input" id="sName" name="name" maxlength="60" required placeholder="Start typing, for example React or SEO" list="skillSuggestions" autocomplete="off" /><datalist id="skillSuggestions"></datalist></div>
+      <div class="ui-row-2">
+        <div class="ui-field"><label class="ui-label" for="sProf">Proficiency</label><select class="ui-select" id="sProf" name="proficiency"><option value="beginner">Beginner</option><option value="intermediate" selected>Intermediate</option><option value="advanced">Advanced</option><option value="expert">Expert</option></select></div>
+        <div class="ui-field"><label class="ui-label" for="sYears">Years of experience <span class="ui-optional">(optional)</span></label><input class="ui-input" id="sYears" name="years_exp" type="number" min="0" max="60" step="0.5" /></div>
+      </div>
+      <p class="ui-error" data-error role="alert"></p>
+      <div class="ui-cluster" style="justify-content:flex-end"><button class="ui-btn ui-btn--quiet" type="button" data-close>Cancel</button><button class="ui-btn ui-btn--primary" type="submit">Add skill</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="ui-dialog" id="evidenceModal" aria-labelledby="evidenceTitle">
+    <div class="ui-dialog__head"><div><h2 class="ui-dialog__title" id="evidenceTitle">Request verification</h2><p class="ui-dialog__sub">A reviewer checks your evidence and records a decision with a reason. Verification is evidence, not a guarantee of work.</p></div>
+      <button class="ui-btn ui-btn--quiet ui-btn--icon ui-btn--sm" type="button" data-close aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
+    <form class="ui-dialog__body ui-stack" id="evidenceForm" novalidate>
+      <input type="hidden" name="skill_id" />
+      <div class="ui-field"><label class="ui-label" for="eNote">What should the reviewer look at?</label><textarea class="ui-textarea" id="eNote" name="evidence_note" rows="4" maxlength="2000" required placeholder="Describe the work that shows this skill and your part in it."></textarea><p class="ui-hint">At least 20 characters.</p></div>
+      <div class="ui-field"><label class="ui-label" for="eLinks">Evidence links <span class="ui-optional">(one per line, up to 5)</span></label><textarea class="ui-textarea" id="eLinks" name="external_links" rows="3" placeholder="https://"></textarea></div>
+      <p class="ui-error" data-error role="alert"></p>
+      <div class="ui-cluster" style="justify-content:flex-end"><button class="ui-btn ui-btn--quiet" type="button" data-close>Cancel</button><button class="ui-btn ui-btn--primary" type="submit">Submit evidence</button></div>
+    </form>
+  </dialog>
+
+  <script src="/assets/js/shell.js"></script>
+  <script src="/assets/js/dashboard.js"></script>
 </body>
 </html>

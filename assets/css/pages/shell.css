@@ -1,0 +1,90 @@
+/* =========================================================
+   Signed-in app shell: top bar (desktop nav), bottom tab bar (phones)
+   ========================================================= */
+.sh-body { min-height: 100dvh; background:
+  radial-gradient(700px 420px at 0% -8%, rgba(255, 255, 255, 0.03), transparent 65%),
+  radial-gradient(700px 420px at 100% -8%, rgba(255, 255, 255, 0.03), transparent 65%),
+  var(--bg); }
+
+/* Floating glass pill bar (from the Figma "Main" navbar) */
+.sh-top { position: sticky; top: 0; z-index: 50; padding-top: 12px; }
+.sh-top__inner {
+  display: flex; align-items: center; gap: var(--s-6); min-height: 58px;
+  padding: 6px 8px 6px 20px !important; border-radius: var(--r-pill);
+  background: rgba(10, 10, 14, 0.82); backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 18px 50px -24px rgba(0, 0, 0, 0.95);
+  max-width: calc(var(--container) - 2 * var(--gutter));
+}
+.sh-top .ui-brand span { font-size: 0.98rem; }
+
+.sh-nav { display: flex; align-items: center; gap: 2px; margin-right: auto; }
+.sh-nav__item {
+  display: flex; align-items: center; padding: 8px 14px; border-radius: var(--r-pill); color: var(--text-2); text-decoration: none;
+  font-weight: 500; font-size: var(--fs-sm);
+  transition: color var(--t-fast), background var(--t-fast);
+}
+.sh-nav__item:hover { color: var(--text); background: rgba(255, 255, 255, 0.05); }
+.sh-nav__item[aria-current="page"] { color: var(--text); background: rgba(255, 255, 255, 0.1); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset; }
+
+.sh-tools { display: flex; align-items: center; gap: var(--s-3); }
+.sh-role {
+  display: inline-flex; align-items: center; gap: var(--s-2); height: 36px; padding: 0 var(--s-3);
+  border-radius: var(--r-pill); border: 1px solid var(--border); background: rgba(255, 255, 255, 0.04);
+  color: var(--text); font: 600 var(--fs-sm)/1 var(--font); cursor: pointer;
+}
+.sh-role:hover { background: var(--surface-hover); }
+.sh-role__label { color: var(--text-3); font-weight: 500; }
+.sh-role svg { color: var(--text-2); }
+
+.sh-pop { position: relative; }
+.sh-icon-btn { position: relative; color: var(--text-2); }
+.sh-dot { position: absolute; top: 8px; right: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--bg); }
+.sh-account { background: none; border: 0; padding: 2px; border-radius: 50%; cursor: pointer; }
+.sh-account__who { display: flex; flex-direction: column; padding: var(--s-2) var(--s-3); min-width: 0; }
+.sh-account__who b { overflow-wrap: anywhere; }
+
+.sh-notif { width: min(360px, calc(100vw - 24px)); padding: 0; }
+.sh-notif__head { padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--border); }
+.sh-notif__list { max-height: 380px; overflow-y: auto; }
+.sh-notif__item { display: block; padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--border); text-decoration: none; color: var(--text); }
+.sh-notif__item:last-child { border-bottom: 0; }
+a.sh-notif__item:hover { background: var(--surface-hover); color: var(--text); }
+.sh-notif__item[data-unread] { box-shadow: inset 3px 0 0 var(--accent); }
+.sh-notif__item b { display: block; font-weight: 620; font-size: var(--fs-sm); }
+.sh-notif__item span { display: block; font-size: var(--fs-sm); color: var(--text-2); }
+.sh-notif__item time { display: block; font-size: var(--fs-xs); color: var(--text-3); margin-top: 2px; }
+.sh-notif__empty { padding: var(--s-6) var(--s-4); color: var(--text-2); font-size: var(--fs-sm); }
+
+.sh-banners { display: flex; flex-direction: column; gap: var(--s-2); padding-top: var(--s-4); }
+.sh-banners:empty { display: none; }
+.sh-main { padding-top: var(--s-6); padding-bottom: var(--s-16); outline: none; }
+
+/* Phone tab bar */
+.sh-tabbar { display: none; }
+@media (max-width: 860px) {
+  .sh-nav { display: none; }
+  .sh-top__inner { gap: var(--s-3); justify-content: space-between; }
+  .sh-role__label { display: none; }
+  /* Floating pill dock (from the Figma "NEXT UI" bottom dock) */
+  .sh-tabbar {
+    display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px;
+    position: fixed; z-index: 50; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom));
+    padding: 6px; border-radius: var(--r-pill);
+    background: rgba(13, 28, 31, 0.82); backdrop-filter: saturate(150%) blur(18px);
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 20px 50px -18px rgba(0, 0, 0, 0.95);
+  }
+  .sh-tabbar .sh-nav__item {
+    justify-content: center; text-align: center; min-height: 44px; padding: 0 4px; border-radius: var(--r-pill);
+    font-size: var(--fs-xs); line-height: 1.15;
+  }
+  .sh-top__inner { padding-left: 14px !important; }
+  .sh-tabbar .sh-nav__item[aria-current="page"] { background: var(--accent-quiet); color: var(--accent-strong); }
+  .sh-main { padding-bottom: 120px; }
+  .ui-toast-host { bottom: 92px; }
+}
+@media (max-width: 420px) {
+  .sh-top .ui-brand span { display: none; }
+  #tierPillWrap .ui-tier { padding-right: 6px; font-size: 0; gap: 0; }
+}

@@ -219,3 +219,266 @@
   .dock__menu { left: auto; right: -40px; transform: translateY(6px); }
   .dock__menu.is-open { transform: none; }
 }
+
+
+/* =========================================================
+   CREOTASK — Direct Marketplace & Workspace Additions
+   ========================================================= */
+
+/* Top bar controls */
+.top-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.role-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all .2s;
+}
+.role-switch-btn:hover {
+  background: #2c2c32;
+  border-color: var(--gold);
+}
+.role-badge {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--gold);
+  color: #111;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Tier pill */
+.tier-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  border: 1px solid;
+  cursor: pointer;
+}
+.tier-pill--bronze   { color: #c7834a; border-color: rgba(199,131,74,.4); background: rgba(199,131,74,.1); }
+.tier-pill--silver   { color: #c9ced6; border-color: rgba(201,206,214,.4); background: rgba(201,206,214,.1); }
+.tier-pill--gold     { color: #e8b64c; border-color: rgba(232,182,76,.4); background: rgba(232,182,76,.1); }
+.tier-pill--platinum { color: #b8e3ee; border-color: rgba(184,227,238,.4); background: rgba(184,227,238,.1); }
+
+/* Project card */
+.proj-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: all .2s;
+  cursor: pointer;
+}
+.proj-card:hover {
+  border-color: rgba(245, 179, 1, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+}
+.proj-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.proj-card__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.proj-card__desc {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.proj-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.proj-card__budget {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold);
+}
+.proj-card__budget small {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 400;
+  display: block;
+}
+
+/* Badge states */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.badge-status--open        { background: rgba(61,220,151,.15); color: var(--success); }
+.badge-status--active      { background: rgba(245,179,1,.15); color: var(--gold); }
+.badge-status--completed   { background: rgba(61,220,151,.25); color: var(--success); }
+.badge-status--disputed    { background: rgba(255,107,107,.2); color: var(--danger); }
+.badge-status--draft       { background: rgba(155,158,166,.2); color: var(--muted); }
+.badge-status--creostart   { background: linear-gradient(135deg, rgba(245,179,1,.2), rgba(15,74,88,.4)); color: var(--gold); border: 1px solid var(--gold); }
+
+/* Workspace layout */
+.ws-container {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 20px;
+  margin-top: 16px;
+}
+@media (max-width: 960px) {
+  .ws-container { grid-template-columns: 1fr; }
+}
+
+.ws-milestone {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 14px;
+}
+.ws-milestone.is-funded {
+  border-left: 4px solid var(--gold);
+}
+.ws-milestone.is-released {
+  border-left: 4px solid var(--success);
+}
+
+.chat-box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  height: 540px;
+}
+.chat-messages {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.chat-msg {
+  max-width: 82%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.chat-msg--client {
+  align-self: flex-start;
+  background: #222730;
+  border: 1px solid var(--line-strong);
+}
+.chat-msg--freelancer {
+  align-self: flex-end;
+  background: #2a2818;
+  border: 1px solid rgba(245,179,1,.3);
+  color: #fff;
+}
+.chat-msg--system {
+  align-self: center;
+  background: rgba(255,255,255,.05);
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  padding: 6px 14px;
+}
+.chat-input-bar {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+/* Fee breakdown display */
+.fee-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 13.5px;
+}
+.fee-table td {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.fee-table td:last-child {
+  text-align: right;
+  font-weight: 600;
+}
+.fee-table tr.total-row td {
+  font-size: 15px;
+  border-bottom: 0;
+  padding-top: 12px;
+  color: var(--gold);
+}
+
+/* Table styles for Admin & Ledger */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+.data-table th, .data-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.data-table th {
+  color: var(--muted);
+  font-weight: 500;
+  background: rgba(255,255,255,.02);
+}
+.data-table tr:hover td {
+  background: rgba(255,255,255,.03);
+}
+
+/* Account-level banners (unverified email, sandbox payments) */
+.account-banners { max-width: 1200px; margin: 0 auto; padding: 0 16px; display: grid; gap: 8px; }
+.account-banners:empty { display: none; }
+.account-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  margin-top: 12px; padding: 10px 14px; border-radius: var(--radius-sm);
+  border: 1px solid rgba(245, 179, 1, .35); background: rgba(245, 179, 1, .07);
+  font-size: 13px; line-height: 1.45; color: var(--text);
+}
+.account-banner--sandbox { border-color: rgba(58, 160, 255, .35); background: rgba(58, 160, 255, .07); }
+.account-banner b { font-weight: 600; }

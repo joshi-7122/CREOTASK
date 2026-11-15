@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verify your email — CreoTask</title>
+  <meta name="theme-color" content="#071214" />
+  <link rel="icon" href="/assets/img/logo.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Cinzel:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/ds.css" />
+  <link rel="stylesheet" href="/assets/css/pages/auth.css" />
+</head>
+<body class="ui">
+  <main class="auth-page">
+    <div class="auth-panel" data-page="verify">
+      <a class="ui-brand" href="/" aria-label="CreoTask home"><img src="/assets/img/logo.svg" alt="" width="30" height="30" /><span>CREOTASK</span></a>
+      <div class="ui-card"><div class="ui-card__body" aria-live="polite">
+        <div class="auth-status" id="stateLoading">
+          <h1 class="ui-h2">Verifying your email</h1>
+          <p class="ui-text-2">One moment while we check your link.</p>
+          <span class="ui-skeleton ui-skeleton--line" style="width:100%"></span>
+        </div>
+        <div class="auth-status" id="stateSuccess" hidden>
+          <span class="ui-badge ui-badge--success ui-badge--dot">Verified</span>
+          <h1 class="ui-h2">Your email is verified</h1>
+          <p class="ui-text-2">You can now publish projects, apply for work and accept offers.</p>
+          <a class="ui-btn ui-btn--primary" href="/app.html" id="continueLink">Continue to CreoTask</a>
+        </div>
+        <div class="auth-status" id="stateError" hidden>
+          <span class="ui-badge ui-badge--danger ui-badge--dot">Link not valid</span>
+          <h1 class="ui-h2">We couldn't verify this link</h1>
+          <p class="ui-text-2" id="errorMessage">The link is invalid, already used or expired.</p>
+          <p class="ui-small ui-text-2">Each link works once and expires after 24 hours. Sending a new one cancels the old ones.</p>
+          <form class="ui-stack" id="resendForm" style="width:100%" novalidate>
+            <div class="ui-field">
+              <label class="ui-label" for="resendEmail">Email</label>
+              <input class="ui-input" id="resendEmail" type="email" autocomplete="email" required />
+            </div>
+            <button class="ui-btn ui-btn--primary" type="submit">Send a new link</button>
+            <p class="ui-small ui-text-2" id="resendResult" role="status"></p>
+          </form>
+        </div>
+      </div></div>
+    </div>
+  </main>
+  <script src="/assets/js/auth-pages.js"></script>
+</body>
+</html>

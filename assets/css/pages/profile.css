@@ -1,0 +1,39 @@
+/* =========================================================
+   Profile page (dashboard.html) — on ds.css
+   ========================================================= */
+.pf { display: flex; flex-direction: column; gap: var(--s-6); }
+
+.pf-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--s-6); align-items: center; padding-bottom: var(--s-2); }
+.pf-head__who { min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
+.pf-head__who .ui-h1 { overflow-wrap: anywhere; }
+.pf-head__headline { color: var(--text-2); font-size: var(--fs-lg); }
+.pf-head__headline:empty { display: none; }
+.pf-head__meta { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); align-items: center; margin-top: var(--s-1); }
+.pf-head__meta span:empty { display: none; }
+.pf-head__side { display: flex; flex-direction: column; align-items: stretch; gap: var(--s-3); min-width: 220px; }
+.pf-complete { display: flex; flex-direction: column; gap: var(--s-2); }
+.pf-complete b { font-size: var(--fs-lg); }
+@media (max-width: 760px) {
+  .pf-head { grid-template-columns: auto minmax(0, 1fr); }
+  .pf-head__side { grid-column: 1 / -1; min-width: 0; }
+  .pf-head .ui-avatar--lg { --size: 64px; }
+}
+
+.pf-grid.is-active { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: var(--s-5); align-items: start; }
+.pf-col { display: flex; flex-direction: column; gap: var(--s-5); min-width: 0; }
+@media (max-width: 960px) { .pf-grid.is-active { grid-template-columns: 1fr; } }
+.pf-narrow { max-width: 760px; }
+
+.pf-about { white-space: pre-line; overflow-wrap: anywhere; }
+.pf-about[data-empty] { color: var(--text-2); font-size: var(--fs-sm); }
+
+.pf-work__badges { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-1); }
+.pf-work__link { font-size: var(--fs-sm); overflow-wrap: anywhere; }
+.pf-skill__name { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+
+.pf-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-3); margin-bottom: var(--s-5); }
+.pf-stats div { display: flex; flex-direction: column; gap: 2px; }
+.pf-stats b { font-size: var(--fs-2xl); font-weight: 700; line-height: 1.1; }
+.pf-stats span { font-size: var(--fs-xs); color: var(--text-2); }
+.pf-next { display: flex; flex-direction: column; gap: var(--s-3); }
+.pf-next .ui-checklist { grid-template-columns: 1fr; }

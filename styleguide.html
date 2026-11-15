@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Design system — CreoTask</title>
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="/assets/img/logo.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Cinzel:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/ds.css" />
+  <style>
+    .sg { padding-block: var(--s-12) var(--s-24); display: flex; flex-direction: column; gap: var(--s-16); }
+    .sg section { display: flex; flex-direction: column; gap: var(--s-5); }
+    .sg h2 { padding-bottom: var(--s-3); border-bottom: 1px solid var(--border); }
+    .sg-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--s-3); }
+    .sg-swatch { border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; background: var(--surface); }
+    .sg-swatch i { display: block; height: 64px; }
+    .sg-swatch span { display: block; padding: var(--s-2) var(--s-3); font-size: var(--fs-xs); color: var(--text-2); }
+    .sg-swatch b { display: block; color: var(--text); font-size: var(--fs-sm); }
+    .sg-panel { padding: var(--s-6); border: 1px solid var(--border); border-radius: var(--r-md); background: var(--ink-850); }
+    .sg-note { color: var(--text-2); max-width: 70ch; }
+  </style>
+</head>
+<body class="ui">
+  <main class="ui-container sg">
+    <header class="ui-stack">
+      <a class="ui-brand" href="/"><img src="/assets/img/logo.svg" alt="" width="30" height="30" /><span>CREOTASK</span></a>
+      <h1 class="ui-display">Indigo &amp; Zari</h1>
+      <p class="ui-lead">The CreoTask design system. Indigo-ink grounds, zari-gold accents taken from the logo, Anek Latin type, and a stitched thread for anything that moves through stages. This page is for review and only exists in development.</p>
+    </header>
+
+    <section>
+      <h2 class="ui-h2">Colour</h2>
+      <p class="sg-note">Components use semantic roles (background, surface, text, accent), never raw hex. Gold is reserved for primary actions, progress and earned status. It isn't decoration.</p>
+      <div class="sg-swatches">
+        <div class="sg-swatch"><i style="background:var(--ink-900)"></i><span><b>Ink 900</b>Page background</span></div>
+        <div class="sg-swatch"><i style="background:var(--ink-800)"></i><span><b>Ink 800</b>Surface</span></div>
+        <div class="sg-swatch"><i style="background:var(--ink-700)"></i><span><b>Ink 700</b>Raised / hover</span></div>
+        <div class="sg-swatch"><i style="background:var(--ink-500)"></i><span><b>Ink 500</b>Strong line</span></div>
+        <div class="sg-swatch"><i style="background:var(--paper-100)"></i><span><b>Paper 100</b>Text</span></div>
+        <div class="sg-swatch"><i style="background:var(--paper-300)"></i><span><b>Paper 300</b>Secondary text</span></div>
+        <div class="sg-swatch"><i style="background:var(--zari-500)"></i><span><b>Zari 500</b>Logo gold</span></div>
+        <div class="sg-swatch"><i style="background:var(--zari-400)"></i><span><b>Zari 400</b>Primary action</span></div>
+        <div class="sg-swatch"><i style="background:var(--mint-400)"></i><span><b>Mint</b>Success</span></div>
+        <div class="sg-swatch"><i style="background:var(--saffron-400)"></i><span><b>Saffron</b>Warning</span></div>
+        <div class="sg-swatch"><i style="background:var(--coral-400)"></i><span><b>Coral</b>Danger</span></div>
+        <div class="sg-swatch"><i style="background:var(--sky-400)"></i><span><b>Sky</b>Information</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="ui-h2">Type</h2>
+      <p class="sg-note">One family, Anek Latin, used at two widths. Display and headings run wide and heavy; reading text stays at normal width. Cinzel appears only in the wordmark.</p>
+      <div class="ui-stack sg-panel">
+        <span class="ui-display">Display, 76px wide</span>
+        <span class="ui-h1">Heading 1, for page titles</span>
+        <span class="ui-h2">Heading 2, for sections</span>
+        <span class="ui-h3">Heading 3, for card titles</span>
+        <p class="ui-lead">Lead text introduces a page or section in one or two sentences.</p>
+        <p>Body text is 15px with a 1.55 line height and a 60–75 character measure.</p>
+        <p class="ui-small ui-text-2">Small secondary text for metadata and hints.</p>
+        <p class="ui-num">₹1,25,000.00 uses tabular figures so amounts line up.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="ui-h2">Buttons</h2>
+      <div class="ui-cluster">
+        <button class="ui-btn ui-btn--primary">Publish project</button>
+        <button class="ui-btn">Save draft</button>
+        <button class="ui-btn ui-btn--quiet">Cancel</button>
+        <button class="ui-btn ui-btn--danger">Withdraw application</button>
+        <button class="ui-btn ui-btn--primary" aria-busy="true">Saving</button>
+        <button class="ui-btn" disabled>Disabled</button>
+        <button class="ui-btn ui-btn--sm">Small</button>
+        <button class="ui-btn ui-btn--primary ui-btn--lg">Large</button>
+        <button class="ui-link-btn">Text action</button>
+      </div>
+      <p class="sg-note">One primary button per view. Labels say exactly what happens ("Publish project", not "Submit").</p>
+    </section>
+
+    <section>
+      <h2 class="ui-h2">Form fields</h2>
+      <form class="ui-stack sg-panel" style="max-width:560px" onsubmit="return false">
+        <div class="ui-field"><label class="ui-label" for="f1">Project title</label><input class="ui-input" id="f1" placeholder="For example: Brand identity for a tea brand" /></div>
+        <div class="ui-field"><label class="ui-label" for="f2">Budget <span class="ui-optional">(optional)</span></label><input class="ui-input" id="f2" aria-invalid="true" value="12,0" /><p class="ui-error">Enter a whole number of rupees, like 12000.</p></div>
+        <div class="ui-row-2">
+          <div class="ui-field"><label class="ui-label" for="f3">Category</label><select class="ui-select" id="f3"><option>Design</option><option>Development</option></select></div>
+          <div class="ui-field"><label class="ui-label" for="f4">Deadline</label><input class="ui-input" id="f4" type="date" /><p class="ui-hint">Shown in your timezone.</p></div>
+        </div>
+        <div class="ui-field"><label class="ui-label" for="f5">Brief</label><textarea class="ui-textarea" id="f5"></textarea></div>
+        <fieldset class="ui-segmented"><legend class="ui-sr-only">Role</legend><label><input type="radio" name="r" checked /><span>Find work</span></label><label><input type="radio" name="r" /><span>Hire</span></label></fieldset>
+        <fieldset class="ui-chips"><legend class="ui-label">Categories</legend>
+          <label class="ui-chip"><input type="checkbox" checked /><span>Design</span></label>
+          <label class="ui-chip"><input type="checkbox" /><span>Writing</span></label>
+          <label class="ui-chip"><input type="checkbox" /><span>Video</span></label>
+        </fieldset>
+        <label class="ui-check"><input type="checkbox" checked /><span><b>Keep this confidential.</b> It never appears on your public profile.</span></label>
+      </form>
+    </section>
+
+    <section>
+      <h2 class="ui-h2">Status</h2>
+      <div class="ui-cluster">
+        <span class="ui-badge">Draft</span>
+        <span class="ui-badge ui-badge--success ui-badge--dot">Funded</span>
+        <span class="ui-badge ui-badge--warning">Funding pending</span>
+        <span class="ui-badge ui-badge--danger">Payout failed</span>
+        <span class="ui-badge ui-badge--info">Confidential</span>
+        <span class="ui-badge ui-badge--accent">CreoStart</span>
+      </div>
+      <div class="ui-cluster">
+        <span class="ui-tier">Bronze</span><span class="ui-tier ui-tier--silver">Silver</span><span class="ui-tier ui-tier--gold">Gold</span><span class="ui-tier ui-tier--platinum">Platinum</span>
+      </div>
+      <p class="sg-note">Money states are always explicit. "Funding pending" is never shown as funded.</p>
+      <div class="ui-stack">
+        <div class="ui-alert ui-alert--warning"><span><b>Verify your email.</b> You can't publish or apply until you do.</span><button class="ui-btn ui-btn--sm">Resend link</button></div>
+        <div class="ui-alert ui-alert--info"><span><b>Sandbox payments.</b> Funding on this environment is a test record only.</span></div>
+        <div class="ui-alert ui-alert--danger"><span><b>This page didn't load.</b> Check your connection and try again.</span></div>
+        <div class="ui-alert ui-alert--success"><span><b>Offer accepted.</b> The project starts when the first milestone is funded.</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="ui-h2">The thread and progress</h2>
+      <p class="sg-note">The stitched thread marks anything that moves through stages: milestones, project states, steps. Done stages are solid gold, the current stage glows, upcoming stages stay quiet.</p>
+      <div class="ui-row-2">
+        <div class="sg-panel">
+          <ol class="ui-thread">
+            <li data-state="done"><span class="ui-thread__title">Concepts and mood board</span><span class="ui-thread__meta">₹5,000, accepted 12 Nov</span></li>
+            <li data-state="current"><span class="ui-thread__title">Final logo and assets</span><span class="ui-thread__meta">₹10,000, due 28 Nov</span></li>
+            <li data-state="upcoming"><span class="ui-thread__title">Brand usage guide</span><span class="ui-thread__meta">₹3,000, due 5 Dec</span></li>
+          </ol>
+        </div>
+        <div class="sg-panel ui-stack">
+          <div class="ui-split"><span class="ui-small ui-text-2">Profile complete</span><b>63%</b></div>
+          <div class="ui-progress ui-progress--stitch"><span style="width:63%"></span></div>
+          <div class="ui-progress"><span style="width:40%"></span></div>
+          <ul class="ui-checklist"><li data-done>Add your name</li><li>Add at least 3 skills</li><li>Add a public portfolio item</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="ui-h2">Cards, rows and empty states</h2>
+      <div class="ui-row-2">
+        <article class="ui-card">
+          <div class="ui-card__head"><div><h3 class="ui-card__title">Skills</h3><p class="ui-card__sub">Verified means a reviewer checked your evidence.</p></div><button class="ui-btn ui-btn--sm">Add skill</button></div>
+          <div class="ui-card__body"><ul class="ui-rows">
+            <li class="ui-row"><div class="ui-row__main"><span class="ui-row__title">Figma <span class="ui-badge ui-badge--success">Verified</span></span><span class="ui-row__meta">Expert, 7 years</span></div></li>
+            <li class="ui-row"><div class="ui-row__main"><span class="ui-row__title">Branding <span class="ui-badge">Self-declared</span></span><span class="ui-row__meta">Advanced</span></div><div class="ui-row__actions"><button class="ui-link-btn">Get verified</button></div></li>
+          </ul></div>
+        </article>
+        <article class="ui-card">
+          <div class="ui-card__head"><h3 class="ui-card__title">Applications</h3></div>
+          <div class="ui-card__body"><div class="ui-empty"><span class="ui-empty__title">No applications yet</span><p>Projects with clear acceptance criteria get more qualified applicants. Review your brief while you wait.</p><button class="ui-btn ui-btn--sm">Edit brief</button></div></div>
+        </article>
+      </div>
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Milestone</th><th>Status</th><th class="is-num">Amount</th></tr></thead>
+          <tbody>
+            <tr><td>Concepts</td><td><span class="ui-badge ui-badge--success ui-badge--dot">Released</span></td><td class="is-num">₹5,000</td></tr>
+            <tr><td>Final logo</td><td><span class="ui-badge ui-badge--warning">Funding pending</span></td><td class="is-num">₹10,000</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="ui-h2">Tabs, avatars, loading</h2>
+      <div class="ui-tabs" role="tablist"><button class="ui-tab" role="tab" aria-selected="true">Profile</button><button class="ui-tab" role="tab" aria-selected="false">Work preferences</button><button class="ui-tab" role="tab" aria-selected="false">Account and security</button></div>
+      <div class="ui-cluster"><span class="ui-avatar ui-avatar--sm">AJ</span><span class="ui-avatar">PS</span><span class="ui-avatar ui-avatar--lg">CL</span></div>
+      <div class="ui-stack" style="max-width:480px"><span class="ui-skeleton ui-skeleton--line"></span><span class="ui-skeleton ui-skeleton--block"></span></div>
+      <div class="ui-cluster"><button class="ui-btn" onclick="document.getElementById('sgDialog').showModal()">Open a dialog</button><button class="ui-btn" onclick="UI.toast('Profile saved.','success')">Show a toast</button></div>
+    </section>
+  </main>
+
+  <dialog class="ui-dialog" id="sgDialog" aria-labelledby="sgDialogTitle">
+    <div class="ui-dialog__head"><div><h2 class="ui-dialog__title" id="sgDialogTitle">Withdraw this application?</h2><p class="ui-dialog__sub">The client will see it as withdrawn. You can apply again only if the project allows it.</p></div></div>
+    <div class="ui-dialog__foot"><button class="ui-btn ui-btn--quiet" onclick="this.closest('dialog').close()">Keep application</button><button class="ui-btn ui-btn--danger" onclick="this.closest('dialog').close()">Withdraw</button></div>
+  </dialog>
+
+  <script src="/assets/js/store.js"></script>
+</body>
+</html>

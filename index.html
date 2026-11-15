@@ -3,154 +3,500 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CREOTASK — Connect · Create · Compete</title>
-  <meta name="description" content="CREOTASK is a gamified freelancing platform: connect with clients, create standout work, and compete on the leaderboard." />
-  <meta name="theme-color" content="#0b0b0d" />
-  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml" />
+  <title>CreoTask — Where skills meet opportunities</title>
+  <meta name="description" content="CreoTask is an India-first marketplace for direct, milestone-based projects. Clients hire on evidence of skill; freelancers build a record that's earned, never bought." />
+  <meta name="theme-color" content="#050507" />
+  <link rel="icon" href="/assets/img/logo.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/styles.css" />
-  <link rel="stylesheet" href="assets/css/landing.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Cinzel:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/ds.css" />
+  <link rel="stylesheet" href="/assets/css/pages/landing.css" />
+  <script>
+    /* Decide before first paint whether the intro plays: once per visit, never for reduced motion. ?intro forces a replay. */
+    (function (d) {
+      var play = false;
+      try {
+        var force = /[?&]intro\b/.test(location.search);
+        var reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+        play = force || (!reduced && !sessionStorage.getItem("creo_intro_played"));
+      } catch (e) { play = false; }
+      d.documentElement.classList.add(play ? "intro-on" : "no-intro");
+      /* Safety net: if intro.js never runs, never leave the page hidden. */
+      if (play) setTimeout(function () {
+        var c = d.documentElement.classList;
+        if (c.contains("intro-on")) { c.remove("intro-on"); c.add("no-intro", "intro-revealed"); }
+      }, 6000);
+    })(document);
+  </script>
 </head>
-<body class="landing">
-  <!-- Logo symbol (uses currentColor so it can be silver or gold) -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <symbol id="logo" viewBox="0 0 64 64"><g fill="currentColor"><path d="M32 1C33.82 19.6 33.56 47.5 32 63C30.44 47.5 30.18 19.6 32 1Z"/><path d="M26 15C27.54 28.2 27.32 48 26 59C24.68 48 24.46 28.2 26 15Z"/><path d="M38 15C39.54 28.2 39.32 48 38 59C36.68 48 36.46 28.2 38 15Z"/><path d="M31.45 33.6Q18.17 42.21 5 51Q18.83 43.29 32.55 35.4Z"/><path d="M31.45 35.4Q45.17 43.29 59 51Q45.83 42.21 32.55 33.6Z"/><path d="M25.48 41.83Q20.19 46.35 15 51Q20.81 47.15 26.52 43.17Z"/><path d="M37.48 43.17Q43.19 47.15 49 51Q43.81 46.35 38.52 41.83Z"/></g></symbol>
-  </svg>
+<body class="ui lp">
+  <!-- Cinematic intro: the logo flies in, lands, and the screen opens like gates.
+       Plays once per visit (add ?intro to replay). Skipped for reduced motion. -->
+  <div class="lp-intro" id="lpIntro">
+    <div class="lp-intro__veil" aria-hidden="true"><div class="lp-intro__grain"></div></div>
+    <div class="lp-intro__flight" aria-hidden="true">
+      <div class="lp-intro__mark">
+        <svg class="lp-intro__logo" viewBox="0 0 64 64" fill="none">
+            <path d="M32 2C33.8 20.6 33.5 48.5 32 64C30.5 48.5 30.2 20.6 32 2Z" fill="url(#introGold)"/>
+            <path d="M26 16C27.5 29.2 27.3 49 26 60C24.7 49 24.5 29.2 26 16Z" fill="url(#introGold)"/>
+            <path d="M38 16C39.5 29.2 39.3 49 38 60C36.7 49 36.5 29.2 38 16Z" fill="url(#introGold)"/>
+            <path d="M31.5 34.6Q18.2 43.2 5 52Q18.8 44.3 32.5 36.4Z" fill="url(#introGold)"/>
+            <path d="M31.5 36.4Q45.2 44.3 59 52Q45.8 43.2 32.5 34.6Z" fill="url(#introGold)"/>
+            <path d="M25.5 42.8Q20.2 47.3 15 52Q20.8 48.1 26.5 44.1Z" fill="url(#introGold)"/>
+            <path d="M37.5 44.1Q43.2 48.1 49 52Q43.8 47.3 38.5 42.8Z" fill="url(#introGold)"/>
+          <defs>
+            <linearGradient id="introGold" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="30%" stop-color="#e4e6ea"/>
+              <stop offset="62%" stop-color="#9a9ea6"/>
+              <stop offset="100%" stop-color="#d6d9de"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </div>
+    <div class="lp-intro__brand" aria-hidden="true">
+      <span class="lp-intro__wordmark"><span>C</span><span>R</span><span>E</span><span>O</span><span>T</span><span>A</span><span>S</span><span>K</span></span>
+      <span class="lp-intro__tag">Where skills meet opportunities</span>
+    </div>
+    <button class="lp-intro__skip" id="lpIntroSkip" type="button">Skip intro</button>
+  </div>
 
-  <header class="site-header">
-    <a class="brand" href="index.html" aria-label="CREOTASK home">
-      <svg class="brand__mark"><use href="#logo"/></svg>
-      <span class="brand__name">CREOTASK</span>
-    </a>
-    <nav class="site-header__actions" id="headerActions">
-      <button class="btn btn--ghost" data-auth="signin">Sign in</button>
-      <button class="btn btn--light" data-auth="signup">Sign up</button>
-    </nav>
+  <a class="ui-skip" href="#main">Skip to content</a>
+
+  <!-- Floating glass dock (assets/js/nav.js). Starts wide and nearly clear; once the page scrolls
+       it tightens into a compact dock. Chapter links follow the hero journey; other sections
+       live under Explore. Below 1000px the links move into a drawer. -->
+  <header class="lp-header" id="siteHeader">
+    <div class="lp-dock" id="navDock">
+      <a class="ui-brand lp-dock__brand" href="/" aria-label="CreoTask, back to the top">
+        <img src="/assets/img/logo-silver.svg" alt="" width="26" height="26" />
+        <span>CREOTASK</span>
+      </a>
+
+      <nav class="lp-dock__nav" aria-label="Primary">
+        <span class="lp-dock__ind" id="navInd" aria-hidden="true"></span>
+        <ul class="lp-dock__links" id="navLinks">
+          <li><a href="#ch-connect" data-nav="ch0">Connect</a></li>
+          <li><a href="#ch-create" data-nav="ch1">Create</a></li>
+          <li><a href="#ch-compete" data-nav="ch2">Compete</a></li>
+          <li><a href="#ch-why" data-nav="ch3">Why CreoTask</a></li>
+          <li><a href="#ch-insights" data-nav="ch4">Insights</a></li>
+          <li class="lp-explore" id="explore">
+            <button class="lp-explore__btn" id="exploreBtn" type="button" aria-expanded="false" aria-controls="explorePanel" data-nav="explore">Explore <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg></button>
+            <div class="lp-explore__panel" id="explorePanel" hidden>
+              <div class="lp-explore__col">
+                <span class="lp-explore__k">On this page</span>
+                <a href="#how" data-nav="how"><b>How it works</b><small>Step by step, for each side</small></a>
+                <a href="#tiers" data-nav="tiers"><b>Tiers</b><small>What each tier takes</small></a>
+                <a href="#creostart" data-nav="creostart"><b>CreoStart</b><small>Paid entry projects and practice</small></a>
+                <a href="#faq" data-nav="faq"><b>FAQ</b><small>Costs, payments, who can join</small></a>
+              </div>
+              <div class="lp-explore__col" data-guest>
+                <span class="lp-explore__k">Get started</span>
+                <button type="button" data-auth="signup" data-role="client"><b>Hire a freelancer</b><small>Post a structured brief</small></button>
+                <button type="button" data-auth="signup" data-role="freelancer"><b>Find work</b><small>Build a profile from evidence</small></button>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="lp-nav-actions" id="headerActions">
+        <button class="ui-btn ui-btn--quiet ui-btn--sm lp-dock__login" type="button" data-auth="signin">Log in</button>
+        <button class="ui-btn ui-btn--sm lp-dock__cta" type="button" data-auth="signup">Get started</button>
+      </div>
+
+      <button class="lp-dock__menu" id="navMenuBtn" type="button" aria-expanded="false" aria-controls="navDrawer" aria-label="Open menu"><span></span><span></span></button>
+    </div>
+
+    <div class="lp-drawer" id="navDrawer" hidden>
+      <nav aria-label="Menu">
+        <span class="lp-explore__k">The journey</span>
+        <ul>
+          <li><a href="#ch-connect" data-nav="ch0">Connect</a></li>
+          <li><a href="#ch-create" data-nav="ch1">Create</a></li>
+          <li><a href="#ch-compete" data-nav="ch2">Compete</a></li>
+          <li><a href="#ch-why" data-nav="ch3">Why CreoTask</a></li>
+          <li><a href="#ch-insights" data-nav="ch4">Market insights</a></li>
+        </ul>
+        <span class="lp-explore__k">Explore</span>
+        <ul>
+          <li><a href="#how" data-nav="how">How it works</a></li>
+          <li><a href="#tiers" data-nav="tiers">Tiers</a></li>
+          <li><a href="#creostart" data-nav="creostart">CreoStart</a></li>
+          <li><a href="#faq" data-nav="faq">FAQ</a></li>
+        </ul>
+      </nav>
+      <div class="lp-drawer__actions" id="drawerActions">
+        <button class="ui-btn lp-btn-line" type="button" data-auth="signin">Log in</button>
+        <button class="ui-btn lp-dock__cta" type="button" data-auth="signup">Get started</button>
+      </div>
+    </div>
+    <div class="lp-drawer__scrim" id="navScrim" hidden></div>
   </header>
 
-  <main>
-    <section class="hero">
-      <div>
-        <h1 class="hero__title">
-          <span>Connect</span><span class="accent">Create</span><span>Compete</span>
-        </h1>
-        <p class="hero__lead">
-          Join India's gamified freelancing platform — connect with clients, create standout work,
-          and compete on the leaderboard to showcase your skills.
-        </p>
-        <div class="hero__cta">
-          <button class="btn btn--light btn--pill" data-auth="signup">Hire Talent</button>
-          <button class="btn btn--pill" data-auth="signup">Start Freelancing</button>
+  <main id="main">
+    <!-- Hero journey: one pinned stage. The CreoTask card stays anchored in the centre while
+         scroll moves through Connect → Create → Compete → Why CreoTask → Market insights
+         (assets/js/journey.js, GSAP ScrollTrigger). Without JS, on small screens or with reduced
+         motion the chapters simply stack as ordinary sections. -->
+    <section class="lp-hero lp-journey" id="journey" aria-labelledby="heroTitle">
+      <div class="lp-j-stage">
+        <div class="lp-hero__fx" aria-hidden="true">
+          <div class="lp-hero__tint lp-hero__tint--l"></div>
+          <div class="lp-hero__tint lp-hero__tint--r"></div>
+          <div class="lp-hero__spot"></div>
         </div>
-        <div class="hero__chips" aria-label="Highlights">
-          <span class="chip">Daily Challenges</span>
-          <span class="chip">Skill Tree</span>
-          <span class="chip">XP &amp; Levels</span>
-          <span class="chip">Badges</span>
-          <span class="chip">Leaderboards</span>
+
+        <div class="ui-container lp-hero__inner" id="jIntro">
+          <div class="lp-j-top">
+            <h1 class="lp-hero__title" id="heroTitle" aria-label="Connect. Create. Compete.">
+              <span class="lp-hero__w lp-hero__w--side" aria-hidden="true">Connect</span>
+              <span class="lp-hero__w lp-hero__w--main" aria-hidden="true">Create</span>
+              <span class="lp-hero__w lp-hero__w--side" aria-hidden="true">Compete</span>
+            </h1>
+          </div>
+          <div class="lp-j-bottom">
+            <p class="lp-hero__lead">Direct, fixed-price projects in India. Clients hire on evidence of skill. Freelancers build a record that's earned, never bought.</p>
+            <div class="lp-hero__cta">
+              <button class="ui-btn ui-btn--primary ui-btn--lg" type="button" data-auth="signup" data-role="client">Hire a freelancer</button>
+              <button class="ui-btn ui-btn--lg lp-btn-line" type="button" data-auth="signup" data-role="freelancer">Find work</button>
+            </div>
+            <div class="lp-j-hint" aria-hidden="true"><span></span>Scroll to explore</div>
+          </div>
         </div>
+
+        <div class="lp-stage" aria-hidden="true">
+          <div class="lp-orbits" id="jOrbits"><i class="lp-orbit" style="--s:560px;--t:38s"></i><i class="lp-orbit" style="--s:820px;--t:56s"></i><i class="lp-orbit" style="--s:1120px;--t:80s"></i></div>
+          <div class="lp-card-rig" id="jRig">
+          <div class="lp-card" id="lpCard">
+            <div class="lp-card__edge"><i style="--z:1"></i><i style="--z:2"></i><i style="--z:3"></i><i style="--z:4"></i><i style="--z:5"></i><i style="--z:6"></i></div>
+            <div class="lp-card__back">
+              <div class="lp-card__back-top"><span>Tier ladder</span><span>Earned, never bought</span></div>
+              <div class="lp-card__ladder">
+                <span><i class="b"></i>Bronze</span><span><i class="s"></i>Silver</span><span><i class="g"></i>Gold</span><span><i class="p"></i>Platinum</span>
+              </div>
+              <div class="lp-card__strip">Delivered work · Verified skills · Client ratings</div>
+            </div>
+            <div class="lp-card__face">
+              <div class="lp-card__top">
+                <svg class="lp-card__logo" viewBox="0 0 64 64">
+                  <path d="M32 2C33.8 20.6 33.5 48.5 32 64C30.5 48.5 30.2 20.6 32 2Z"/>
+                  <path d="M26 16C27.5 29.2 27.3 49 26 60C24.7 49 24.5 29.2 26 16Z"/>
+                  <path d="M38 16C39.5 29.2 39.3 49 38 60C36.7 49 36.5 29.2 38 16Z"/>
+                  <path d="M31.5 34.6Q18.2 43.2 5 52Q18.8 44.3 32.5 36.4Z"/>
+                  <path d="M31.5 36.4Q45.2 44.3 59 52Q45.8 43.2 32.5 34.6Z"/>
+                </svg>
+                <span class="lp-card__tiers"><i class="b"></i><i class="s"></i><i class="g"></i><i class="p"></i></span>
+              </div>
+              <div class="lp-card__name">CREOTASK</div>
+              <div class="lp-card__bottom">
+                <span>Create Connect Compete</span>
+                <span>Earned, never bought</span>
+              </div>
+              <div class="lp-card__glare"></div>
+            </div>
+          </div>
+          </div>
+          <div class="lp-card__floor"></div>
+        </div>
+
+        <div class="lp-chapters">
+          <article class="lp-ch" id="ch-connect" data-ch="Connect" aria-labelledby="ch1Title">
+            <div class="lp-ch__text">
+              <span class="lp-ch__no">01 · Connect</span>
+              <h2 class="lp-ch__title" id="ch1Title">Clients and freelancers, on one account.</h2>
+              <p>One account lets you hire and work. Clients post a structured brief; freelancers answer with the work that fits it.</p>
+            </div>
+            <div class="lp-ch__panels">
+              <div class="lp-glass" style="--d:1"><span class="lp-glass__k">Client</span><b>Posts a structured brief</b><p>Scope, deliverables, acceptance criteria and a fixed budget.</p></div>
+              <div class="lp-glass" style="--d:1.6"><span class="lp-glass__k">Freelancer</span><b>Applies with matching work</b><p>A message written for the brief, plus the samples that fit it.</p></div>
+              <div class="lp-glass lp-glass--line" style="--d:2.2"><p>Matched on evidence of skill, never on paid visibility.</p></div>
+            </div>
+          </article>
+
+          <article class="lp-ch" id="ch-create" data-ch="Create" aria-labelledby="ch2Title">
+            <div class="lp-ch__text">
+              <span class="lp-ch__no">02 · Create</span>
+              <h2 class="lp-ch__title" id="ch2Title">From brief to delivered work.</h2>
+              <p>Both sides agree the same scope, milestones and fees before work starts. Then everything stays with the project.</p>
+            </div>
+            <div class="lp-ch__panels">
+              <div class="lp-glass" style="--d:1">
+                <span class="lp-glass__k">How a project moves</span>
+                <ol class="lp-flow"><li>Brief</li><li>Applications</li><li>Agreed terms</li><li>Milestones</li><li>Review</li></ol>
+              </div>
+              <div class="lp-glass" style="--d:1.7">
+                <span class="lp-glass__k">Example milestones</span>
+                <ul class="lp-ms">
+                  <li data-state="done"><b>Concept and mood board</b><span>₹5,000 · accepted</span></li>
+                  <li data-state="current"><b>Initial brand designs</b><span>₹7,500 · in progress</span></li>
+                </ul>
+              </div>
+              <div class="lp-glass lp-glass--line" style="--d:2.3"><p>Messages, files, versions and revisions in one workspace.</p></div>
+            </div>
+          </article>
+
+          <article class="lp-ch" id="ch-compete" data-ch="Compete" aria-labelledby="ch3Title">
+            <div class="lp-ch__text">
+              <span class="lp-ch__no">03 · Compete and grow</span>
+              <h2 class="lp-ch__title" id="ch3Title">Tiers are earned, never bought.</h2>
+              <p>Your tier reflects delivered work, verified skills and client ratings. No fee can change it, and newcomers get a fair way in.</p>
+            </div>
+            <div class="lp-ch__panels">
+              <div class="lp-glass" style="--d:1">
+                <span class="lp-glass__k">Four tiers</span>
+                <ul class="lp-tiers-mini"><li><i class="b"></i>Bronze<small>Emerging</small></li><li><i class="s"></i>Silver<small>Rising</small></li><li><i class="g"></i>Gold<small>Proven</small></li><li><i class="p"></i>Platinum<small>Elite</small></li></ul>
+              </div>
+              <div class="lp-glass" style="--d:1.7"><span class="lp-glass__k">CreoStart</span><b>A fair start for newcomers</b><p>Paid entry projects from real clients, and practice challenges that are always marked as unpaid.</p></div>
+            </div>
+          </article>
+
+          <article class="lp-ch" id="ch-why" data-ch="Why CreoTask" aria-labelledby="ch4Title">
+            <div class="lp-ch__text">
+              <span class="lp-ch__no">04 · Why CreoTask</span>
+              <h2 class="lp-ch__title" id="ch4Title">Trust is built into how it works.</h2>
+              <p>Not a promise on a banner: the same rules apply to everyone, and both sides can see them.</p>
+            </div>
+            <div class="lp-ch__panels lp-ch__panels--grid">
+              <div class="lp-glass" style="--d:1"><b>Skills before connections</b><p>Qualified newcomers get a fair look beside established names.</p></div>
+              <div class="lp-glass" style="--d:1.5"><b>Money is never ambiguous</b><p>Fixed prices, split into milestones that add up exactly.</p></div>
+              <div class="lp-glass" style="--d:2"><b>Same terms for both sides</b><p>Scope, fees and dates are visible before work starts.</p></div>
+              <div class="lp-glass" style="--d:2.5"><b>Nothing to buy</b><p>No paid tiers, no paid ranking, no fee that changes your standing.</p></div>
+            </div>
+          </article>
+
+          <article class="lp-ch" id="ch-insights" data-ch="Market insights" aria-labelledby="ch5Title">
+            <div class="lp-ch__text">
+              <span class="lp-ch__no">05 · Market insights</span>
+              <h2 class="lp-ch__title" id="ch5Title">Independent work in India is growing fast.</h2>
+              <p>These figures cover all gig and platform work in India, not only freelancing.</p>
+              <p class="lp-ch__source">Source: <a href="https://www.niti.gov.in/sites/default/files/2022-06/Policy_Brief_India%27s_Booming_Gig_and_Platform_Economy_27062022.pdf" target="_blank" rel="noopener noreferrer">NITI Aayog, India's Booming Gig and Platform Economy (June 2022)</a></p>
+            </div>
+            <div class="lp-ch__panels">
+              <div class="lp-glass lp-glass--stat" style="--d:1"><b>7.7 million</b><p>gig and platform workers in India in 2020–21</p></div>
+              <div class="lp-glass lp-glass--stat" style="--d:1.7"><b>23.5 million</b><p>projected by 2029–30</p></div>
+              <div class="lp-glass lp-glass--stat" style="--d:2.4"><b>1.5% → 4.1%</b><p>share of India's total workforce, 2020–21 to 2029–30 (projected)</p></div>
+            </div>
+          </article>
+        </div>
+
+        <ol class="lp-j-rail" aria-hidden="true">
+          <li>Connect</li><li>Create</li><li>Compete</li><li>Why CreoTask</li><li>Insights</li>
+        </ol>
       </div>
-      <div class="hero__glow" aria-hidden="true"></div>
     </section>
 
-    <section class="section" id="how">
-      <p class="section__eyebrow">HOW IT WORKS</p>
-      <h2 class="section__title">Freelancing that levels you up</h2>
-      <div class="pillars">
-        <article class="pillar">
-          <div class="pillar__icon">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15 14.5c3 0 6 1.8 6 5"/></svg>
+    <!-- How it works: light band with a rounded teal panel (Figma "Main" stats band, reused for the two paths) -->
+    <section class="lp-light lp-markzone" id="how" aria-labelledby="howTitle">
+      <div class="lp-markzone__fx" aria-hidden="true">
+        <!-- Brand mark backdrop: faint engraving; gold fills in under the cursor -->
+        <div class="lp-mark">
+          <svg class="lp-mark__line" viewBox="0 0 64 64"><path d="M32 1C33.82 19.6 33.56 47.5 32 63C30.44 47.5 30.18 19.6 32 1Z"/><path d="M26 15C27.54 28.2 27.32 48 26 59C24.68 48 24.46 28.2 26 15Z"/><path d="M38 15C39.54 28.2 39.32 48 38 59C36.68 48 36.46 28.2 38 15Z"/><path d="M31.45 33.6Q18.17 42.21 5 51Q18.83 43.29 32.55 35.4Z"/><path d="M31.45 35.4Q45.17 43.29 59 51Q45.83 42.21 32.55 33.6Z"/><path d="M25.48 41.83Q20.19 46.35 15 51Q20.81 47.15 26.52 43.17Z"/><path d="M37.48 43.17Q43.19 47.15 49 51Q43.81 46.35 38.52 41.83Z"/></svg>
+          <svg class="lp-mark__gold" viewBox="0 0 64 64"><path d="M32 1C33.82 19.6 33.56 47.5 32 63C30.44 47.5 30.18 19.6 32 1Z"/><path d="M26 15C27.54 28.2 27.32 48 26 59C24.68 48 24.46 28.2 26 15Z"/><path d="M38 15C39.54 28.2 39.32 48 38 59C36.68 48 36.46 28.2 38 15Z"/><path d="M31.45 33.6Q18.17 42.21 5 51Q18.83 43.29 32.55 35.4Z"/><path d="M31.45 35.4Q45.17 43.29 59 51Q45.83 42.21 32.55 33.6Z"/><path d="M25.48 41.83Q20.19 46.35 15 51Q20.81 47.15 26.52 43.17Z"/><path d="M37.48 43.17Q43.19 47.15 49 51Q43.81 46.35 38.52 41.83Z"/></svg>
           </div>
-          <h3>Connect</h3>
-          <p>Meet clients and fellow creators who match your skills. A verified profile and real reviews build trust from day one.</p>
-        </article>
-        <article class="pillar">
-          <div class="pillar__icon">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/></svg>
-          </div>
-          <h3>Create</h3>
-          <p>Build a portfolio of featured work and grow your skill tree. Every project you ship earns XP.</p>
-        </article>
-        <article class="pillar">
-          <div class="pillar__icon">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>
-          </div>
-          <h3>Compete</h3>
-          <p>Take on daily challenges, unlock badges and climb the leaderboard so clients find the best first.</p>
-        </article>
       </div>
+      <div class="ui-container">
+        <h2 class="ui-h1 lp-center" id="howTitle">Two ways in.<br />One honest process.</h2>
+        <p class="ui-lead lp-center lp-light__lead">The same project, step by step, from each side.</p>
+        <div class="lp-band">
+          <article class="lp-path">
+            <h3 class="ui-h3">If you're hiring</h3>
+            <ol class="lp-steps">
+              <li><span class="lp-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6zM9 10h6M9 14h6M9 18h3" /></svg></span><div><b>Write a structured brief</b>Scope, deliverables, acceptance criteria, and a budget split into milestones that add up exactly.</div></li>
+              <li><span class="lp-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h7v12H4zM13 6h7v12h-7zM7 10h1M16 10h1M7 14h2M16 14h2" /></svg></span><div><b>Compare on evidence</b>Verified skills, relevant work samples and delivery history, side by side.</div></li>
+              <li><span class="lp-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12l4 4 6-7M14 15l2 2 4-5" /></svg></span><div><b>Agree exact terms</b>Both of you see the same scope, milestones, fees and dates before work starts.</div></li>
+              <li><span class="lp-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" /><path d="M8.5 12.5l2.3 2.3 4.7-5" /></svg></span><div><b>Review each milestone</b>Accept the work, or ask for a revision within what you agreed.</div></li>
+            </ol>
+            <button class="ui-btn lp-btn-line" type="button" data-auth="signup" data-role="client">Create a client account</button>
+          </article>
+          <article class="lp-path">
+            <h3 class="ui-h3">If you're freelancing</h3>
+            <ol class="lp-steps">
+              <li><span class="lp-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 4-5.5 7-5.5s5.8 1.9 7 5.5" /></svg></span><div><b>Build a profile from evidence</b>Skills, work samples and availability. Submit evidence to get skills verified.</div></li>
+              <li><span class="lp-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4zM8 9h8M8 12h5" /></svg></span><div><b>Apply with the work that fits</b>A message written for the brief, plus the samples that match it.</div></li>
+              <li><span class="lp-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h7l2 2h9v10H3zM3 7V5h6" /></svg></span><div><b>Deliver in one workspace</b>Messages, files, versions and revisions stay with the project.</div></li>
+              <li><span class="lp-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19V13M10 19V9M15 19v-6M20 19V5" /></svg></span><div><b>Grow your record</b>Accepted, paid work moves you towards the next tier.</div></li>
+            </ol>
+            <button class="ui-btn lp-btn-line" type="button" data-auth="signup" data-role="freelancer">Create a freelancer account</button>
+          </article>
+        </div>
+      </div>
+    </section>
 
-      <div class="brand-band">
-        <svg class="brand__mark brand__mark--gold"><use href="#logo"/></svg>
-        <p class="brand-band__name">CREOTASK</p>
-        <p class="brand-band__tag">CREATE CONNECT COMPETE</p>
-        <button class="btn btn--gold btn--pill" data-auth="signup">Create your free profile</button>
+    <!-- Tiers -->
+    <section class="lp-section" id="tiers" aria-labelledby="tiersTitle">
+      <div class="ui-container">
+        <h2 class="ui-h1 lp-center" id="tiersTitle">What each tier takes.</h2>
+        <p class="ui-lead lp-center">Four steps, each earned from delivered work. A tier never overrides what a project needs.</p>
+        <div class="lp-climb-wrap">
+        <div class="lp-climb" aria-hidden="true"><span class="lp-climb__fill"></span></div>
+        <ol class="lp-ladder">
+          <li><span class="lp-medal lp-medal--bronze" aria-hidden="true"><span class="lp-medal__body"><span class="lp-medal__face"><svg viewBox="0 0 64 64"><path d="M32 6C33.5 21.5 33.3 44.7 32 57.6C30.7 44.7 30.5 21.5 32 6Z"/><path d="M27 17.7C28.3 28.7 28.1 45.2 27 54.3C25.9 45.2 25.7 28.7 27 17.7Z"/><path d="M37 17.7C38.3 28.7 38.1 45.2 37 54.3C35.9 45.2 35.7 28.7 37 17.7Z"/><path d="M31.5 33.2Q20.5 40.3 9.5 47.6Q21 41.2 32.5 34.6Z"/><path d="M31.5 34.6Q43 41.2 54.5 47.6Q43.5 40.3 32.5 33.2Z"/></svg></span><span class="lp-medal__light"></span></span></span><h3 class="ui-h4">Bronze</h3><b>Emerging</b><p>Where everyone starts: a verified email and a complete profile.</p></li>
+          <li><span class="lp-medal lp-medal--silver" aria-hidden="true"><span class="lp-medal__body"><span class="lp-medal__face"><svg viewBox="0 0 64 64"><path d="M32 6C33.5 21.5 33.3 44.7 32 57.6C30.7 44.7 30.5 21.5 32 6Z"/><path d="M27 17.7C28.3 28.7 28.1 45.2 27 54.3C25.9 45.2 25.7 28.7 27 17.7Z"/><path d="M37 17.7C38.3 28.7 38.1 45.2 37 54.3C35.9 45.2 35.7 28.7 37 17.7Z"/><path d="M31.5 33.2Q20.5 40.3 9.5 47.6Q21 41.2 32.5 34.6Z"/><path d="M31.5 34.6Q43 41.2 54.5 47.6Q43.5 40.3 32.5 33.2Z"/></svg></span><span class="lp-medal__light"></span></span></span><h3 class="ui-h4">Silver</h3><b>Rising</b><p>Verified skills and first paid projects for more than one client.</p></li>
+          <li><span class="lp-medal lp-medal--gold" aria-hidden="true"><span class="lp-medal__body"><span class="lp-medal__face"><svg viewBox="0 0 64 64"><path d="M32 6C33.5 21.5 33.3 44.7 32 57.6C30.7 44.7 30.5 21.5 32 6Z"/><path d="M27 17.7C28.3 28.7 28.1 45.2 27 54.3C25.9 45.2 25.7 28.7 27 17.7Z"/><path d="M37 17.7C38.3 28.7 38.1 45.2 37 54.3C35.9 45.2 35.7 28.7 37 17.7Z"/><path d="M31.5 33.2Q20.5 40.3 9.5 47.6Q21 41.2 32.5 34.6Z"/><path d="M31.5 34.6Q43 41.2 54.5 47.6Q43.5 40.3 32.5 33.2Z"/></svg></span><span class="lp-medal__light"></span></span></span><h3 class="ui-h4">Gold</h3><b>Proven</b><p>Consistent quality and on-time delivery across many clients.</p></li>
+          <li><span class="lp-medal lp-medal--platinum" aria-hidden="true"><span class="lp-medal__body"><span class="lp-medal__face"><svg viewBox="0 0 64 64"><path d="M32 6C33.5 21.5 33.3 44.7 32 57.6C30.7 44.7 30.5 21.5 32 6Z"/><path d="M27 17.7C28.3 28.7 28.1 45.2 27 54.3C25.9 45.2 25.7 28.7 27 17.7Z"/><path d="M37 17.7C38.3 28.7 38.1 45.2 37 54.3C35.9 45.2 35.7 28.7 37 17.7Z"/><path d="M31.5 33.2Q20.5 40.3 9.5 47.6Q21 41.2 32.5 34.6Z"/><path d="M31.5 34.6Q43 41.2 54.5 47.6Q43.5 40.3 32.5 33.2Z"/></svg></span><span class="lp-medal__light"></span></span></span><h3 class="ui-h4">Platinum</h3><b>Elite</b><p>Sustained expertise, confirmed by our team as well as the numbers.</p></li>
+        </ol>
+        </div>
+        <p class="ui-small ui-text-3 lp-center lp-note">Exact thresholds are being calibrated during our pilot and will be published before they apply.</p>
+      </div>
+    </section>
+
+    <!-- CreoStart -->
+    <section class="lp-section lp-section--tint" id="creostart" aria-labelledby="creostartTitle">
+      <div class="ui-container">
+        <h2 class="ui-h1 lp-center" id="creostartTitle">CreoStart,<br />for your first projects.</h2>
+        <p class="ui-lead lp-center">Two clearly separate ways in, so you always know whether you're being paid.</p>
+        <div class="lp-compare">
+          <article class="lp-option lp-option--paid">
+            <div class="ui-split"><h3 class="ui-h3">Paid entry project</h3><span class="ui-badge ui-badge--success ui-badge--dot">Paid</span></div>
+            <dl>
+              <div><dt>Who sets it</dt><dd>A real client</dd></div>
+              <div><dt>Payment</dt><dd>An agreed fee per milestone</dd></div>
+              <div><dt>What you get</dt><dd>Paid work and a client review</dd></div>
+              <div><dt>Counts towards tier</dt><dd>Yes, once accepted and paid</dd></div>
+            </dl>
+          </article>
+          <article class="lp-option">
+            <div class="ui-split"><h3 class="ui-h3">Practice challenge</h3><span class="ui-badge">Unpaid</span></div>
+            <dl>
+              <div><dt>Who sets it</dt><dd>CreoTask</dd></div>
+              <div><dt>Payment</dt><dd>None, and it's marked as practice everywhere</dd></div>
+              <div><dt>What you get</dt><dd>A portfolio piece and feedback</dd></div>
+              <div><dt>Counts towards tier</dt><dd>No</dd></div>
+            </dl>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Questions -->
+    <section class="lp-section" id="faq" aria-labelledby="faqTitle">
+      <div class="ui-container lp-faq">
+        <h2 class="ui-h1" id="faqTitle">Questions, answered plainly.</h2>
+        <div class="lp-faq__list">
+          <details>
+            <summary>Can I use CreoTask today?</summary>
+            <p>You can create an account, verify your email and build your profile now. Paid projects open once our payment partner is approved. Until then, no money moves through CreoTask.</p>
+          </details>
+          <details>
+            <summary>What does it cost?</summary>
+            <p>Creating an account and building a profile is free. Before you accept or fund any project, you'll see the exact fee, any tax and what the freelancer receives. Nothing is charged by surprise.</p>
+          </details>
+          <details>
+            <summary>How do payments work?</summary>
+            <p>Every project has a fixed price split into milestones. Each milestone is paid through an approved payment provider, and you can always see whether an amount is pending, funded, released or refunded.</p>
+          </details>
+          <details>
+            <summary>How are tiers decided?</summary>
+            <p>From delivered work: completed paid projects, verified skills, ratings and on-time delivery. Tiers can't be bought, they never override what a project requires, and every tier decision comes with a reason you can appeal.</p>
+          </details>
+          <details>
+            <summary>What if I disagree with a decision?</summary>
+            <p>People make the big calls. Tier changes, skill verification and disputes each come with a stated reason, and you can appeal them.</p>
+          </details>
+          <details>
+            <summary>I'm new. Will anyone hire me?</summary>
+            <p>We can't promise work, but qualified newcomers get a fair look alongside established names, and nobody is shown for a project they can't do. CreoStart has paid entry projects meant for first-timers. Practice challenges are always clearly marked as unpaid.</p>
+          </details>
+          <details>
+            <summary>Who can join?</summary>
+            <p>Anyone in India who is at least 18. One account can both hire and work; you choose which role you're using at any time.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- Closing -->
+    <section class="lp-closing" aria-labelledby="closingTitle">
+      <div class="ui-container lp-closing__inner">
+        <h2 class="ui-display ui-silver lp-closing__title" id="closingTitle">Start with what you can do.</h2>
+        <div class="lp-hero__cta">
+          <button class="ui-btn ui-btn--primary ui-btn--lg" type="button" data-auth="signup" data-role="freelancer">Create your profile</button>
+          <button class="ui-btn ui-btn--lg" type="button" data-auth="signup" data-role="client">Post a project</button>
+        </div>
       </div>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <a class="brand brand--sm brand--gold" href="index.html">
-      <svg class="brand__mark"><use href="#logo"/></svg>
-      <span class="brand__name">CREOTASK</span>
-    </a>
-    <p>© <span id="year"></span> CREOTASK. All rights reserved.</p>
+  <footer class="lp-footer">
+    <div class="ui-container lp-footer__inner">
+      <div class="lp-footer__brand">
+        <a class="ui-brand" href="/" aria-label="CreoTask home">
+          <img src="/assets/img/logo-silver.svg" alt="" width="26" height="26" />
+          <span>CREOTASK</span>
+        </a>
+        <p class="lp-tagline">Create Connect Compete</p>
+      </div>
+      <p class="ui-small ui-text-3">&copy; <span id="year">2026</span> CreoTask. Built for India first. <a class="lp-replay" href="/?intro">Replay intro</a></p>
+    </div>
   </footer>
 
-  <!-- Auth modal -->
-  <div class="modal auth" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle" aria-hidden="true">
-    <div class="modal__dialog">
-      <div class="auth__inner">
-        <button class="modal__close" data-close aria-label="Close">&times;</button>
-        <div class="brand brand--sm brand--gold auth__brand">
-          <svg class="brand__mark"><use href="#logo"/></svg>
-          <span class="brand__name">CREOTASK</span>
-        </div>
-        <h2 class="auth__title" id="authTitle">Sign Up or Login</h2>
-        <p class="auth__sub">For Freelancers and Clients</p>
-
-        <form class="stack" id="authForm" novalidate>
-          <div class="role-toggle" role="radiogroup" aria-label="I am a" id="roleToggle">
-            <label><input type="radio" name="role" value="freelancer" checked /><span>I'm a Freelancer</span></label>
-            <label><input type="radio" name="role" value="client" /><span>I'm a Client</span></label>
-          </div>
-          <label class="field">
-            <span class="sr-only">Email</span>
-            <input class="input" type="email" name="email" placeholder="Email" autocomplete="email" required />
-          </label>
-          <label class="field">
-            <span class="sr-only">Password</span>
-            <input class="input" type="password" name="password" placeholder="Password" autocomplete="current-password" minlength="6" required style="padding-right:130px" />
-            <button type="button" class="field__aside" id="forgotBtn">Forgot password?</button>
-          </label>
-          <p class="form-error" id="authError" role="alert"></p>
-          <button class="btn btn--block" type="submit" id="authSubmit" style="font-size:16px;padding:11px">Sign Up</button>
-
-          <div class="auth__divider">or</div>
-
-          <button type="button" class="btn btn--block btn--social" data-provider="google">
-            <svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
-            Continue with Google
-          </button>
-          <button type="button" class="btn btn--block btn--social" data-provider="github">
-            <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0C17.3 4.8 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5z"/></svg>
-            Continue with Github
-          </button>
-          <button type="button" class="btn btn--block btn--social" data-provider="linkedin">
-            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="3" fill="#0A66C2"/><path fill="#fff" d="M7.1 9.5H4.6V19h2.5zM5.9 5a1.4 1.4 0 1 0 0 2.9 1.4 1.4 0 0 0 0-2.9zM19.4 13.6c0-2.6-1.4-4.3-3.7-4.3-1.3 0-2.1.7-2.5 1.3V9.5h-2.4V19h2.5v-4.9c0-1.2.4-2.4 1.8-2.4s1.6 1.3 1.6 2.4V19h2.5z"/></svg>
-            Continue with Linkedin
-          </button>
-        </form>
-
-        <p class="auth__switch" id="authSwitch"></p>
-        <p class="auth__note">Email verification required</p>
+  <!-- Sign up / Log in -->
+  <dialog class="ui-dialog lp-auth" id="authModal" aria-labelledby="authTitle">
+    <div class="ui-dialog__head">
+      <div>
+        <h2 class="ui-dialog__title" id="authTitle">Create your account</h2>
+        <p class="ui-dialog__sub" id="authSub">Freelancers and clients use the same account. You can add the other role later.</p>
       </div>
+      <button class="ui-btn ui-btn--quiet ui-btn--icon ui-btn--sm ui-close" type="button" data-close aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
     </div>
-  </div>
+    <div class="ui-dialog__body">
+      <div class="ui-alert ui-alert--danger" id="authNotice" role="alert" hidden></div>
+      <form class="ui-stack" id="authForm" novalidate>
+        <fieldset class="ui-segmented" id="roleToggle">
+          <legend class="ui-sr-only">I want to</legend>
+          <label><input type="radio" name="role" value="freelancer" checked /><span>Find work</span></label>
+          <label><input type="radio" name="role" value="client" /><span>Hire</span></label>
+        </fieldset>
+        <div class="ui-field">
+          <label class="ui-label" for="authEmail">Email</label>
+          <input class="ui-input" id="authEmail" type="email" name="email" autocomplete="email" required />
+        </div>
+        <div class="ui-field">
+          <div class="ui-split">
+            <label class="ui-label" for="authPassword">Password</label>
+            <button class="ui-link-btn" type="button" id="forgotBtn">Forgot password?</button>
+          </div>
+          <div class="ui-input-wrap">
+            <input class="ui-input" id="authPassword" type="password" name="password" autocomplete="new-password" required aria-describedby="pwRule" />
+            <button class="ui-link-btn ui-link-btn--muted ui-input-action" type="button" id="pwToggle" aria-pressed="false">Show</button>
+          </div>
+          <p class="ui-hint" id="pwRule">At least 8 characters, with a letter and a number.</p>
+        </div>
+        <label class="ui-check" id="ageConfirmRow">
+          <input type="checkbox" name="age_confirmed" id="ageConfirmed" />
+          <span>I confirm I'm at least <b id="minAgeLabel">18</b> years old.</span>
+        </label>
+        <p class="ui-error" id="authError" role="alert"></p>
+        <button class="ui-btn ui-btn--primary ui-btn--block ui-btn--lg" type="submit" id="authSubmit">Create account</button>
+        <p class="ui-small ui-text-2" id="authSwitch"></p>
+        <p class="ui-xs ui-text-3" id="authNote">You'll need to verify your email before you can publish, apply or accept work.</p>
 
-  <script src="assets/js/store.js"></script>
-  <script src="assets/js/landing.js"></script>
+        <!-- Shown only when the server reports NODE_ENV=development. Not a sign-in method. -->
+        <div class="lp-demo" id="demoPersonas" hidden>
+          <p class="ui-xs ui-text-2"><b>Development only.</b> Log in as a demo account from the local seed data.</p>
+          <div class="ui-cluster" style="--cluster: var(--s-2)">
+            <button type="button" class="ui-btn ui-btn--sm" data-demo="aman@demo.in">Bronze freelancer</button>
+            <button type="button" class="ui-btn ui-btn--sm" data-demo="priya@demo.in">Platinum freelancer</button>
+            <button type="button" class="ui-btn ui-btn--sm" data-demo="chai@demo.in">Client</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/store.js"></script>
+  <script src="/assets/vendor/gsap.min.js"></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js"></script>
+  <script src="/assets/js/intro.js"></script>
+  <script src="/assets/js/journey.js"></script>
+  <script src="/assets/js/landing.js"></script>
+  <script src="/assets/js/nav.js"></script>
 </body>
 </html>
