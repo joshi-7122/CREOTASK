@@ -1,20 +1,40 @@
 /* =========================================================
    Signed-in app shell: top bar (desktop nav), bottom tab bar (phones)
    ========================================================= */
-.sh-body { min-height: 100dvh; background:
-  radial-gradient(700px 420px at 0% -8%, rgba(255, 255, 255, 0.03), transparent 65%),
-  radial-gradient(700px 420px at 100% -8%, rgba(255, 255, 255, 0.03), transparent 65%),
-  var(--bg); }
+/* Atmosphere: the same tinted graphite stage as the landing hero, with soft silver haze
+   in the two top corners. Fixed, so content scrolls over it. */
+.sh-body { min-height: 100dvh; background: #0b0b0c; }
+.sh-body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(640px 520px at 0% 0%, rgba(255, 255, 255, 0.12), transparent 70%),
+    radial-gradient(640px 520px at 100% 0%, rgba(255, 255, 255, 0.12), transparent 70%),
+    radial-gradient(1000px 520px at 50% 108%, rgba(255, 255, 255, 0.04), transparent 70%),
+    linear-gradient(180deg, #0f0f10 0%, #0b0b0c 60%);
+}
 
-/* Floating glass pill bar (from the Figma "Main" navbar) */
+/* Floating glass dock, matching the landing page. The glass sits on ::before so the menus
+   that open from it can blur the page too. .is-scrolled (shell.js) strengthens it. */
 .sh-top { position: sticky; top: 0; z-index: 50; padding-top: 12px; }
 .sh-top__inner {
-  display: flex; align-items: center; gap: var(--s-6); min-height: 58px;
+  position: relative; display: flex; align-items: center; gap: var(--s-6); min-height: 58px;
   padding: 6px 8px 6px 20px !important; border-radius: var(--r-pill);
-  background: rgba(10, 10, 14, 0.82); backdrop-filter: saturate(180%) blur(20px);
-  border: 1px solid var(--border-strong);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 18px 50px -24px rgba(0, 0, 0, 0.95);
   max-width: calc(var(--container) - 2 * var(--gutter));
+}
+.sh-top__inner::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background-color: rgba(18, 18, 20, 0.34);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0) 55%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%); backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: background-color 400ms ease, border-color 400ms ease, box-shadow 500ms ease, -webkit-backdrop-filter 400ms ease, backdrop-filter 400ms ease;
+}
+.sh-top.is-scrolled .sh-top__inner::before {
+  background-color: rgba(14, 14, 16, 0.7);
+  -webkit-backdrop-filter: blur(24px) saturate(170%); backdrop-filter: blur(24px) saturate(170%);
+  border-color: rgba(255, 255, 255, 0.17);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.4), 0 26px 60px -26px rgba(0, 0, 0, 0.95), 0 2px 10px rgba(0, 0, 0, 0.45);
 }
 .sh-top .ui-brand span { font-size: 0.98rem; }
 
@@ -25,15 +45,21 @@
   transition: color var(--t-fast), background var(--t-fast);
 }
 .sh-nav__item:hover { color: var(--text); background: rgba(255, 255, 255, 0.05); }
-.sh-nav__item[aria-current="page"] { color: var(--text); background: rgba(255, 255, 255, 0.1); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset; }
+.sh-nav__item[aria-current="page"] {
+  color: #ffffff;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.06));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.32), 0 8px 18px -10px rgba(0, 0, 0, 0.9);
+}
 
 .sh-tools { display: flex; align-items: center; gap: var(--s-3); }
 .sh-role {
   display: inline-flex; align-items: center; gap: var(--s-2); height: 36px; padding: 0 var(--s-3);
-  border-radius: var(--r-pill); border: 1px solid var(--border); background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--r-pill); border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
   color: var(--text); font: 600 var(--fs-sm)/1 var(--font); cursor: pointer;
+  transition: background-color 200ms ease, border-color 200ms ease;
 }
-.sh-role:hover { background: var(--surface-hover); }
+.sh-role:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.24); }
 .sh-role__label { color: var(--text-3); font-weight: 500; }
 .sh-role svg { color: var(--text-2); }
 
@@ -71,16 +97,17 @@ a.sh-notif__item:hover { background: var(--surface-hover); color: var(--text); }
     display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px;
     position: fixed; z-index: 50; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom));
     padding: 6px; border-radius: var(--r-pill);
-    background: rgba(13, 28, 31, 0.82); backdrop-filter: saturate(150%) blur(18px);
-    border: 1px solid var(--border-strong);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 20px 50px -18px rgba(0, 0, 0, 0.95);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 60%), rgba(14, 14, 16, 0.72);
+    -webkit-backdrop-filter: saturate(170%) blur(24px); backdrop-filter: saturate(170%) blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset, 0 20px 50px -18px rgba(0, 0, 0, 0.95);
   }
   .sh-tabbar .sh-nav__item {
     justify-content: center; text-align: center; min-height: 44px; padding: 0 4px; border-radius: var(--r-pill);
     font-size: var(--fs-xs); line-height: 1.15;
   }
   .sh-top__inner { padding-left: 14px !important; }
-  .sh-tabbar .sh-nav__item[aria-current="page"] { background: var(--accent-quiet); color: var(--accent-strong); }
+  .sh-tabbar .sh-nav__item[aria-current="page"] { color: #ffffff; }
   .sh-main { padding-bottom: 120px; }
   .ui-toast-host { bottom: 92px; }
 }
@@ -88,3 +115,162 @@ a.sh-notif__item:hover { background: var(--surface-hover); color: var(--text); }
   .sh-top .ui-brand span { display: none; }
   #tierPillWrap .ui-tier { padding-right: 6px; font-size: 0; gap: 0; }
 }
+
+/* =========================================================
+   Signed-in glass skin
+   One monochrome, glass language for every signed-in screen: the design-system
+   components (ui-*) on the profile page and the older marketplace classes
+   (tile, proj-card, btn, input, modal…) that app.js still renders.
+   Tier colours and status colours (success, danger, info) are the only colour.
+   ========================================================= */
+
+/* ---- Type: the landing page's lighter, tighter headings ---- */
+.sh-body .ui-h1, .sh-body .view-title { font-weight: 400; letter-spacing: -0.045em; line-height: 1.05; }
+.sh-body .view-title { font-size: clamp(2rem, 3.6vw, 3rem); }
+.sh-body .view-sub { color: var(--text-2); margin-top: 8px; font-size: var(--fs-md); }
+.sh-body .view-head { margin: 20px 0 26px; }
+.sh-body .section-title { font-weight: 500; letter-spacing: -0.02em; }
+.sh-body .section-title a { color: var(--text-2); }
+
+/* ---- Surfaces: frosted glass panels ---- */
+.sh-body :is(.ui-card, .tile, .proj-card, .ws-milestone, .chat-box, .plan, .contest, .course, .ticket, .creator) {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.02) 62%), rgba(16, 16, 18, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 30px 60px -38px rgba(0, 0, 0, 0.95);
+  -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%);
+}
+.sh-body :is(.ui-card, .tile, .proj-card, .ws-milestone, .chat-box, .plan) { border-radius: 22px; }
+.sh-body .tile { padding: 22px; }
+.sh-body .ui-card--flat, .sh-body .tile .tile, .sh-body .ui-card .tile {
+  background: rgba(255, 255, 255, 0.035); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+.sh-body .plan--pro { background: linear-gradient(160deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.03) 62%), rgba(16, 16, 18, 0.5); border-color: rgba(255, 255, 255, 0.24); }
+
+/* Cards you can open lift toward you */
+.sh-body .proj-card { padding: 22px; gap: 14px; transition: transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 220ms ease, box-shadow 320ms ease; }
+.sh-body .proj-card:hover, .sh-body .contest:hover {
+  border-color: rgba(255, 255, 255, 0.28); transform: translateY(-4px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 36px 70px -34px rgba(0, 0, 0, 1);
+}
+.sh-body .proj-card:focus-visible { outline: 2px solid #e6e8ec; outline-offset: 3px; }
+.sh-body .proj-card__title { font-weight: 550; letter-spacing: -0.015em; }
+.sh-body .proj-card__budget { color: #ffffff; }
+.sh-body .stat-box b, .sh-body .stat-box strong { font-weight: 400; letter-spacing: -0.03em; }
+.sh-body .tier.is-current { border-color: rgba(255, 255, 255, 0.4); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 30px 60px -38px rgba(0, 0, 0, 0.95); }
+.sh-body .ws-milestone.is-funded { border-left: 3px solid #d9dce1; }
+.sh-body .empty-note, .sh-body .ui-empty {
+  border: 1px dashed rgba(255, 255, 255, 0.16); border-radius: 22px; background: rgba(255, 255, 255, 0.02);
+}
+.sh-body .empty-note { padding: 48px 20px; }
+
+/* ---- Buttons: bright silver for the main action, glass for the rest ---- */
+.sh-body :is(.ui-btn--primary, .btn--gold) {
+  color: #0b0b0c; font-weight: 600; text-shadow: none;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: linear-gradient(180deg, #ffffff 0%, #e6e8ec 46%, #c2c5cb 100%);
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: inset 0 1px 0 #ffffff, inset 0 -1px 0 rgba(0, 0, 0, 0.2), 0 10px 26px -12px rgba(255, 255, 255, 0.35);
+}
+.sh-body :is(.ui-btn--primary, .btn--gold):hover {
+  color: #0b0b0c; background: linear-gradient(180deg, #ffffff 0%, #eef0f2 46%, #d0d3d8 100%); border-color: #ffffff; filter: brightness(1.04);
+  box-shadow: inset 0 1px 0 #ffffff, inset 0 -1px 0 rgba(0, 0, 0, 0.2), 0 14px 32px -12px rgba(255, 255, 255, 0.5);
+}
+.sh-body .btn {
+  border-radius: 999px; padding: 10px 20px; font: 550 var(--fs-sm)/1.1 var(--font); letter-spacing: -0.005em;
+  transition: background-color 200ms ease, border-color 200ms ease, transform 120ms ease, box-shadow 300ms ease, filter 200ms ease;
+}
+.sh-body .btn--sm { padding: 8px 16px; font-size: var(--fs-sm); }
+.sh-body .btn:not(.btn--gold) {
+  color: var(--text); border: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+.sh-body .btn:not(.btn--gold):hover { background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06)); border-color: rgba(255, 255, 255, 0.36); }
+.sh-body .btn--ghost:not(.btn--gold) { background: transparent; box-shadow: none; border-color: rgba(255, 255, 255, 0.14); }
+.sh-body .btn:focus-visible { outline: 2px solid #e6e8ec; outline-offset: 2px; }
+.sh-body .ui-btn:not(.ui-btn--primary):not(.ui-btn--quiet):not(.ui-btn--danger) {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+  border-color: rgba(255, 255, 255, 0.18); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+.sh-body .ui-btn:not(.ui-btn--primary):not(.ui-btn--quiet):not(.ui-btn--danger):hover { background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06)); border-color: rgba(255, 255, 255, 0.36); }
+.sh-body .chip-btn { transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease; }
+.sh-body .chip-btn:hover { border-color: rgba(255, 255, 255, 0.36); color: var(--text); }
+
+/* ---- Fields: recessed glass ---- */
+.sh-body :is(.input, .textarea, .select, .ui-input, .ui-select, .ui-textarea) {
+  background-color: rgba(255, 255, 255, 0.04); color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 14px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
+}
+.sh-body :is(.input, .textarea, .select, .ui-input, .ui-select, .ui-textarea):hover { border-color: rgba(255, 255, 255, 0.22); }
+.sh-body :is(.input, .textarea, .select, .ui-input, .ui-select, .ui-textarea):focus {
+  outline: none; border-color: rgba(255, 255, 255, 0.6); background-color: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(220, 222, 226, 0.16);
+}
+.sh-body .filters .input, .sh-body .filters .select { border-radius: 999px; padding-left: 18px; padding-right: 18px; }
+.sh-body .label { color: var(--text-2); }
+
+/* ---- Tabs and chips: glass segments ---- */
+.sh-body .ui-tabs, .sh-body .tabs {
+  display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; max-width: 100%; overflow-x: auto; scrollbar-width: none;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.sh-body .tab {
+  padding: 9px 16px; border-radius: 999px; border: 0; background: none; cursor: pointer; white-space: nowrap;
+  font: 500 var(--fs-sm)/1 var(--font); color: var(--text-2); transition: color 200ms ease;
+}
+.sh-body .tab:hover { color: var(--text); }
+.sh-body .ui-tab[aria-selected="true"], .sh-body .tab.is-active {
+  color: #ffffff; background: linear-gradient(180deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.06));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.32), 0 8px 18px -10px rgba(0, 0, 0, 0.9);
+}
+
+/* ---- Pills, badges, banners: silver instead of gold ---- */
+.sh-body .pill { border-color: rgba(255, 255, 255, 0.16); color: var(--text-2); background: rgba(255, 255, 255, 0.03); padding: 4px 10px; }
+.sh-body .pill--gold { color: #e6e8ec; border-color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.08); }
+.sh-body .badge-status--active { background: rgba(255, 255, 255, 0.12); color: #ffffff; }
+.sh-body .badge-status--creostart {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.06)); color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.36); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.sh-body .account-banner { border-color: rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.05); border-radius: 16px; }
+.sh-body .account-banner--sandbox { border-color: rgba(58, 160, 255, 0.35); background: rgba(58, 160, 255, 0.07); }
+.sh-body .feed__icon { background: rgba(255, 255, 255, 0.07); }
+.sh-body .dropzone:hover, .sh-body .dropzone.is-over { border-color: rgba(255, 255, 255, 0.5); background: rgba(255, 255, 255, 0.04); }
+.sh-body .creator__avatar, .sh-body .xp-card__avatar { background: radial-gradient(120% 120% at 30% 20%, #3a3b40, #151517); }
+.sh-body .bar__fill--gold { background: linear-gradient(90deg, #8f9399, #ffffff); }
+
+/* ---- Chat and tables ---- */
+.sh-body .chat-msg { border-radius: 16px; }
+.sh-body .chat-msg--client { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.14); }
+.sh-body .chat-msg--freelancer { background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1)); border-color: rgba(255, 255, 255, 0.3); color: #ffffff; }
+.sh-body .data-table th { font-size: var(--fs-xs); letter-spacing: 0.08em; text-transform: uppercase; background: none; }
+.sh-body .data-table tr:hover td { background: rgba(255, 255, 255, 0.04); }
+
+/* ---- Dialogs: a strong glass sheet over a blurred page ---- */
+.sh-body .modal { background: rgba(0, 0, 0, 0.55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.sh-body .modal__dialog {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 26%), rgba(16, 16, 18, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 28px; padding: 30px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 50px 100px -40px #000;
+}
+.sh-body .modal__title { font-weight: 500; letter-spacing: -0.03em; }
+.sh-body .modal__close { border-radius: 50%; transition: background-color 200ms ease; }
+.sh-body .modal__close:hover { background: rgba(255, 255, 255, 0.1); }
+.sh-body dialog.ui-dialog::backdrop { background: rgba(0, 0, 0, 0.55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+
+/* ---- Progress and avatar ---- */
+.sh-body .ui-progress { background: rgba(255, 255, 255, 0.1); }
+.sh-body .ui-progress > span { background: linear-gradient(90deg, #9da1a8, #ffffff); }
+.sh-body .ui-avatar { color: #f4f5f7; background: radial-gradient(120% 120% at 30% 20%, #3a3b40, #151517); box-shadow: inset 0 0 0 1.5px rgba(220, 222, 226, 0.5), 0 8px 24px -10px rgba(0, 0, 0, 0.8); }
+
+/* ---- Views arrive softly ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .sh-main > * { animation: sh-rise 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .sh-main > *:nth-child(2) { animation-delay: 60ms; }
+  .sh-main > *:nth-child(3) { animation-delay: 120ms; }
+  .sh-main > *:nth-child(n+4) { animation-delay: 170ms; }
+}
+@keyframes sh-rise { from { opacity: 0; transform: translateY(14px); } }

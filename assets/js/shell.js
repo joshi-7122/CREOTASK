@@ -184,4 +184,12 @@
     refreshBanner(user) { if (user) currentUser = user; renderAccountBanner(); },
   };
   global.Shell = Shell;
+
+  // The dock strengthens its glass once the page scrolls under it.
+  const top = document.querySelector(".sh-top");
+  if (top) {
+    const onScroll = () => top.classList.toggle("is-scrolled", global.scrollY > 8);
+    global.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
 })(window);

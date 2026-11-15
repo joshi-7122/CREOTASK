@@ -26,9 +26,10 @@
   --ink-600: #252532;
   --ink-500: #343444;
   --ink-400: #4c4c60;
-  --teal-600: #0c1a1e;
-  --teal-500: #14282e;
-  --teal-400: #1c3840;
+  /* Formerly teal: now neutral graphite (names kept for older rules) */
+  --teal-600: #141416;
+  --teal-500: #1c1c1f;
+  --teal-400: #2a2a2e;
 
   /* Paper (crisp monochrome typography) */
   --paper-100: #ffffff;
@@ -36,15 +37,15 @@
   --paper-300: #a1a1a6;
   --paper-400: #636366;
 
-  /* Champagne gold — 500 is the logo gold */
-  --zari-200: #faebd0;
-  --zari-300: #f5dc9e;
-  --zari-400: #e8c679;
-  --zari-500: #c4a265;
-  --zari-600: #9e7e45;
-  --zari-700: #6e542c;
-  /* Metallic gold, as on the logo foil */
-  --gold-metal: linear-gradient(135deg, #fff2cc 0%, #e8c679 28%, #b8934e 55%, #f2d999 82%, #c4a265 100%);
+  /* Silver scale (the brand accent is monochrome; token names are historical) */
+  --zari-200: #f4f5f7;
+  --zari-300: #e6e8ec;
+  --zari-400: #d4d7dc;
+  --zari-500: #aeb2b9;
+  --zari-600: #858a92;
+  --zari-700: #55595f;
+  /* Brushed silver, as on the logo */
+  --gold-metal: linear-gradient(135deg, #ffffff 0%, #dfe1e5 26%, #a9adb4 54%, #eef0f2 80%, #b9bdc3 100%);
   /* Silver mist headline (Figma palette "Silver Mist") */
   --silver: linear-gradient(180deg, #ffffff 0%, #f0f0f2 40%, #8e8e93 100%);
 
@@ -72,15 +73,15 @@
   --text: var(--paper-100);
   --text-2: var(--paper-300);
   --text-3: var(--paper-400);
-  --accent: var(--zari-400);
-  --accent-strong: var(--zari-300);
-  --accent-quiet: rgba(232, 198, 121, 0.12);
-  --on-accent: #000000;
+  --accent: #d9dce1;
+  --accent-strong: #ffffff;
+  --accent-quiet: rgba(220, 222, 226, 0.1);
+  --on-accent: #0b0b0c;
   --success: var(--mint-400);
   --danger: var(--coral-400);
   --warning: var(--saffron-400);
   --info: var(--sky-400);
-  --focus: 0 0 0 2px var(--bg), 0 0 0 4px var(--zari-400);
+  --focus: 0 0 0 2px var(--bg), 0 0 0 4px #d9dce1;
 
   /* Type */
   --font: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
@@ -114,7 +115,7 @@
   /* Elevation: ink-tinted, never grey */
   --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 10px 30px -18px rgba(0, 0, 0, 0.8);
   --shadow-2: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 40px 80px -30px rgba(0, 0, 0, 0.9);
-  --glow-gold: 0 0 0 1px rgba(226, 192, 124, 0.25), 0 20px 60px -20px rgba(226, 192, 124, 0.45);
+  --glow-gold: 0 0 0 1px rgba(220, 222, 226, 0.22), 0 20px 60px -20px rgba(220, 222, 226, 0.3);
 
   /* Motion */
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -145,7 +146,7 @@ body.ui {
 .ui :where(a) { color: var(--accent); text-underline-offset: 3px; }
 .ui :where(a:hover) { color: var(--accent-strong); }
 .ui :where(img, svg) { max-width: 100%; }
-.ui ::selection { background: rgba(226, 192, 124, 0.35); color: var(--paper-100); }
+.ui ::selection { background: rgba(220, 222, 226, 0.35); color: var(--paper-100); }
 .ui :focus-visible { outline: none; box-shadow: var(--focus); border-radius: var(--r-xs); }
 .ui [hidden] { display: none !important; }
 
@@ -208,15 +209,15 @@ body.ui {
   backdrop-filter: blur(8px);
   transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease), box-shadow var(--t-med) var(--ease);
 }
-.ui-btn:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(214, 232, 230, 0.28); color: var(--btn-fg); }
+.ui-btn:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(230, 232, 236, 0.28); color: var(--btn-fg); }
 .ui-btn:active { transform: translateY(1px) scale(0.99); }
 .ui-btn--primary {
   --btn-fg: var(--on-accent); --btn-bd: transparent;
   background: var(--gold-metal);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.55) inset, 0 -1px 0 rgba(0, 0, 0, 0.18) inset, 0 10px 30px -12px rgba(226, 192, 124, 0.55);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.55) inset, 0 -1px 0 rgba(0, 0, 0, 0.18) inset, 0 10px 30px -12px rgba(220, 222, 226, 0.55);
   font-weight: 600;
 }
-.ui-btn--primary:hover { background: var(--gold-metal); filter: brightness(1.07) saturate(1.05); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 -1px 0 rgba(0, 0, 0, 0.18) inset, 0 14px 40px -12px rgba(226, 192, 124, 0.7); }
+.ui-btn--primary:hover { background: var(--gold-metal); filter: brightness(1.06); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 -1px 0 rgba(0, 0, 0, 0.18) inset, 0 14px 40px -12px rgba(220, 222, 226, 0.7); }
 .ui-btn--quiet { --btn-bd: transparent; --btn-bg: transparent; backdrop-filter: none; }
 .ui-btn--quiet:hover { background: rgba(255, 255, 255, 0.06); border-color: transparent; }
 .ui-btn--danger { --btn-fg: var(--danger); --btn-bd: rgba(242, 122, 122, 0.45); }
@@ -261,7 +262,7 @@ body.ui {
   background-position: calc(100% - 18px) 52%, calc(100% - 13px) 52%; background-size: 5px 5px; background-repeat: no-repeat; }
 .ui-input::placeholder, .ui-textarea::placeholder { color: var(--text-3); }
 .ui-input:hover, .ui-select:hover, .ui-textarea:hover { border-color: var(--ink-400); }
-.ui-input:focus, .ui-select:focus, .ui-textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(231, 194, 125, 0.2); }
+.ui-input:focus, .ui-select:focus, .ui-textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(220, 222, 226, 0.2); }
 .ui-input[aria-invalid="true"], .ui-select[aria-invalid="true"], .ui-textarea[aria-invalid="true"] { border-color: var(--danger); }
 .ui-input:disabled, .ui-select:disabled, .ui-textarea:disabled { opacity: 0.55; cursor: not-allowed; }
 .ui-input-wrap { position: relative; }
@@ -306,7 +307,7 @@ body.ui {
 
 /* ---------- 7. Surfaces ---------- */
 .ui-card {
-  background: linear-gradient(180deg, rgba(23, 46, 51, 0.72), rgba(14, 30, 34, 0.72));
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025) 60%), rgba(16, 16, 18, 0.55);
   border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--shadow-1); min-width: 0;
   backdrop-filter: blur(14px);
 }
@@ -409,7 +410,7 @@ button.ui-tier, a.ui-tier { cursor: pointer; font-family: inherit; }
 .ui-progress > span { display: block; height: 100%; background: var(--accent); border-radius: inherit; transition: width 600ms var(--ease); }
 /* Stitched variant: the remaining distance is drawn as thread, not empty track */
 .ui-progress--stitch { background: repeating-linear-gradient(90deg, var(--ink-500) 0 7px, transparent 7px 12px); height: 3px; overflow: visible; }
-.ui-progress--stitch > span { height: 3px; box-shadow: 0 0 10px rgba(231, 194, 125, 0.35); }
+.ui-progress--stitch > span { height: 3px; box-shadow: 0 0 10px rgba(220, 222, 226, 0.35); }
 
 /* Thread: an ordered sequence joined by a stitched line (milestones, steps) */
 .ui-thread { list-style: none; margin: 0; padding: 0; counter-reset: thread; }
@@ -426,7 +427,7 @@ button.ui-tier, a.ui-tier { cursor: pointer; font-family: inherit; }
 .ui-thread > li:last-child::after { display: none; }
 .ui-thread > li[data-state="done"]::before { background: var(--accent); border-color: var(--accent); }
 .ui-thread > li[data-state="done"]::after { background: repeating-linear-gradient(to bottom, var(--zari-500) 0 6px, transparent 6px 11px); }
-.ui-thread > li[data-state="current"]::before { border-color: var(--accent); box-shadow: 0 0 0 5px rgba(231, 194, 125, 0.16); background: var(--bg); }
+.ui-thread > li[data-state="current"]::before { border-color: var(--accent); box-shadow: 0 0 0 5px rgba(220, 222, 226, 0.16); background: var(--bg); }
 .ui-thread__title { font-weight: 640; display: block; }
 .ui-thread__meta { font-size: var(--fs-sm); color: var(--text-2); display: block; }
 .ui-thread > li[data-state="upcoming"] .ui-thread__title { color: var(--text-2); }
@@ -454,7 +455,7 @@ button.ui-tier, a.ui-tier { cursor: pointer; font-family: inherit; }
 .ui-dialog {
   width: min(560px, calc(100vw - 24px)); max-height: calc(100dvh - 32px);
   padding: 0; border: 1px solid var(--border-strong); border-radius: var(--r-lg);
-  background: linear-gradient(180deg, rgba(20, 42, 47, 0.92), rgba(10, 23, 26, 0.94)); color: var(--text); box-shadow: var(--shadow-2);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 30%), rgba(16, 16, 18, 0.86); color: var(--text); box-shadow: var(--shadow-2);
   backdrop-filter: blur(24px);
 }
 .ui-dialog--wide { width: min(720px, calc(100vw - 24px)); }
@@ -471,7 +472,7 @@ button.ui-tier, a.ui-tier { cursor: pointer; font-family: inherit; }
 /* ---------- 13. Menus / popovers ---------- */
 .ui-menu {
   position: absolute; z-index: 60; top: calc(100% + 8px); right: 0; min-width: 240px;
-  background: rgba(15, 32, 36, 0.92); backdrop-filter: blur(20px); border: 1px solid var(--border-strong); border-radius: var(--r-md);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 40%), rgba(16, 16, 18, 0.9); -webkit-backdrop-filter: blur(24px) saturate(160%); backdrop-filter: blur(24px) saturate(160%); border: 1px solid var(--border-strong); border-radius: var(--r-md);
   box-shadow: var(--shadow-2); padding: var(--s-2);
 }
 .ui-menu__item { display: flex; width: 100%; align-items: center; gap: var(--s-3); padding: 9px var(--s-3); border-radius: var(--r-xs); background: none; border: 0; color: var(--text); font: 500 var(--fs-md)/1.3 var(--font); text-align: left; text-decoration: none; cursor: pointer; }
@@ -485,7 +486,7 @@ button.ui-tier, a.ui-tier { cursor: pointer; font-family: inherit; }
   width: var(--size); height: var(--size); flex: none; border-radius: 50%;
   display: grid; place-items: center; font-weight: 700; font-size: calc(var(--size) * 0.38);
   color: var(--zari-200); background: radial-gradient(120% 120% at 30% 20%, var(--teal-500), var(--ink-800));
-  box-shadow: inset 0 0 0 1.5px rgba(226, 192, 124, 0.55), 0 8px 24px -10px rgba(0, 0, 0, 0.8);
+  box-shadow: inset 0 0 0 1.5px rgba(220, 222, 226, 0.55), 0 8px 24px -10px rgba(0, 0, 0, 0.8);
 }
 .ui-avatar--lg { --size: 88px; }
 .ui-avatar--sm { --size: 30px; }
