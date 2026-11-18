@@ -95,6 +95,23 @@
     });
     tl.to({}, { duration: 0.7 }); // hold on the last chapter before the page moves on
 
+    // Screen readers: chapters 2–5 are visibility:hidden until scrolled to, which also hides them from
+    // assistive tech. Keep an offscreen copy of all five in the page so nobody misses a chapter.
+    const summary = document.createElement("section");
+    summary.className = "ui-sr-only";
+    summary.setAttribute("aria-label", "Overview: Connect, Create, Compete, Why CreoTask, Market insights");
+    chapters.forEach((ch) => {
+      const copy = ch.cloneNode(true);
+      copy.removeAttribute("id");
+      copy.removeAttribute("aria-labelledby");
+      copy.querySelectorAll("[id]").forEach((n) => n.removeAttribute("id"));
+      copy.querySelectorAll(".lp-glass__k, .lp-ch__no").forEach((n) => { n.hidden = false; });
+      copy.querySelectorAll("a").forEach((a) => a.setAttribute("tabindex", "-1")); // screen readers still list them
+      summary.appendChild(copy);
+    });
+    sec.querySelector(".lp-chapters")?.before(summary);
+    summary.querySelectorAll(".lp-ch").forEach((n) => { n.style.cssText = "position:static;visibility:visible;"; });
+
     const st = tl.scrollTrigger;
     const at = (t) => st.start + (st.end - st.start) * (t / tl.duration());
     api.pinned = true;
@@ -103,6 +120,7 @@
 
     return () => {
       sec.classList.remove("is-pinned");
+      summary.remove();
       api.pinned = false;
       setActive(-1);
     };
