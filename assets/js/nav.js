@@ -31,6 +31,7 @@
   // ── Targets, in page order ──
   const TARGETS = [
     ["ch0", "ch-connect"], ["ch1", "ch-create"], ["ch2", "ch-compete"], ["ch3", "ch-why"], ["ch4", "ch-insights"],
+    ["beyond", "beyond"], ["india", "india"],
     ["how", "how"], ["tiers", "tiers"], ["creostart", "creostart"], ["faq", "faq"],
   ].map(([key, id]) => ({ key, el: document.getElementById(id) })).filter((t) => t.el);
   const closing = document.querySelector(".lp-closing");

@@ -8,7 +8,7 @@
   "use strict";
   if (!window.matchMedia("(pointer: fine)").matches) return;
 
-  const SELECTOR = ".lp-hero__cta .ui-btn, .lp-closing .ui-btn, .lp-path > .ui-btn";
+  const SELECTOR = ".lp-hero__cta .ui-btn, .lp-closing .ui-btn, .lp-path > .ui-btn, .lp-act > .ui-btn";
   let raf = 0, last = null;
 
   function apply() {
