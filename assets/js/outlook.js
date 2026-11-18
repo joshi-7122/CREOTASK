@@ -4,7 +4,7 @@
    - Reveals: elements marked [data-reveal] rise in once as they scroll into view.
    - Counters: [data-count] numbers count up once when seen.
    - Explorer: 2020–21 estimate vs 2029–30 projection (NITI Aayog), as an accessible tab set.
-   - Route: the first-timer's six steps as a navigation map; travels the route once on first view, then it is yours.
+   - Route: the first-timer's six steps as a navigation map; loops continuously while on screen, under the visitor's control.
    Everything is fully readable without this script, and with reduced motion nothing animates.
    ========================================================= */
 (function () {
@@ -114,7 +114,7 @@
     const doneP = svg.querySelector(".lp-route__done");
     const count = document.getElementById("csCount");
     const text = document.getElementById("csText");
-    let timer = 0, touched = false, cur = 0, fracs = [0];
+    let cur = 0, fracs = [0];
 
     // The travelled line ends exactly on the current waypoint, whatever the spacing (the phone
     // list opens a gap under the active step), so measure each segment instead of assuming equal ones.
@@ -169,9 +169,6 @@
       text.textContent = items[i].querySelector("p").textContent;
       drawPath(); // the phone list changes height as steps open; redraw straight away
     }
-    items.forEach((li, i) => li.querySelector("button").addEventListener("click", () => {
-      touched = true; clearInterval(timer); setStep(i);
-    }));
     setStep(0);
     drawPath();
     window.addEventListener("resize", drawPath);
@@ -179,17 +176,70 @@
     document.fonts && document.fonts.ready.then(drawPath);
     if ("ResizeObserver" in window) new ResizeObserver(drawPath).observe(inner);
 
-    // Once, on first view, travel the six waypoints so the route reads as a journey.
-    if (!reduce) {
-      whenSeen(route, () => {
-        let i = 0;
-        timer = setInterval(() => {
-          if (touched) { clearInterval(timer); return; }
-          i += 1;
-          if (i >= items.length) { clearInterval(timer); return; }
-          setStep(i);
-        }, 1500);
-      }, 0.4);
+    // ── Continuous loop ──
+    // Travels step 1 to 6, holds, rewinds to step 1 and goes again, but only while the route is
+    // on screen, and never against the visitor: hovering or focusing the map pauses it, picking a
+    // step holds it for a few seconds, and the pause button stops it for good. Automatic steps are
+    // not announced to screen readers; steps the visitor picks are.
+    const pauseBtn = document.getElementById("csPause");
+    const DWELL = 1900, END_HOLD = 2800, AFTER_PICK = 9000;
+    let loopTimer = 0, resumeTimer = 0, onScreen = false, hoverHold = false, userPaused = false, pickHold = false;
+
+    function canRun() { return !reduce && onScreen && !hoverHold && !userPaused && !pickHold && !document.hidden; }
+    function schedule() {
+      clearTimeout(loopTimer);
+      if (!canRun()) return;
+      const atEnd = cur === items.length - 1;
+      loopTimer = setTimeout(() => {
+        if (!canRun()) return;
+        detail.setAttribute("aria-live", "off");
+        if (atEnd) {
+          map.classList.add("is-rewinding");
+          setStep(0);
+          setTimeout(() => map.classList.remove("is-rewinding"), 650);
+        } else {
+          setStep(cur + 1);
+        }
+        schedule();
+      }, atEnd ? END_HOLD : DWELL);
+    }
+    function hold(ms) {
+      pickHold = true;
+      clearTimeout(loopTimer); clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(() => { pickHold = false; schedule(); }, ms);
+    }
+
+    items.forEach((li, i) => li.querySelector("button").addEventListener("click", () => {
+      detail.setAttribute("aria-live", "polite");
+      setStep(i);
+      hold(AFTER_PICK);
+    }));
+    detail.setAttribute("aria-live", "off");
+
+    if (reduce) {
+      if (pauseBtn) pauseBtn.remove();
+    } else {
+      map.addEventListener("pointerenter", () => { hoverHold = true; clearTimeout(loopTimer); });
+      map.addEventListener("pointerleave", () => { hoverHold = false; schedule(); });
+      map.addEventListener("focusin", () => { hoverHold = true; clearTimeout(loopTimer); });
+      map.addEventListener("focusout", () => { hoverHold = false; schedule(); });
+      document.addEventListener("visibilitychange", schedule);
+      if (pauseBtn) pauseBtn.addEventListener("click", () => {
+        userPaused = !userPaused;
+        pauseBtn.setAttribute("aria-pressed", userPaused ? "true" : "false");
+        pauseBtn.setAttribute("aria-label", userPaused ? "Play the route animation" : "Pause the route animation");
+        if (userPaused) clearTimeout(loopTimer); else schedule();
+      });
+      // Track whether the route is on screen (observer plus a scroll backup).
+      const setOn = (now) => { if (now !== onScreen) { onScreen = now; if (onScreen) setTimeout(schedule, 700); else clearTimeout(loopTimer); } };
+      const check = () => {
+        const r = route.getBoundingClientRect();
+        setOn(r.top < window.innerHeight * 0.9 && r.bottom > window.innerHeight * 0.1);
+      };
+      if (hasIO) new IntersectionObserver((e) => { if (e.length) setOn(e[e.length - 1].isIntersecting); }, { threshold: 0.25 }).observe(route);
+      window.addEventListener("scroll", check, { passive: true });
+      setInterval(check, 600); // cheap safety net in case a scroll or observer event is delayed
+      check();
     }
   }
 })();
