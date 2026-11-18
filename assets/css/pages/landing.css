@@ -1644,3 +1644,26 @@ body.lp {
 .lp p, .lp dd, .lp .lp-s p { text-wrap: pretty; }
 .lp-src { max-width: 56ch; }
 .lp-closing__note, .lp-yr__note { max-width: 52ch; }
+
+
+/* ---------- Beyond 9-to-5: drawn illustrations (one wordless scene per card) ----------
+   Geometric vector art in the silver glass language. Pieces settle in when the card
+   reveals; a dial of hour ticks turns very slowly and the spire floats a couple of pixels.
+   All of it is off with reduced motion. */
+.lp-art {
+  margin: -4px -4px 20px; border-radius: 16px; overflow: hidden; line-height: 0;
+  background: radial-gradient(120% 110% at 50% 0%, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0) 70%), rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.lp-art svg { display: block; width: 100%; height: auto; }
+.js-reveal .lp-art [data-a] { opacity: 0; transform: translateY(8px); }
+.js-reveal .is-in .lp-art [data-a] {
+  opacity: 1; transform: none;
+  transition: opacity 800ms ease calc(var(--k, 0) * 140ms + 300ms), transform 900ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--k, 0) * 140ms + 300ms);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lp-art__spin { transform-box: fill-box; transform-origin: center; animation: lp-art-spin 120s linear infinite; }
+  .lp-art__float { animation: lp-art-float 7s ease-in-out infinite; }
+}
+@keyframes lp-art-spin { to { transform: rotate(360deg); } }
+@keyframes lp-art-float { 50% { translate: 0 -3px; } }
