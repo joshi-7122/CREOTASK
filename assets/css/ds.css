@@ -34,8 +34,8 @@
   /* Paper (crisp monochrome typography) */
   --paper-100: #ffffff;
   --paper-200: #e5e5ea;
-  --paper-300: #a1a1a6;
-  --paper-400: #636366;
+  --paper-300: #b0b0b6;
+  --paper-400: #92929a;
 
   /* Silver scale (the brand accent is monochrome; token names are historical) */
   --zari-200: #f4f5f7;

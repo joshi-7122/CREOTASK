@@ -72,6 +72,7 @@
     document.getElementById("roleToggle").hidden = !signup;
     document.getElementById("pwRule").hidden = !signup;
     document.getElementById("authNote").hidden = !signup;
+    document.getElementById("authPilot").hidden = !signup;
     ageRow.hidden = !signup;
   }
 
