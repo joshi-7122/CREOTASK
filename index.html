@@ -168,8 +168,8 @@
           <div class="lp-j-bottom">
             <p class="lp-hero__lead">Direct, fixed-price projects in India. Clients hire on evidence of skill. Freelancers build a record that's earned, never bought.</p>
             <div class="lp-hero__cta">
-              <button class="ui-btn ui-btn--primary ui-btn--lg" type="button" data-auth="signup" data-role="client">Hire a freelancer</button>
-              <button class="ui-btn ui-btn--lg lp-btn-line" type="button" data-auth="signup" data-role="freelancer">Find work</button>
+              <button class="ui-btn ui-btn--primary ui-btn--lg" type="button" data-auth="signup" data-role="client">Hire a freelancer<svg class="lp-btn__arrow" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>
+              <button class="ui-btn ui-btn--lg lp-btn-line" type="button" data-auth="signup" data-role="freelancer">Find work<svg class="lp-btn__arrow" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>
             </div>
             <p class="lp-hero__pilot"><b>Now in pilot.</b> You can create an account and build your profile today. Paid projects open once our payment partner is approved.</p>
             <div class="lp-j-hint" aria-hidden="true"><span></span>Scroll to explore</div>
@@ -318,7 +318,7 @@
               <li><span class="lp-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12l4 4 6-7M14 15l2 2 4-5" /></svg></span><div><b>Agree exact terms</b>Both of you see the same scope, milestones, fees and dates before work starts.</div></li>
               <li><span class="lp-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" /><path d="M8.5 12.5l2.3 2.3 4.7-5" /></svg></span><div><b>Review each milestone</b>Accept the work, or ask for a revision within what you agreed.</div></li>
             </ol>
-            <button class="ui-btn lp-btn-line" type="button" data-auth="signup" data-role="client">Create a client account</button>
+            <button class="ui-btn lp-btn-line" type="button" data-auth="signup" data-role="client">Create a client account<svg class="lp-btn__arrow" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>
           </article>
           <article class="lp-path">
             <h3 class="ui-h3">If you're freelancing</h3>
@@ -328,7 +328,7 @@
               <li><span class="lp-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h7l2 2h9v10H3zM3 7V5h6" /></svg></span><div><b>Deliver in one workspace</b>Messages, files, versions and revisions stay with the project.</div></li>
               <li><span class="lp-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19V13M10 19V9M15 19v-6M20 19V5" /></svg></span><div><b>Grow your record</b>Accepted, paid work moves you towards the next tier.</div></li>
             </ol>
-            <button class="ui-btn lp-btn-line" type="button" data-auth="signup" data-role="freelancer">Create a freelancer account</button>
+            <button class="ui-btn lp-btn-line" type="button" data-auth="signup" data-role="freelancer">Create a freelancer account<svg class="lp-btn__arrow" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>
           </article>
         </div>
       </div>
@@ -422,8 +422,8 @@
       <div class="ui-container lp-closing__inner">
         <h2 class="ui-display ui-silver lp-closing__title" id="closingTitle">Start with what you can do.</h2>
         <div class="lp-hero__cta">
-          <button class="ui-btn ui-btn--primary ui-btn--lg" type="button" data-auth="signup" data-role="freelancer">Create your profile</button>
-          <button class="ui-btn ui-btn--lg" type="button" data-auth="signup" data-role="client">Post a project</button>
+          <button class="ui-btn ui-btn--primary ui-btn--lg" type="button" data-auth="signup" data-role="freelancer">Create your profile<svg class="lp-btn__arrow" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>
+          <button class="ui-btn ui-btn--lg" type="button" data-auth="signup" data-role="client">Post a project<svg class="lp-btn__arrow" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>
         </div>
       </div>
     </section>
@@ -444,6 +444,11 @@
 
   <!-- Sign up / Log in -->
   <dialog class="ui-dialog lp-auth" id="authModal" aria-labelledby="authTitle">
+   <div class="lp-auth__panel">
+    <div class="ui-brand lp-auth__brand" aria-hidden="true">
+      <img src="/assets/img/logo-silver.svg" alt="" width="30" height="30" />
+      <span>CREOTASK</span>
+    </div>
     <div class="ui-dialog__head">
       <div>
         <h2 class="ui-dialog__title" id="authTitle">Create your account</h2>
@@ -497,6 +502,7 @@
         </div>
       </form>
     </div>
+   </div>
   </dialog>
 
   <script src="/assets/js/api.js"></script>
@@ -507,5 +513,6 @@
   <script src="/assets/js/journey.js"></script>
   <script src="/assets/js/landing.js"></script>
   <script src="/assets/js/nav.js"></script>
+  <script src="/assets/js/buttons.js"></script>
 </body>
 </html>

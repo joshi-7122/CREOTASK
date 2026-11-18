@@ -77,7 +77,7 @@
   }
 
   // ── Hero studio: metal type that lifts toward the cursor and catches the light,
-  //    a card with depth and reflection, magnetic buttons, scroll choreography. ──
+  //    a card with depth and reflection, scroll choreography. ──
   function runHero() {
     const hero = document.querySelector(".lp-hero");
     const title = document.getElementById("heroTitle");
@@ -85,7 +85,6 @@
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const card = document.getElementById("lpCard");
-    const btns = [...hero.querySelectorAll(".lp-hero__cta .ui-btn")];
     const fine = window.matchMedia("(pointer: fine)").matches;
 
     // Split each word into letters; the word's gradient is continued across its letters.
@@ -172,20 +171,10 @@
       tpy = ((e.clientY - r.top) / Math.min(r.height, window.innerHeight)) * 2 - 1;
       hero.style.setProperty("--mx", (((e.clientX - r.left) / r.width) * 100).toFixed(1) + "%");
       hero.style.setProperty("--my", (((e.clientY - r.top) / r.height) * 100).toFixed(1) + "%");
-      // Magnetic buttons
-      for (const b of btns) {
-        const br = b.getBoundingClientRect();
-        const dx = e.clientX - (br.left + br.width / 2);
-        const dy = e.clientY - (br.top + br.height / 2);
-        const near = Math.hypot(dx, dy) < Math.max(br.width, 120);
-        const cap = (v) => Math.max(-10, Math.min(10, v)).toFixed(1);
-        b.style.translate = near ? `${cap(dx * 0.18)}px ${cap(dy * 0.28)}px` : "";
-      }
       wake();
     });
     hero.addEventListener("pointerleave", () => {
       pointer = null;
-      btns.forEach((b) => { b.style.translate = ""; });
       wake();
     });
   }

@@ -68,7 +68,7 @@ html { scroll-padding-top: 100px; }
   position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 6px;
   padding: 9px 13px; border-radius: 999px; border: 0; background: none; cursor: pointer;
   font: 500 var(--fs-sm)/1 var(--font); color: var(--text-2); text-decoration: none; white-space: nowrap;
-  transition: color 220ms ease, translate 380ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: color 220ms ease, background-color 220ms ease;
 }
 
 .lp-dock__links > li > a:hover, .lp-explore__btn:hover, .lp-explore__btn[aria-expanded="true"] { color: var(--text); }
@@ -149,12 +149,12 @@ html { scroll-padding-top: 100px; }
   background: linear-gradient(180deg, #ffffff 0%, #e6e8ec 46%, #c2c5cb 100%);
   -webkit-backdrop-filter: none; backdrop-filter: none;
   box-shadow: inset 0 1px 0 #ffffff, inset 0 -1px 0 rgba(0, 0, 0, 0.2), 0 10px 26px -12px rgba(255, 255, 255, 0.4);
-  transition: filter 200ms ease, box-shadow 300ms ease, translate 380ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: filter 200ms ease, box-shadow 300ms ease;
 }
 
 .lp .lp-dock__cta:hover, .lp .lp-auth .ui-btn--primary:hover:not(:disabled) { color: #0b0b0c; background: linear-gradient(180deg, #ffffff 0%, #eef0f2 46%, #d0d3d8 100%); border-color: #ffffff; filter: brightness(1.04); box-shadow: inset 0 1px 0 #ffffff, inset 0 -1px 0 rgba(0, 0, 0, 0.2), 0 14px 32px -12px rgba(255, 255, 255, 0.55); }
 
-.lp-dock__login { transition: color 200ms ease, background-color 200ms ease, translate 380ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+.lp-dock__login { transition: color 200ms ease, background-color 200ms ease; }
 
 /* Menu button (small screens) */
 
@@ -551,10 +551,45 @@ html { scroll-padding-top: 100px; }
 
 /* ---------- Sign-in dialog: silver metallic edge ---------- */
 
-.lp-auth { width: min(460px, calc(100vw - 24px)); border: 1px solid transparent;
-  background: linear-gradient(180deg, rgba(16, 16, 22, 0.98), rgba(8, 8, 10, 0.99)) padding-box,
-              linear-gradient(140deg, rgba(244, 245, 247, 0.6), rgba(174, 178, 185, 0.2) 40%, rgba(255, 255, 255, 0.08) 70%, rgba(222, 224, 228, 0.4)) border-box;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 30px 80px -20px rgba(0, 0, 0, 0.95); }
+/* Sign-in dialog: a rotating spectrum ring, from the founder's Figma login frame.
+   The one multi-colour element on the page, by request. The shell stays transparent and
+   unclipped; the dark glass lives on .lp-auth__panel. ::before is the 2px ring, ::after is
+   the same gradient blurred behind the panel as the glow. The palette mirrors back on itself,
+   so the loop is seamless. --lp-angle is animated (needs @property; static if unsupported). */
+@property --lp-angle { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
+.lp-auth {
+  --lp-ring: conic-gradient(from var(--lp-angle, 0deg), #ff4b3a, #ffb52e, #c8e04a, #3fd47e, #3a8dff, #3fd47e, #c8e04a, #ffb52e, #ff4b3a);
+  width: min(460px, calc(100vw - 24px)); max-height: none; overflow: visible;
+  padding: 0; border: 0; background: transparent; box-shadow: none;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+.lp-auth[open] { animation: ui-dialog-in var(--t-med) var(--ease), lp-ring-spin 9s linear infinite; }
+@keyframes lp-ring-spin { to { --lp-angle: 360deg; } }
+.lp-auth::backdrop { background: rgba(3, 3, 5, 0.72); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.lp-auth::before {
+  content: ""; position: absolute; inset: 0; z-index: 2; padding: 2px; border-radius: var(--r-lg); pointer-events: none;
+  background: var(--lp-ring);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.lp-auth::after {
+  content: ""; position: absolute; inset: -2px; z-index: -1; border-radius: calc(var(--r-lg) + 2px); pointer-events: none;
+  background: var(--lp-ring); filter: blur(20px); opacity: 0.55;
+}
+.lp-auth__panel {
+  position: relative; border-radius: var(--r-lg); overflow: auto;
+  max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 24%), linear-gradient(180deg, rgba(18, 18, 22, 0.98), rgba(8, 8, 10, 0.99));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+/* Centred brand header, as in the Figma frame */
+.lp-auth__brand { display: flex; justify-content: center; gap: 12px; padding: 28px var(--s-6) 0; }
+.lp-auth__brand img { width: 30px; height: 30px; }
+.lp-auth .ui-dialog__head { justify-content: center; text-align: center; padding-top: var(--s-4); }
+.lp-auth .ui-dialog__title { font-size: clamp(1.6rem, 5.5vw, 2rem); font-weight: 500; letter-spacing: -0.04em; }
+.lp-auth .ui-dialog__sub { max-width: 34ch; margin-inline: auto; }
+.lp-auth .ui-close { position: absolute; top: 14px; right: 14px; z-index: 3; }
+@media (prefers-reduced-motion: reduce) { .lp-auth[open] { animation: ui-dialog-in var(--t-med) var(--ease); } }
 
 .lp-auth #authNotice { margin-bottom: var(--s-5); }
 
@@ -1128,11 +1163,6 @@ body.lp {
 
 .lp-card__floor { scale: calc(1 - var(--sp) * 0.3); opacity: calc(1 - var(--sp)); }
 
-/* Magnetic buttons: drift toward the cursor (translate set by JS) */
-
-.lp-hero__cta .ui-btn {
-  transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), box-shadow var(--t-med) var(--ease), translate 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
 
 @media (prefers-reduced-motion: reduce) {
   .lp-hero__w--side:first-child, .lp-hero__w--side:last-child, .lp-stage { translate: none; }
@@ -1452,3 +1482,33 @@ body.lp {
 .is-pinned .lp-hero__pilot { margin-top: clamp(8px, 1.3vh, 14px); }
 .lp-auth__pilot { margin: 0; padding: 10px 14px; border-radius: 14px; font-size: 0.8125rem; line-height: 1.5; color: var(--text-2); background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); }
 .lp-auth__pilot b { font-weight: 600; color: var(--text); }
+
+/* =========================================================
+   Buttons: lit glass, drawn arrow, tactile lift and press
+   (replaces the old magnetic drift; nothing here sweeps or sparkles)
+   - Glass call-to-action buttons: a pool of light follows the pointer inside the button
+     (--bx/--by from buttons.js), the arrow eases forward, the button lifts 2px.
+   - Bright silver buttons (nav Get started, dialog main button): the bloom swells instead,
+     because a spotlight cannot show on near-white.
+   - Press: every landing button visibly presses in.
+   ========================================================= */
+:is(.lp-hero__cta, .lp-closing, .lp-path) > .ui-btn { --bx: 50%; --by: 0%; }
+:is(.lp-hero__cta, .lp-closing, .lp-path) > .ui-btn:not([aria-busy="true"])::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(120px circle at var(--bx) var(--by), rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 70%);
+  opacity: 0; transition: opacity 260ms ease;
+}
+:is(.lp-hero__cta, .lp-closing, .lp-path) > .ui-btn:hover::after,
+:is(.lp-hero__cta, .lp-closing, .lp-path) > .ui-btn:focus-visible::after { opacity: 1; }
+
+.lp-btn__arrow { flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; opacity: 0.55; transition: translate 320ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 220ms ease; }
+.ui-btn:hover .lp-btn__arrow, .ui-btn:focus-visible .lp-btn__arrow { translate: 3px 0; opacity: 1; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lp .ui-btn { transition: background-color 200ms ease, border-color 200ms ease, box-shadow 320ms ease, filter 200ms ease, translate 260ms cubic-bezier(0.2, 0.8, 0.2, 1), scale 140ms ease; }
+  .lp .ui-btn:not(.ui-btn--quiet):not([disabled]):hover { translate: 0 -2px; }
+  .lp .ui-btn:not([disabled]):active { transform: none; translate: 0 0; scale: 0.97; transition-duration: 80ms; }
+  .lp .lp-dock__cta:hover, .lp .lp-auth .ui-btn--primary:hover:not(:disabled) { box-shadow: inset 0 1px 0 #ffffff, inset 0 -1px 0 rgba(0, 0, 0, 0.2), 0 18px 42px -10px rgba(255, 255, 255, 0.7); }
+}
+@media (prefers-reduced-motion: reduce) { .ui-btn:hover .lp-btn__arrow { translate: none; } }
+.lp-dock__links > li > a:hover, .lp-explore__btn:hover { background-color: rgba(255, 255, 255, 0.07); }

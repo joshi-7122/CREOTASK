@@ -209,17 +209,4 @@
       else if (!f.includes(document.activeElement)) { e.preventDefault(); first.focus(); }
     });
   }
-
-  // ── Magnetic hover on dock items (fine pointers, motion allowed) ──
-  if (fine && !reduce) {
-    dock.querySelectorAll(".lp-dock__links > li > a, .lp-explore__btn, .lp-nav-actions .ui-btn").forEach((el) => {
-      el.addEventListener("pointermove", (e) => {
-        const r = el.getBoundingClientRect();
-        const dx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
-        const dy = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
-        el.style.translate = `${(dx * 4).toFixed(1)}px ${(dy * 3).toFixed(1)}px`;
-      });
-      el.addEventListener("pointerleave", () => { el.style.translate = ""; });
-    });
-  }
 })();
