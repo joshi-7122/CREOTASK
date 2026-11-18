@@ -117,12 +117,11 @@
     const doneP = svg.querySelector(".lp-route__done");
     const count = document.getElementById("csCount");
     const text = document.getElementById("csText");
-    const pauseBtn = document.getElementById("csPause");
 
     const PASS_MS_PER_STEP = 1250;       // the one-time glide, per step
     let cur = -1, u = 0, fracs = [0], pts = [];
     let glide = null, rafId = 0, layoutUntil = 0;
-    let traveled = false, onScreen = false, userPaused = false;
+    let traveled = false, onScreen = false;
     const clock = () => performance.now() / 1000;
     const ease = (k) => 0.5 - 0.5 * Math.cos(Math.PI * k);   // smooth in and out
 
@@ -258,16 +257,7 @@
       glideTo(i, 520 + 240 * Math.abs(i - u), true, null);
     }));
 
-    if (reduce) {
-      if (pauseBtn) pauseBtn.remove();
-    } else {
-      if (pauseBtn) pauseBtn.addEventListener("click", () => {
-        userPaused = !userPaused;
-        map.classList.toggle("is-paused", userPaused);
-        pauseBtn.setAttribute("aria-pressed", userPaused ? "true" : "false");
-        pauseBtn.setAttribute("aria-label", userPaused ? "Play the route animation" : "Pause the route animation");
-        kick();
-      });
+    if (!reduce) {
       document.addEventListener("visibilitychange", kick);
       // Track whether the route is on screen (observer plus a scroll backup); the first time it
       // is, the one-time pass begins.

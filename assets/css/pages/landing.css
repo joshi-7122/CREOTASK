@@ -1749,23 +1749,6 @@ body.lp {
 }
 @media (prefers-reduced-motion: reduce) { .lp-route__done { transition: none; } }
 
-/* The pause control */
-.lp-route__pause {
-  position: absolute; top: 14px; right: 14px; z-index: 3; display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border-radius: 50%; cursor: pointer;
-  color: var(--text-2); background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
-  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
-}
-.lp-route__pause:hover { color: var(--text); background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.28); }
-.lp-route__pause:focus-visible { outline: 2px solid #e6e8ec; outline-offset: 2px; }
-.lp-route:not(.is-armed) .lp-route__pause { display: none; }
-.lp-route__pause svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.lp-route__pause .p-play { display: none; fill: currentColor; stroke-width: 1; }
-.lp-route__pause[aria-pressed="true"] .p-pause { display: none; }
-.lp-route__pause[aria-pressed="true"] .p-play { display: block; }
-
-/* Pausing stops the "you are here" ripple */
-.lp-route__map.is-paused .lp-s__dot::before, .lp-route__map.is-paused .lp-s__dot::after { animation-play-state: paused; }
-
 /* =========================================================
    Smoother route: the head is driven frame by frame (outlook.js), so the CSS transition on the
    line is switched off while it glides; the text crossfades; the phone list opens smoothly.
