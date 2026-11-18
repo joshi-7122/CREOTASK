@@ -19,7 +19,7 @@
   const stage = sec.querySelector(".lp-j-stage");
   const intro = sec.querySelector(".lp-hero__inner");
   const rig = sec.querySelector(".lp-card-rig");
-  const orbits = sec.querySelector(".lp-orbits");
+  const chrome = window.CreoChrome && window.CreoChrome.state; // hero backdrop settings (chrome.js)
   const shadow = sec.querySelector(".lp-card__floor");
   const chapters = [...sec.querySelectorAll(".lp-ch")];
   const rail = sec.querySelector(".lp-j-rail");
@@ -34,6 +34,15 @@
     { rotationX: 0, rotationY: 180, scale: 0.98, yPercent: 0 },     // Compete: flips to the tier ladder
     { rotationX: 56, rotationY: 360, scale: 0.86, yPercent: 6 },    // Why: lies back like a platform
     { rotationX: 4, rotationY: 372, scale: 0.8, yPercent: -4 },     // Insights: upright, set back
+  ];
+  // How the chrome ribbons move in each chapter: Connect draws them together, Create lets them
+  // fold and billow, Compete lifts them into a rising diagonal, then they settle.
+  const CHROME = [
+    { flow: 0.9, amp: 0.75, converge: 0.75, twist: 0.6, tilt: 0, lift: 0, glow: 0.9, focus: 1 },       // Connect
+    { flow: 1.2, amp: 1.5, converge: 0.3, twist: 1.6, tilt: 0.1, lift: 0, glow: 0.95, focus: 1 },      // Create
+    { flow: 1.6, amp: 0.9, converge: 0.55, twist: 1.0, tilt: 0.36, lift: 0.03, glow: 1, focus: 1 },    // Compete
+    { flow: 0.75, amp: 0.6, converge: 0.2, twist: 0.7, tilt: 0.05, lift: 0, glow: 0.72, focus: 1 },    // Why CreoTask
+    { flow: 0.6, amp: 0.5, converge: 0.15, twist: 0.6, tilt: -0.04, lift: 0, glow: 0.6, focus: 1 },    // Insights
   ];
   const STEP = 1.7; // timeline units per chapter: ~1 of transition, ~0.7 of hold
 
@@ -79,10 +88,10 @@
       const panels = ch.querySelectorAll(".lp-glass");
       const leaving = i === 0 ? intro : chapters[i - 1];
 
-      // Previous content lifts away; the card turns to its next pose; the orbits swing round.
+      // Previous content lifts away; the card turns to its next pose; the chrome changes its flow.
       tl.to(leaving, { autoAlpha: 0, y: -44, duration: 0.5, ease: "power2.in" }, t);
       tl.to(rig, POSES[i], t);
-      if (orbits) tl.to(orbits, { "--oz": (i + 1) * 48 + "deg" }, t);
+      if (chrome && CHROME[i]) tl.to(chrome, { ...CHROME[i], duration: 1.2, ease: "sine.inOut" }, t);
       if (shadow) tl.to(shadow, { opacity: i === 3 ? 0.35 : 0.8, scaleX: POSES[i].scale, duration: 1 }, t);
 
       // Next chapter arrives: text rises in, glass panels swing in from depth.
@@ -134,6 +143,7 @@
         scrollTrigger: { trigger: ch, start: "top 80%", once: true },
       });
     });
+    if (chrome) gsap.to(chrome, { converge: 0.5, tilt: 0.12, ease: "none", scrollTrigger: { trigger: sec, start: "top top", end: "+=90%", scrub: 0.8 } });
     gsap.fromTo(rig, { rotationY: 0 }, {
       rotationY: 26, rotationX: -6, ease: "none",
       scrollTrigger: { trigger: rig, start: "top 70%", end: "bottom top", scrub: 0.6 },
