@@ -484,7 +484,10 @@
          <div class="lp-route__map" id="csMap">
           <div class="lp-route__inner">
           <button type="button" class="lp-route__pause" id="csPause" aria-pressed="false" aria-label="Pause the route animation"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="p-pause" d="M5 3.5v9M11 3.5v9"/><path class="p-play" d="M5.5 3.5l7 4.5-7 4.5z"/></svg></button>
-          <svg class="lp-route__path" aria-hidden="true" focusable="false"><path class="lp-route__base"/><path class="lp-route__done" pathLength="1"/></svg>
+          <svg class="lp-route__path" aria-hidden="true" focusable="false">
+            <path class="lp-route__d lp-route__base"/>
+            <path class="lp-route__d lp-route__done" pathLength="1"/>
+          </svg>
           <ol class="lp-route__steps" id="csSteps">
             <li class="lp-s" data-step="1"><button type="button" class="lp-s__btn" aria-expanded="false"><span class="lp-s__dot" aria-hidden="true">1</span><b>Name your skills</b></button><p>List what you can do: skills, tools and how long you've used them. Skills you declare yourself are labelled as self-declared.</p></li>
             <li class="lp-s" data-step="2"><button type="button" class="lp-s__btn" aria-expanded="false"><span class="lp-s__dot" aria-hidden="true">2</span><b>Add your evidence</b></button><p>Add work samples or practice pieces. Paid, personal or practice work all count, and clients compare real samples, not just ratings.</p></li>

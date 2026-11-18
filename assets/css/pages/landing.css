@@ -1709,7 +1709,7 @@ body.lp {
 .lp-route__done {
   fill: none; stroke: #e9ebee; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1 1;
   stroke-dashoffset: calc(1 - (var(--step, 1) - 1) / 5);
-  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.55)); transition: stroke-dashoffset 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.55)); transition: stroke-dashoffset 520ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .lp-route.is-armed .lp-route__steps { position: relative; z-index: 1; }
 
@@ -1725,14 +1725,14 @@ body.lp {
   .lp-route.is-armed .lp-route__steps { padding-bottom: 52px; }
 }
 
-/* "You are here": the current waypoint ripples outward like a location ping */
+/* "You are here": the current waypoint ripples outward like a location ping, until the last step is reached */
 .lp-s__dot { position: relative; }
 @media (prefers-reduced-motion: no-preference) {
-  .lp-s.is-active .lp-s__dot::before, .lp-s.is-active .lp-s__dot::after {
+  .lp-s.is-active:not(:last-child) .lp-s__dot::before, .lp-s.is-active:not(:last-child) .lp-s__dot::after {
     content: ""; position: absolute; inset: -1.5px; border-radius: 50%; pointer-events: none;
-    border: 1.5px solid rgba(255, 255, 255, 0.75); animation: lp-ripple 2.8s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+    border: 1.5px solid rgba(255, 255, 255, 0.75); animation: lp-ripple 1.8s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
   }
-  .lp-s.is-active .lp-s__dot::after { animation-delay: 1.4s; }
+  .lp-s.is-active:not(:last-child) .lp-s__dot::after { animation-delay: 0.9s; }
 }
 @keyframes lp-ripple { from { transform: scale(1); opacity: 0.75; } to { transform: scale(3.6); opacity: 0; } }
 
@@ -1749,8 +1749,7 @@ body.lp {
 }
 @media (prefers-reduced-motion: reduce) { .lp-route__done { transition: none; } }
 
-/* Route loop: a quick rewind, and the pause control */
-.lp-route__map.is-rewinding .lp-route__done { transition-duration: 450ms; }
+/* The pause control */
 .lp-route__pause {
   position: absolute; top: 14px; right: 14px; z-index: 3; display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border-radius: 50%; cursor: pointer;
   color: var(--text-2); background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
@@ -1763,3 +1762,26 @@ body.lp {
 .lp-route__pause .p-play { display: none; fill: currentColor; stroke-width: 1; }
 .lp-route__pause[aria-pressed="true"] .p-pause { display: none; }
 .lp-route__pause[aria-pressed="true"] .p-play { display: block; }
+
+/* Pausing stops the "you are here" ripple */
+.lp-route__map.is-paused .lp-s__dot::before, .lp-route__map.is-paused .lp-s__dot::after { animation-play-state: paused; }
+
+/* =========================================================
+   Smoother route: the head is driven frame by frame (outlook.js), so the CSS transition on the
+   line is switched off while it glides; the text crossfades; the phone list opens smoothly.
+   ========================================================= */
+.lp-route__map.is-driving .lp-route__done { transition: none; }
+.lp-route__detail { transition: opacity 220ms ease, transform 300ms cubic-bezier(0.22, 1, 0.36, 1); }
+.lp-route__detail.is-swap { opacity: 0; transform: translateY(6px); }
+.lp-s__btn { transition: color 450ms ease; }
+.lp-s__dot { transition: background-color 450ms ease, color 450ms ease, border-color 450ms ease, box-shadow 600ms ease, scale 450ms cubic-bezier(0.22, 1, 0.36, 1); }
+@media (max-width: 720px) {
+  .lp-route.is-armed .lp-s p {
+    display: block; max-height: 0; opacity: 0; overflow: hidden; margin: 0 0 0 50px;
+    transition: max-height 520ms cubic-bezier(0.22, 1, 0.36, 1), opacity 360ms ease, margin-top 360ms ease;
+  }
+  .lp-route.is-armed .lp-s.is-active p { max-height: 10em; opacity: 1; margin-top: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lp-route__detail, .lp-s__btn, .lp-s__dot, .lp-route.is-armed .lp-s p { transition: none; }
+}

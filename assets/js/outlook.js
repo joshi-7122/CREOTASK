@@ -4,7 +4,7 @@
    - Reveals: elements marked [data-reveal] rise in once as they scroll into view.
    - Counters: [data-count] numbers count up once when seen.
    - Explorer: 2020–21 estimate vs 2029–30 projection (NITI Aayog), as an accessible tab set.
-   - Route: the first-timer's six steps as a navigation map; loops continuously while on screen, under the visitor's control.
+   - Route: the first-timer's six steps as a navigation map; one smooth glide from step 1 to 6.
    Everything is fully readable without this script, and with reduced motion nothing animates.
    ========================================================= */
 (function () {
@@ -98,9 +98,10 @@
     }, 0.3);
   }
 
-  // ── CreoStart route: a navigation map ──
+  // ── CreoStart route: a navigation map that is travelled once, smoothly ──
   // The winding path is drawn from the real waypoint positions, so it follows the layout at any
   // width (a zig-zag on wide screens, a straight line down the list on phones).
+  // First view: one smooth glide from step 1 to 6, then the line stays lit. Picking a step glides there too.
   const route = document.getElementById("csRoute");
   const steps = document.getElementById("csSteps");
   const detail = document.getElementById("csDetail");
@@ -108,44 +109,56 @@
   if (route && steps && detail && map) {
     route.classList.add("is-armed");
     const items = [...steps.children];
+    const N = items.length;
     const svg = map.querySelector(".lp-route__path");
     const inner = map.querySelector(".lp-route__inner");
+    const allPaths = [...svg.querySelectorAll(".lp-route__d")];
     const baseP = svg.querySelector(".lp-route__base");
     const doneP = svg.querySelector(".lp-route__done");
     const count = document.getElementById("csCount");
     const text = document.getElementById("csText");
-    let cur = 0, fracs = [0];
+    const pauseBtn = document.getElementById("csPause");
 
-    // The travelled line ends exactly on the current waypoint, whatever the spacing (the phone
-    // list opens a gap under the active step), so measure each segment instead of assuming equal ones.
-    function applyProgress() {
-      const f = fracs[Math.min(cur, fracs.length - 1)] || 0;
-      doneP.style.strokeDashoffset = String(1 - f);
+    const PASS_MS_PER_STEP = 1250;       // the one-time glide, per step
+    let cur = -1, u = 0, fracs = [0], pts = [];
+    let glide = null, rafId = 0, layoutUntil = 0;
+    let traveled = false, onScreen = false, userPaused = false;
+    const clock = () => performance.now() / 1000;
+    const ease = (k) => 0.5 - 0.5 * Math.cos(Math.PI * k);   // smooth in and out
+
+    // ── Geometry ──
+    function curveD() {
+      let d = "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
+      for (let i = 1; i < pts.length; i++) {
+        const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
+        if (Math.abs(x1 - x0) >= Math.abs(y1 - y0)) {
+          const mx = ((x0 + x1) / 2).toFixed(1);
+          d += " C" + mx + " " + y0.toFixed(1) + " " + mx + " " + y1.toFixed(1) + " " + x1.toFixed(1) + " " + y1.toFixed(1);
+        } else {
+          const my = ((y0 + y1) / 2).toFixed(1);
+          d += " C" + x0.toFixed(1) + " " + my + " " + x1.toFixed(1) + " " + my + " " + x1.toFixed(1) + " " + y1.toFixed(1);
+        }
+      }
+      return d;
     }
-    function drawPath() {
+    function setD(d) { allPaths.forEach((p) => p.setAttribute("d", d)); }
+
+    // Reads the real waypoint positions and where each sits along the drawn path.
+    function measure() {
       const mr = inner.getBoundingClientRect();
       if (!mr.width) return;
-      const pts = items.map((li) => {
+      pts = items.map((li) => {
         const r = li.querySelector(".lp-s__dot").getBoundingClientRect();
         return [r.left + r.width / 2 - mr.left, r.top + r.height / 2 - mr.top];
       });
       svg.setAttribute("viewBox", "0 0 " + mr.width + " " + mr.height);
-      let d = "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
-      for (let i = 1; i < pts.length; i++) {
-        const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
-        if (Math.abs(x1 - x0) >= Math.abs(y1 - y0)) { const mx = ((x0 + x1) / 2).toFixed(1); d += " C" + mx + " " + y0.toFixed(1) + " " + mx + " " + y1.toFixed(1) + " " + x1.toFixed(1) + " " + y1.toFixed(1); }
-        else { const my = ((y0 + y1) / 2).toFixed(1); d += " C" + x0.toFixed(1) + " " + my + " " + x1.toFixed(1) + " " + my + " " + x1.toFixed(1) + " " + y1.toFixed(1); }
-      }
-      baseP.setAttribute("d", d);
-      doneP.setAttribute("d", d);
-      // Where along the drawn path each waypoint sits (found on the real path, so the travelled
-      // line always ends exactly on the current dot, whatever the spacing between steps).
+      setD(curveD());
       const total = baseP.getTotalLength() || 1;
       fracs = [0];
       let from = 0;
       for (let i = 1; i < pts.length; i++) {
         let best = from, bd = Infinity;
-        for (let l = from; l <= total; l += 2) {
+        for (let l = from; l <= total; l += 3) {
           const q = baseP.getPointAtLength(l);
           const dd = (q.x - pts[i][0]) * (q.x - pts[i][0]) + (q.y - pts[i][1]) * (q.y - pts[i][1]);
           if (dd < bd) { bd = dd; best = l; }
@@ -153,85 +166,117 @@
         fracs.push(best / total);
         from = best;
       }
-      applyProgress();
+    }
+    // u is the head's position in knot units (0 to N-1); the line ends exactly there.
+    function applyProgress() {
+      const k = Math.max(0, Math.min(N - 1, Math.floor(u)));
+      const a = fracs[k] || 0, b = fracs[Math.min(k + 1, N - 1)] || a;
+      const v = String(1 - (a + (b - a) * (u - k)));
+      doneP.style.strokeDashoffset = v;
     }
 
-    function setStep(i) {
-      cur = i;
-      items.forEach((li, k) => {
-        li.classList.toggle("is-active", k === i);
-        li.classList.toggle("is-done", k <= i);
-        li.querySelector("button").setAttribute("aria-expanded", k === i ? "true" : "false");
+    // ── The active step (text crossfades; the phone list opens smoothly) ──
+    let swapTimer = 0;
+    function activate(k) {
+      if (k === cur) return;
+      const first = cur < 0;
+      cur = k;
+      items.forEach((li, n) => {
+        li.classList.toggle("is-active", n === k);
+        li.classList.toggle("is-done", n <= k);
+        li.querySelector("button").setAttribute("aria-expanded", n === k ? "true" : "false");
       });
-      map.style.setProperty("--step", String(i + 1));
-      applyProgress();
-      count.textContent = "Step " + (i + 1) + " of " + items.length;
-      text.textContent = items[i].querySelector("p").textContent;
-      drawPath(); // the phone list changes height as steps open; redraw straight away
+      map.style.setProperty("--step", String(k + 1));
+      const label = "Step " + (k + 1) + " of " + N;
+      const body = items[k].querySelector("p").textContent;
+      clearTimeout(swapTimer);
+      if (first || reduce) { count.textContent = label; text.textContent = body; }
+      else {
+        detail.classList.add("is-swap");
+        swapTimer = setTimeout(() => { count.textContent = label; text.textContent = body; detail.classList.remove("is-swap"); }, 180);
+      }
+      layoutUntil = clock() + 0.8;   // keep the path glued to the dots while the list opens and closes
+      kick();
     }
-    setStep(0);
-    drawPath();
-    window.addEventListener("resize", drawPath);
-    window.addEventListener("load", drawPath);
-    document.fonts && document.fonts.ready.then(drawPath);
-    if ("ResizeObserver" in window) new ResizeObserver(drawPath).observe(inner);
 
-    // ── Continuous loop ──
-    // Travels step 1 to 6, holds, rewinds to step 1 and goes again, but only while the route is
-    // on screen, and never against the visitor: hovering or focusing the map pauses it, picking a
-    // step holds it for a few seconds, and the pause button stops it for good. Automatic steps are
-    // not announced to screen readers; steps the visitor picks are.
-    const pauseBtn = document.getElementById("csPause");
-    const DWELL = 1900, END_HOLD = 2800, AFTER_PICK = 9000;
-    let loopTimer = 0, resumeTimer = 0, onScreen = false, hoverHold = false, userPaused = false, pickHold = false;
-
-    function canRun() { return !reduce && onScreen && !hoverHold && !userPaused && !pickHold && !document.hidden; }
-    function schedule() {
-      clearTimeout(loopTimer);
-      if (!canRun()) return;
-      const atEnd = cur === items.length - 1;
-      loopTimer = setTimeout(() => {
-        if (!canRun()) return;
-        detail.setAttribute("aria-live", "off");
-        if (atEnd) {
-          map.classList.add("is-rewinding");
-          setStep(0);
-          setTimeout(() => map.classList.remove("is-rewinding"), 650);
-        } else {
-          setStep(cur + 1);
+    // ── One animation loop for the glide ──
+    function frame(ts) {
+      rafId = 0;
+      const t = ts / 1000;
+      let busy = false;
+      if (glide) {
+        const k = Math.min(1, (ts - glide.t0) / glide.dur);
+        u = glide.from + (glide.to - glide.from) * ease(k);
+        if (!glide.user) {
+          const want = Math.max(0, Math.min(N - 1, Math.floor(u + 0.08)));
+          if (want !== cur) activate(want);
         }
-        schedule();
-      }, atEnd ? END_HOLD : DWELL);
+        if (k >= 1) {
+          u = glide.to;
+          const done = glide.onDone;
+          glide = null;
+          map.classList.remove("is-driving");
+          if (done) done();
+        }
+        busy = true;
+      }
+      if (layoutUntil > t) { measure(); busy = true; }
+      applyProgress();
+      if (busy) rafId = requestAnimationFrame(frame);
     }
-    function hold(ms) {
-      pickHold = true;
-      clearTimeout(loopTimer); clearTimeout(resumeTimer);
-      resumeTimer = setTimeout(() => { pickHold = false; schedule(); }, ms);
+    function kick() { if (!rafId) rafId = requestAnimationFrame(frame); }
+    function glideTo(target, dur, user, onDone) {
+      glide = { from: u, to: target, t0: performance.now(), dur, user, onDone };
+      map.classList.add("is-driving");
+      kick();
     }
 
-    items.forEach((li, i) => li.querySelector("button").addEventListener("click", () => {
-      detail.setAttribute("aria-live", "polite");
-      setStep(i);
-      hold(AFTER_PICK);
-    }));
+    // ── Start ──
+    measure();
+    activate(0);
+    applyProgress();
+    window.addEventListener("resize", () => { measure(); applyProgress(); });
+    window.addEventListener("load", () => { measure(); applyProgress(); });
+    document.fonts && document.fonts.ready.then(() => { measure(); applyProgress(); });
+    if ("ResizeObserver" in window) new ResizeObserver(() => { measure(); applyProgress(); }).observe(inner);
     detail.setAttribute("aria-live", "off");
+
+    // First view: the one smooth pass from step 1 to 6.
+    function travel() {
+      if (traveled || reduce) return;
+      traveled = true;
+      glideTo(N - 1, (N - 1) * PASS_MS_PER_STEP, false, null);
+    }
+
+    // Picking a step takes over from the automatic pass and glides there.
+    items.forEach((li, i) => li.querySelector("button").addEventListener("click", () => {
+      traveled = true;
+      detail.setAttribute("aria-live", "polite");
+      if (reduce) { u = i; activate(i); measure(); applyProgress(); return; }
+      glide = null;
+      activate(i);
+      glideTo(i, 520 + 240 * Math.abs(i - u), true, null);
+    }));
 
     if (reduce) {
       if (pauseBtn) pauseBtn.remove();
     } else {
-      map.addEventListener("pointerenter", () => { hoverHold = true; clearTimeout(loopTimer); });
-      map.addEventListener("pointerleave", () => { hoverHold = false; schedule(); });
-      map.addEventListener("focusin", () => { hoverHold = true; clearTimeout(loopTimer); });
-      map.addEventListener("focusout", () => { hoverHold = false; schedule(); });
-      document.addEventListener("visibilitychange", schedule);
       if (pauseBtn) pauseBtn.addEventListener("click", () => {
         userPaused = !userPaused;
+        map.classList.toggle("is-paused", userPaused);
         pauseBtn.setAttribute("aria-pressed", userPaused ? "true" : "false");
         pauseBtn.setAttribute("aria-label", userPaused ? "Play the route animation" : "Pause the route animation");
-        if (userPaused) clearTimeout(loopTimer); else schedule();
+        kick();
       });
-      // Track whether the route is on screen (observer plus a scroll backup).
-      const setOn = (now) => { if (now !== onScreen) { onScreen = now; if (onScreen) setTimeout(schedule, 700); else clearTimeout(loopTimer); } };
+      document.addEventListener("visibilitychange", kick);
+      // Track whether the route is on screen (observer plus a scroll backup); the first time it
+      // is, the one-time pass begins.
+      const setOn = (now) => {
+        if (now === onScreen) return;
+        onScreen = now;
+        if (onScreen) setTimeout(travel, 700);
+        kick();
+      };
       const check = () => {
         const r = route.getBoundingClientRect();
         setOn(r.top < window.innerHeight * 0.9 && r.bottom > window.innerHeight * 0.1);
