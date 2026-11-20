@@ -1904,3 +1904,18 @@ main > .lp-section, main > .lp-light { padding-bottom: clamp(40px, 6vw, 84px); }
 .lp-notes canvas { display: block; }
 /* The soft glows inside the sign-in panel must never make it scroll sideways */
 .lp-auth__panel { overflow-x: hidden; }
+
+/* =========================================================
+   Smoothness: keep always-on animations cheap
+   - The spectrum glows behind the sign-in dialog and the CreoStart map are blurred; rotating
+     their colours meant re-blurring them every frame. The glows now hold still (the thin ring
+     still rotates), which costs one blur instead of sixty a second.
+   - The scroll hint moves with a transform instead of re-laying out the page every frame.
+   - Decorative loops pause while their section is off screen (outlook.js sets .is-offscreen).
+   ========================================================= */
+.lp-auth::after, .lp-route__map::after {
+  background: conic-gradient(from 30deg, #ff4b3a, #ffb52e, #c8e04a, #3fd47e, #3a8dff, #3fd47e, #c8e04a, #ffb52e, #ff4b3a);
+}
+.lp-j-hint span::after { top: 0; transform: translateY(-100%); animation-name: lp-hint-move; will-change: transform; }
+@keyframes lp-hint-move { to { transform: translateY(275%); } }
+.is-offscreen, .is-offscreen *, .is-offscreen ::before, .is-offscreen ::after { animation-play-state: paused !important; }

@@ -132,6 +132,8 @@ app.get("/api/tiers", (req, res) => {
 // ── SPA Fallback — serve the client app for all unknown routes ─
 // (The existing index.html, app.html, dashboard.html continue to work
 //  for the demo pages; the new client pages will be in /client/)
+// Browsers ask for /favicon.ico even when the page declares an SVG icon
+app.get("/favicon.ico", (req, res) => res.redirect(301, "/assets/img/logo.svg"));
 app.get("/verify-email", (req, res) => {
   res.sendFile(path.join(__dirname, "../client/pages/verify-email.html"));
 });

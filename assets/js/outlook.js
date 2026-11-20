@@ -14,16 +14,37 @@
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const hasIO = "IntersectionObserver" in window;
 
-  // Calls fn once, the first time el is meaningfully on screen (observer plus a scroll backup).
+  // Calls fn once, the first time el is meaningfully on screen. An observer per element does
+  // the work; one shared, frame-throttled scroll check backs it up (observers can be delayed).
+  const pending = new Set();
+  let checkQueued = false;
+  function checkPending() {
+    checkQueued = false;
+    const vh = window.innerHeight;
+    for (const item of pending) {
+      const r = item.el.getBoundingClientRect();
+      if (r.top < vh * 0.95 && r.bottom > 0) item.go();
+    }
+    if (!pending.size) window.removeEventListener("scroll", queueCheck);
+  }
+  function queueCheck() { if (!checkQueued) { checkQueued = true; requestAnimationFrame(checkPending); } }
   function whenSeen(el, fn, ratio) {
     if (!el) return;
-    let done = false;
-    const go = () => { if (done) return; done = true; io && io.disconnect(); window.removeEventListener("scroll", check); fn(); };
-    const check = () => { const r = el.getBoundingClientRect(); if (r.top < window.innerHeight * 0.95 && r.bottom > 0) go(); };
-    const io = hasIO ? new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) go(); }, { threshold: ratio || 0.05, rootMargin: "0px 0px 8% 0px" }) : null;
+    const item = { el, done: false };
+    item.go = () => { if (item.done) return; item.done = true; pending.delete(item); io && io.disconnect(); fn(); };
+    const io = hasIO ? new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) item.go(); }, { threshold: ratio || 0.05, rootMargin: "0px 0px 8% 0px" }) : null;
     io && io.observe(el);
-    window.addEventListener("scroll", check, { passive: true });
-    check();
+    if (!pending.size) window.addEventListener("scroll", queueCheck, { passive: true });
+    pending.add(item);
+    queueCheck();
+  }
+
+  // Decorative loops pause while their section is off screen (see .is-offscreen in landing.css)
+  if (hasIO) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => e.target.classList.toggle("is-offscreen", !e.isIntersecting));
+    }, { rootMargin: "200px 0px" });
+    document.querySelectorAll("main > section, .lp-footer").forEach((el) => io.observe(el));
   }
 
   // ── Reveals ──
