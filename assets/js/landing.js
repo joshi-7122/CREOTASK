@@ -7,7 +7,6 @@
   const errorEl = document.getElementById("authError");
   const noticeEl = document.getElementById("authNotice");
   const submitBtn = document.getElementById("authSubmit");
-  const switchEl = document.getElementById("authSwitch");
   const ageRow = document.getElementById("ageConfirmRow");
   let mode = "signup";
   let minAge = 18;
@@ -32,7 +31,7 @@
   pwToggle.addEventListener("click", () => {
     const show = pwInput.type === "password";
     pwInput.type = show ? "text" : "password";
-    pwToggle.textContent = show ? "Hide" : "Show";
+    pwToggle.setAttribute("aria-label", show ? "Hide password" : "Show password");
     pwToggle.setAttribute("aria-pressed", String(show));
   });
 
@@ -57,23 +56,17 @@
   }
 
   function setMode(m) {
-    mode = m;
-    const signup = m === "signup";
-    document.getElementById("authTitle").textContent = signup ? "Create your account" : "Log in";
-    document.getElementById("authSub").textContent = signup
-      ? "Freelancers and clients use the same account. You can add the other role later."
-      : "Welcome back.";
-    submitBtn.textContent = signup ? "Create account" : "Log in";
+    mode = m === "signin" ? "signin" : "signup";
+    const signup = mode === "signup";
+    modal.dataset.view = mode;
+    modal.querySelectorAll(".lp-auth__modes [data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
+    submitBtn.textContent = signup ? "Sign Up" : "Log In";
     form.password.autocomplete = signup ? "new-password" : "current-password";
-    switchEl.innerHTML = signup
-      ? `Already have an account? <button class="ui-link-btn" type="button" data-mode="signin">Log in</button>`
-      : `New to CreoTask? <button class="ui-link-btn" type="button" data-mode="signup">Create an account</button>`;
     errorEl.textContent = "";
-    document.getElementById("roleToggle").hidden = !signup;
+    document.getElementById("signupExtra").hidden = !signup;
     document.getElementById("pwRule").hidden = !signup;
-    document.getElementById("authNote").hidden = !signup;
     document.getElementById("authPilot").hidden = !signup;
-    ageRow.hidden = !signup;
+    document.getElementById("forgotBtn").hidden = signup;
   }
 
   function open(m, role) {
@@ -88,7 +81,7 @@
     const trigger = e.target.closest("[data-auth]");
     if (trigger) { showNotice(""); open(trigger.dataset.auth, trigger.dataset.role); }
     const sw = e.target.closest("[data-mode]");
-    if (sw) setMode(sw.dataset.mode);
+    if (sw) { setMode(sw.dataset.mode); form.email.focus(); }
   });
 
   form.addEventListener("submit", async (e) => {
@@ -157,13 +150,71 @@
     }
   });
 
-  // Deep links: index.html?auth=signin[&reason=session|suspended]
+  // ── Social sign-in: a button works only when the server has that provider's keys ──
+  const ssoButtons = [...form.querySelectorAll("[data-provider]")];
+  CreoAPI.request("/auth/oauth/providers").then(({ providers }) => {
+    ssoButtons.forEach((b) => {
+      const on = !!providers[b.dataset.provider];
+      b.setAttribute("aria-disabled", String(!on));
+      b.classList.toggle("is-ready", on);
+    });
+  }).catch(() => { /* stay disabled */ });
+  ssoButtons.forEach((b) => b.addEventListener("click", () => {
+    errorEl.textContent = "";
+    if (b.getAttribute("aria-disabled") === "true") {
+      errorEl.textContent = `Continue with ${b.textContent.replace("Continue with", "").trim()} is coming soon. Use your email for now.`;
+      return;
+    }
+    if (mode === "signup" && !form.age_confirmed.checked) {
+      errorEl.textContent = `Confirm you're at least ${minAge} years old first.`;
+      form.age_confirmed.focus();
+      return;
+    }
+    const q = new URLSearchParams({
+      mode: mode === "signup" ? "signup" : "login",
+      role: form.role.value,
+      age: mode === "signup" && form.age_confirmed.checked ? "1" : "0",
+    });
+    location.href = `/api/auth/oauth/${encodeURIComponent(b.dataset.provider)}/start?${q}`;
+  }));
+
+  // Back from a provider: the session token arrives in the URL fragment.
+  const hash = new URLSearchParams(location.hash.slice(1));
+  const oauthToken = hash.get("auth_token");
+  if (oauthToken) {
+    history.replaceState(null, "", location.pathname);
+    CreoAPI.setToken(oauthToken);
+    CreoAPI.auth.me().then((r) => {
+      if (!r) throw new Error("no session");
+      if (hash.get("new") === "1") UI.toast("Account created. Your email is already verified.", "success");
+      setTimeout(() => (location.href = "app.html"), hash.get("new") === "1" ? 700 : 0);
+    }).catch(() => { CreoAPI.setToken(null); open("signin"); errorEl.textContent = "We couldn't finish signing you in. Please try again."; });
+  }
+
+  const OAUTH_ERRORS = {
+    unavailable: "Signing in with that provider isn't available yet. Use your email for now.",
+    cancelled: "Sign-in was cancelled.",
+    expired: "That sign-in took too long or started in another window. Please try again.",
+    failed: "We couldn't complete sign-in with that provider. Please try again.",
+    no_verified_email: "That account has no verified email address. Verify it with the provider, or use your email here.",
+    no_account: "There's no CreoTask account with that email yet. Choose Sign up to create one.",
+    age_required: "Confirm you're 18 or older, then continue.",
+    suspended: "This account is suspended. Contact CreoTask support to appeal.",
+    deactivated: "This account is deactivated.",
+  };
+
+  // Deep links: index.html?auth=signin[&reason=session|suspended][&oauth_error=…]
   const params = new URLSearchParams(location.search);
   const q = params.get("auth");
   if (q === "signin" || q === "signup") {
     open(q);
     const reason = params.get("reason");
     if (reason === "session") showNotice("<b>You've been signed out.</b> Your session ended. Log in again to continue.", "info");
+    const oe = params.get("oauth_error");
+    if (oe) {
+      errorEl.textContent = OAUTH_ERRORS[oe] || OAUTH_ERRORS.failed;
+      history.replaceState(null, "", location.pathname);
+    }
     if (reason === "suspended") {
       let s = null;
       try { s = JSON.parse(sessionStorage.getItem("creotask_suspension") || "null"); } catch {}

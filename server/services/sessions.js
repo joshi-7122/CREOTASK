@@ -37,6 +37,14 @@ async function createSession(userId, req) {
   return { sid, token, expiresAt };
 }
 
+/** Short-lived signed value for the social sign-in round trip (state parameter). */
+function signState(payload) {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: "10m", audience: "oauth-state" });
+}
+function verifyState(state) {
+  return jwt.verify(state, JWT_SECRET, { audience: "oauth-state" }); // throws if forged or expired
+}
+
 function verifyToken(token) {
   return jwt.verify(token, JWT_SECRET); // throws on bad signature / expiry
 }
@@ -83,6 +91,6 @@ async function listActiveSessions(userId) {
 }
 
 module.exports = {
-  createSession, verifyToken, getActiveSession, touchSession,
+  createSession, verifyToken, signState, verifyState, getActiveSession, touchSession,
   revokeSession, revokeAllSessions, listActiveSessions,
 };

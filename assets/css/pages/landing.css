@@ -1766,3 +1766,116 @@ body.lp {
 main > .lp-section, main > .lp-light { padding-bottom: clamp(40px, 6vw, 84px); }
 /* The closing glow fades out before the footer instead of being cut by it */
 .lp-closing { background: radial-gradient(900px 380px at 50% 60%, rgba(222, 224, 228, 0.08), transparent 70%); }
+
+/* =========================================================
+   Sign-in dialog, Figma layout: centred brand, large silver title, placeholder fields,
+   a dark outlined main button, "or", then Google / GitHub / LinkedIn. A small switch
+   picks Sign up or Log in; the role and 18+ rows only show for Sign up.
+   ========================================================= */
+.lp-auth { width: min(480px, calc(100vw - 24px)); }
+.lp-auth [hidden] { display: none !important; }
+.lp-auth__panel { padding: 30px clamp(20px, 6vw, 40px) 26px; text-align: center; isolation: isolate; }
+.lp-auth__panel > :not(.lp-auth__glow):not(.ui-close) { position: relative; z-index: 1; }
+.lp-auth__glow { position: absolute; z-index: 0; border-radius: 50%; pointer-events: none; background: radial-gradient(closest-side, rgba(255, 255, 255, 0.13), transparent); filter: blur(8px); }
+.lp-auth__glow--a { width: 220px; height: 220px; top: 40px; right: -30px; }
+.lp-auth__glow--b { width: 200px; height: 200px; top: 150px; left: -50px; opacity: 0.8; }
+
+.lp-auth__brand { padding: 0; gap: 12px; align-items: center; }
+.lp-auth__brand img { width: 34px; height: 34px; }
+.lp-auth__brand span { font-family: "Cinzel", serif; font-size: 1.3rem; letter-spacing: 0.12em; color: #f1f2f4; }
+.lp-auth__title {
+  margin: 14px 0 0; font-size: clamp(2rem, 7.4vw, 2.75rem); font-weight: 600; letter-spacing: -0.035em; line-height: 1.05;
+  background: linear-gradient(180deg, #e6e7e9 0%, #b9bbbf 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.lp-auth__sub { margin: 10px 0 0; font-size: 1rem; color: var(--text-2); }
+
+.lp-auth__modes {
+  display: inline-flex; gap: 2px; margin-top: 18px; padding: 3px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.lp-auth__modes button {
+  padding: 6px 16px; border: 0; border-radius: 999px; background: transparent; color: var(--text-2);
+  font: inherit; font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: background-color 200ms ease, color 200ms ease;
+}
+.lp-auth__modes button[aria-pressed="true"] { background: rgba(255, 255, 255, 0.12); color: var(--text); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12); }
+.lp-auth__modes button:focus-visible { outline: 2px solid #e6e8ec; outline-offset: 2px; }
+
+.lp-auth #authNotice { margin: 18px 0 0; text-align: left; }
+.lp-auth__form { display: grid; gap: 12px; margin-top: 18px; text-align: left; }
+
+.lp-auth__input {
+  width: 100%; height: 52px; padding: 0 18px; border-radius: 12px; font: inherit; font-size: 1rem; color: var(--text);
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.11);
+  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+.lp-auth__input::placeholder { color: rgba(236, 238, 241, 0.5); }
+.lp-auth__input:hover { border-color: rgba(255, 255, 255, 0.2); }
+.lp-auth__input:focus { outline: none; border-color: rgba(255, 255, 255, 0.45); background: rgba(255, 255, 255, 0.07); box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08); }
+
+.lp-auth__pw { position: relative; }
+.lp-auth__pw .lp-auth__input { padding-right: 186px; }
+.lp-auth[data-view="signup"] .lp-auth__pw .lp-auth__input { padding-right: 52px; }
+.lp-auth__pw-actions { position: absolute; right: 8px; top: 50%; translate: 0 -50%; display: flex; align-items: center; gap: 2px; }
+.lp-auth__eye, .lp-auth__forgot {
+  border: 0; background: transparent; color: var(--text-2); font: inherit; cursor: pointer; border-radius: 8px;
+  transition: color 160ms ease, background-color 160ms ease;
+}
+.lp-auth__eye { display: grid; place-items: center; width: 36px; height: 36px; }
+.lp-auth__eye svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.lp-auth__eye .i-hide, .lp-auth__eye[aria-pressed="true"] .i-show { display: none; }
+.lp-auth__eye[aria-pressed="true"] .i-hide { display: block; }
+.lp-auth__forgot { padding: 8px 10px; font-size: 0.95rem; }
+.lp-auth__eye:hover, .lp-auth__forgot:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+.lp-auth__eye:focus-visible, .lp-auth__forgot:focus-visible { outline: 2px solid #e6e8ec; outline-offset: 0; }
+.lp-auth__hint { margin: -4px 2px 0; font-size: 0.8125rem; color: var(--text-3); }
+
+/* Sign-up only: role and age, kept compact */
+.lp-auth__extra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding: 2px 2px 0; }
+.lp-auth__roles { display: flex; align-items: center; gap: 6px; margin: 0; padding: 0; border: 0; }
+.lp-auth__roles legend { float: left; margin-right: 4px; font-size: 0.8125rem; color: var(--text-3); }
+.lp-auth__roles label { position: relative; cursor: pointer; }
+.lp-auth__roles input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.lp-auth__roles span {
+  display: block; padding: 5px 12px; border-radius: 999px; font-size: 0.8125rem; color: var(--text-2);
+  border: 1px solid rgba(255, 255, 255, 0.12); transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+.lp-auth__roles input:checked + span { color: var(--text); background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.32); }
+.lp-auth__roles input:focus-visible + span { outline: 2px solid #e6e8ec; outline-offset: 2px; }
+.lp-auth__age { font-size: 0.8125rem; align-items: center; }
+
+.lp-auth__error { margin: 0; min-height: 0; text-align: center; }
+.lp-auth__error:empty { display: none; }
+
+.lp-auth__submit {
+  height: 52px; margin-top: 2px; border-radius: 12px; cursor: pointer; font: inherit; font-size: 1.15rem; font-weight: 600; letter-spacing: -0.01em;
+  color: #f4f5f7; background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
+  border: 1px solid rgba(255, 255, 255, 0.55); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 220ms ease, transform 160ms ease;
+}
+.lp-auth__submit:hover:not(:disabled) { border-color: rgba(255, 255, 255, 0.85); background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 10px 30px -14px rgba(255, 255, 255, 0.5); }
+.lp-auth__submit:active:not(:disabled) { transform: scale(0.99); }
+.lp-auth__submit:focus-visible { outline: 2px solid #e6e8ec; outline-offset: 3px; }
+.lp-auth__submit:disabled { opacity: 0.6; cursor: progress; }
+
+.lp-auth__or { display: flex; align-items: center; gap: 14px; margin: 2px 0; font-size: 0.95rem; color: var(--text-2); }
+.lp-auth__or::before, .lp-auth__or::after { content: ""; flex: 1; height: 1px; background: rgba(255, 255, 255, 0.14); }
+
+.lp-auth__social { display: grid; gap: 12px; }
+.lp-auth__sso {
+  position: relative; display: flex; align-items: center; justify-content: center; gap: 12px; height: 52px; padding: 0 16px; border-radius: 12px;
+  font: inherit; font-size: 1.05rem; color: var(--text); cursor: pointer;
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.11);
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+.lp-auth__sso svg { flex: none; }
+.lp-auth__sso.is-ready:hover { background: rgba(255, 255, 255, 0.09); border-color: rgba(255, 255, 255, 0.24); }
+.lp-auth__sso:focus-visible { outline: 2px solid #e6e8ec; outline-offset: 2px; }
+.lp-auth__sso[aria-disabled="true"] { cursor: default; }
+.lp-auth__sso[aria-disabled="true"] > span, .lp-auth__sso[aria-disabled="true"] > svg { opacity: 0.55; }
+.lp-auth__sso.is-ready @media (max-width: 420px) {
+  .lp-auth__sso { gap: 8px; font-size: 0.95rem; }
+  }
+
+.lp-auth__foot { margin: 4px 0 0; text-align: center; font-size: 0.875rem; color: var(--text-2); }
+.lp-auth__foot--pilot { margin-top: -6px; font-size: 0.75rem; color: var(--text-3); text-wrap: balance; }
+.lp-auth .lp-demo { text-align: left; }

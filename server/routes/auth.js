@@ -9,6 +9,7 @@ const rateLimit = require("express-rate-limit");
 const router    = express.Router();
 const { authenticate, authenticateAllowSuspended } = require("../middleware/auth");
 const ctrl = require("../controllers/authController");
+const social = require("../controllers/oauthController");
 
 const credentialLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -25,6 +26,11 @@ router.post("/resend-verification",  credentialLimiter, ctrl.resendVerification)
 router.post("/forgot-password",      credentialLimiter, ctrl.forgotPassword);
 router.post("/reset-password",       credentialLimiter, ctrl.resetPassword);
 router.post("/change-password",      credentialLimiter, authenticate, ctrl.changePassword);
+
+// Social sign-in (Google, GitHub, LinkedIn); see controllers/oauthController.js
+router.get ("/oauth/providers",          social.providers);
+router.get ("/oauth/:provider/start",    credentialLimiter, social.start);
+router.get ("/oauth/:provider/callback", credentialLimiter, social.callback);
 
 router.get ("/me",                   authenticateAllowSuspended, ctrl.getMe);
 router.post("/logout",               authenticateAllowSuspended, ctrl.logout);
