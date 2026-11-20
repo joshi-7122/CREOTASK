@@ -72,7 +72,7 @@
         start: "top top",
         end: () => "+=" + Math.round(window.innerHeight * chapters.length * 1.15),
         pin: true,
-        scrub: 0.7,
+        scrub: 0.3,
         anticipatePin: 1,
         invalidateOnRefresh: true,
         onUpdate(self) {
@@ -143,10 +143,10 @@
         scrollTrigger: { trigger: ch, start: "top 80%", once: true },
       });
     });
-    if (chrome) gsap.to(chrome, { converge: 0.5, tilt: 0.12, ease: "none", scrollTrigger: { trigger: sec, start: "top top", end: "+=90%", scrub: 0.8 } });
+    if (chrome) gsap.to(chrome, { converge: 0.5, tilt: 0.12, ease: "none", scrollTrigger: { trigger: sec, start: "top top", end: "+=90%", scrub: 0.4 } });
     gsap.fromTo(rig, { rotationY: 0 }, {
       rotationY: 26, rotationX: -6, ease: "none",
-      scrollTrigger: { trigger: rig, start: "top 70%", end: "bottom top", scrub: 0.6 },
+      scrollTrigger: { trigger: rig, start: "top 70%", end: "bottom top", scrub: 0.3 },
     });
   });
 

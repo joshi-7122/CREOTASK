@@ -45,15 +45,17 @@ float env(vec3 r) {
   return c;
 }
 
-float centre(float x, float fi, float t) {
+// A ribbon's centre line and its slope (exact derivative, so no extra evaluations).
+vec2 centre(float x, float fi, float t) {
   float base = (fi / (N - 1.0) - 0.5) * 0.46;
   base = mix(base, base * 0.16, uConverge);
   float k1 = 1.6 + 0.35 * sin(fi * 1.7);
   float k2 = 3.1 + 0.5 * cos(fi * 2.3);
-  float y = base
-    + uAmp * 0.085 * sin(k1 * x + t * (0.32 + 0.05 * fi) + fi * 1.9)
-    + uAmp * 0.035 * sin(k2 * x - t * (0.21 + 0.03 * fi) + fi * 4.1);
-  return y + uTilt * x + uLift;
+  float a1 = k1 * x + t * (0.32 + 0.05 * fi) + fi * 1.9;
+  float a2 = k2 * x - t * (0.21 + 0.03 * fi) + fi * 4.1;
+  float y = base + uAmp * 0.085 * sin(a1) + uAmp * 0.035 * sin(a2) + uTilt * x + uLift;
+  float dy = uAmp * 0.085 * k1 * cos(a1) + uAmp * 0.035 * k2 * cos(a2) + uTilt;
+  return vec2(y, dy);
 }
 
 void main() {
@@ -68,8 +70,10 @@ void main() {
 
   for (float i = 0.0; i < N; i += 1.0) {
     float depth = i / (N - 1.0);                      // 0 = back, 1 = front
-    float yc = centre(p.x, i, t);
-    float slope = (centre(p.x + 0.01, i, t) - centre(p.x - 0.01, i, t)) * 50.0;
+    vec2 cs = centre(p.x, i, t);
+    float yc = cs.x;
+    if (abs(p.y - yc) > 0.11) continue;               // far from this ribbon (even at its steepest): nothing to draw
+    float slope = cs.y;
     float th = uTwist * (1.3 + 0.4 * sin(i * 3.1)) * p.x + t * (0.25 + 0.04 * i) + i * 2.2;
     float cth = cos(th), sth = sin(th);
     float H = 0.026 + 0.034 * fract(sin(i * 12.9898 + 3.0) * 43758.5453);
@@ -107,6 +111,8 @@ void main() {
   }
 
   let prog, U, raf = 0, last = 0, tAcc = 37, onScreen = true, drawn = false;
+  // Adaptive quality: drops resolution, then frame rate, if this device can't keep up.
+  let quality = 1, halfRate = false, skip = false, slowFrames = 0, sampled = 0;
 
   function setup() {
     const vs = compile(gl.VERTEX_SHADER, VERT), fs = compile(gl.FRAGMENT_SHADER, FRAG);
@@ -133,8 +139,8 @@ void main() {
   function resize() {
     const r = canvas.getBoundingClientRect();
     if (!r.width || !r.height) return;
-    let scale = Math.min(window.devicePixelRatio || 1, 2) * 0.6;
-    const maxPx = 1.1e6;
+    let scale = Math.min(window.devicePixelRatio || 1, 2) * 0.5 * quality;
+    const maxPx = 8e5 * quality * quality;
     if (r.width * r.height * scale * scale > maxPx) scale = Math.sqrt(maxPx / (r.width * r.height));
     const w = Math.max(1, Math.round(r.width * scale)), h = Math.max(1, Math.round(r.height * scale));
     if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
@@ -161,13 +167,29 @@ void main() {
 
   function frame(ts) {
     raf = 0;
-    const dt = last ? Math.min(0.05, (ts - last) / 1000) : 0;
+    const gap = last ? ts - last : 0;
+    const dt = Math.min(0.05, gap / 1000);
     last = ts;
     tAcc += dt * 0.55 * state.flow;   // slow
-    draw();
+    // Watch the frame gaps for a while; persistent slow frames lower the cost.
+    if (gap && sampled < 600) {
+      sampled++;
+      if (gap > (halfRate ? 40 : 22)) slowFrames++;
+      if (sampled % 90 === 0) {
+        if (slowFrames > 30) {
+          if (quality > 0.55) { quality *= 0.75; resize(); }
+          else halfRate = true;
+        }
+        slowFrames = 0;
+      }
+    }
+    skip = halfRate ? !skip : false;
+    if (!skip) draw();
     if (running()) raf = requestAnimationFrame(frame);
   }
-  const running = () => !reduce && onScreen && !document.hidden;
+  // Nothing to animate under an open dialog: its backdrop already hides the hero.
+  const modalOpen = () => !!document.querySelector("dialog[open]");
+  const running = () => !reduce && onScreen && !document.hidden && !modalOpen();
   function kick() {
     if (running() && !raf) { last = 0; raf = requestAnimationFrame(frame); }
   }
@@ -191,6 +213,7 @@ void main() {
   if (reduce) return; // one still frame
 
   document.addEventListener("visibilitychange", kick);
+  document.querySelectorAll("dialog").forEach((d) => d.addEventListener("close", kick));
   if ("IntersectionObserver" in window) {
     new IntersectionObserver((e) => {
       onScreen = e[e.length - 1].isIntersecting;

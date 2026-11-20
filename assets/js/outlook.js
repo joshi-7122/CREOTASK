@@ -19,8 +19,8 @@
     if (!el) return;
     let done = false;
     const go = () => { if (done) return; done = true; io && io.disconnect(); window.removeEventListener("scroll", check); fn(); };
-    const check = () => { const r = el.getBoundingClientRect(); if (r.top < window.innerHeight * 0.85 && r.bottom > 0) go(); };
-    const io = hasIO ? new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) go(); }, { threshold: ratio || 0.2 }) : null;
+    const check = () => { const r = el.getBoundingClientRect(); if (r.top < window.innerHeight * 0.95 && r.bottom > 0) go(); };
+    const io = hasIO ? new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) go(); }, { threshold: ratio || 0.05, rootMargin: "0px 0px 8% 0px" }) : null;
     io && io.observe(el);
     window.addEventListener("scroll", check, { passive: true });
     check();
@@ -261,10 +261,16 @@
       document.addEventListener("visibilitychange", kick);
       // Track whether the route is on screen (observer plus a scroll backup); the first time it
       // is, the one-time pass begins.
+      let safety = 0;
       const setOn = (now) => {
         if (now === onScreen) return;
         onScreen = now;
-        if (onScreen) setTimeout(travel, 700);
+        if (onScreen) {
+          setTimeout(travel, 350);
+          // The route only needs to know it was seen once; stop watching after that.
+          clearInterval(safety);
+          window.removeEventListener("scroll", check);
+        }
         kick();
       };
       const check = () => {
@@ -273,7 +279,7 @@
       };
       if (hasIO) new IntersectionObserver((e) => { if (e.length) setOn(e[e.length - 1].isIntersecting); }, { threshold: 0.25 }).observe(route);
       window.addEventListener("scroll", check, { passive: true });
-      setInterval(check, 600); // cheap safety net in case a scroll or observer event is delayed
+      safety = setInterval(check, 600); // cheap safety net in case a scroll or observer event is delayed
       check();
     }
   }

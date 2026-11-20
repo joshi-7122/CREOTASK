@@ -22,8 +22,8 @@
 
     try { sessionStorage.setItem("creo_intro_played", "1"); } catch { /* private mode */ }
 
-    const FLIGHT_MS = 1100;
-    const HOLD_MS = 2300;
+    const FLIGHT_MS = 850;
+    const HOLD_MS = 1350;
 
     // Aim the flight at the nav logo: X on the outer layer, Y + scale on the inner one.
     function aim() {
@@ -72,6 +72,9 @@
       if (e.key === "Escape" || e.key === " " || e.key === "Enter") { e.preventDefault(); skip(); }
     }
     document.addEventListener("keydown", onKey);
+    // Trying to scroll or tapping anywhere also skips the wait.
+    const onIntent = () => skip();
+    ["wheel", "touchstart"].forEach((t) => window.addEventListener(t, onIntent, { passive: true, once: true }));
 
     if (/[?&]intro\b/.test(location.search)) history.replaceState(null, "", location.pathname + location.hash);
   }
@@ -116,11 +119,17 @@
     // Smoothed state, animated in one rAF loop while the hero is on screen.
     let px = 0, py = 0, tpx = 0, tpy = 0;
     let pointer = null; // {x, y} in client coords while over the hero
+    let mxy = null;     // pending key-light position, applied in the next frame
     let inView = true, raf = 0;
     const lifts = new Map();
 
+    const heroText = document.getElementById("jIntro");
     function frame(t) {
       raf = 0;
+      // Read every letter's position before writing any style, so the browser lays out once per
+      // frame instead of once per letter. Skipped while the journey has the headline hidden.
+      const textShown = !heroText || heroText.style.visibility !== "hidden";
+      const rects = pointer && textShown ? letters.map((l) => l.getBoundingClientRect()) : null;
       if (!fine || !pointer) {
         // No cursor: a slow drift keeps the light and the card alive (touch, or pointer away).
         tpx = Math.sin(t / 2900) * (fine ? 0.25 : 0.55);
@@ -131,6 +140,7 @@
       hero.style.setProperty("--px", px.toFixed(3));
       hero.style.setProperty("--py", py.toFixed(3));
       hero.style.setProperty("--la", (180 + px * 55).toFixed(1) + "deg");
+      if (mxy) { hero.style.setProperty("--mx", mxy[0]); hero.style.setProperty("--my", mxy[1]); mxy = null; }
 
       if (card) {
         // In the pinned journey the rig sets the pose; here the card only leans toward the pointer.
@@ -142,10 +152,11 @@
       }
 
       // Letters near the cursor lift toward it.
-      for (const l of letters) {
+      for (let i = 0; textShown && i < letters.length; i++) {
+        const l = letters[i];
         let lift = 0;
-        if (pointer) {
-          const r = l.getBoundingClientRect();
+        if (rects) {
+          const r = rects[i];
           const d = Math.hypot(pointer.x - (r.left + r.width / 2), pointer.y - (r.top + r.height / 2));
           lift = Math.max(0, 1 - d / 260);
           lift = lift * lift;
@@ -164,15 +175,20 @@
     wake();
 
     if (!fine) return;
+    // Pointer moves only record the position; the next frame applies it (at most once per frame).
+    let heroRect = null;
+    const measureHero = () => { heroRect = hero.getBoundingClientRect(); };
+    window.addEventListener("scroll", () => { heroRect = null; }, { passive: true });
+    window.addEventListener("resize", () => { heroRect = null; });
     hero.addEventListener("pointermove", (e) => {
-      const r = hero.getBoundingClientRect();
+      if (!heroRect) measureHero();
+      const r = heroRect;
       pointer = { x: e.clientX, y: e.clientY };
       tpx = ((e.clientX - r.left) / r.width) * 2 - 1;
       tpy = ((e.clientY - r.top) / Math.min(r.height, window.innerHeight)) * 2 - 1;
-      hero.style.setProperty("--mx", (((e.clientX - r.left) / r.width) * 100).toFixed(1) + "%");
-      hero.style.setProperty("--my", (((e.clientY - r.top) / r.height) * 100).toFixed(1) + "%");
+      mxy = [(((e.clientX - r.left) / r.width) * 100).toFixed(1) + "%", (((e.clientY - r.top) / r.height) * 100).toFixed(1) + "%"];
       wake();
-    });
+    }, { passive: true });
     hero.addEventListener("pointerleave", () => {
       pointer = null;
       wake();
@@ -246,7 +262,7 @@
         items.forEach((li, i) => setTimeout(() => {
           li.classList.add("is-lit");
           if (!hovering) setLevel(i + 1);
-        }, 250 + i * 480));
+        }, 120 + i * 300));
       };
       const io = new IntersectionObserver((entries) => {
         if (entries.some((e) => e.isIntersecting)) start();

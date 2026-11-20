@@ -377,10 +377,10 @@ html { scroll-padding-top: 100px; }
 /* Entrance when the intro is skipped (repeat visits): the hero settles in once */
 
 @media (prefers-reduced-motion: no-preference) {
-  html.no-intro .lp-hero__inner > *, html.no-intro .lp-stage { animation: lp-rise 1000ms var(--ease) both; }
-  html.no-intro .lp-hero__inner > *:nth-child(2) { animation-delay: 90ms; }
-  html.no-intro .lp-hero__inner > *:nth-child(3) { animation-delay: 170ms; }
-  html.no-intro .lp-stage { animation-delay: 260ms; }
+  html.no-intro .lp-hero__inner > *, html.no-intro .lp-stage { animation: lp-rise 600ms var(--ease) both; }
+  html.no-intro .lp-hero__inner > *:nth-child(2) { animation-delay: 40ms; }
+  html.no-intro .lp-hero__inner > *:nth-child(3) { animation-delay: 80ms; }
+  html.no-intro .lp-stage { animation-delay: 110ms; }
 }
 
 @keyframes lp-rise { from { opacity: 0; transform: translateY(18px); } }
@@ -553,7 +553,7 @@ html { scroll-padding-top: 100px; }
 }
 .lp-auth[open] { animation: ui-dialog-in var(--t-med) var(--ease), lp-ring-spin 9s linear infinite; }
 @keyframes lp-ring-spin { to { --lp-angle: 360deg; } }
-.lp-auth::backdrop { background: rgba(3, 3, 5, 0.72); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.lp-auth::backdrop { background: rgba(3, 3, 5, 0.76); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
 .lp-auth::before {
   content: ""; position: absolute; inset: 0; z-index: 2; padding: 2px; border-radius: var(--r-lg); pointer-events: none;
   background: var(--lp-ring);
@@ -616,7 +616,7 @@ html.intro-on body { overflow: hidden; }
   /* Same tinted graphite as the hero, feathered lower edge */
   background:
     linear-gradient(180deg, #0f0f10 0%, #0b0b0c calc(100% - 160px), rgba(11, 11, 12, 0) 100%);
-  transition: transform 1100ms cubic-bezier(0.7, 0, 0.25, 1);
+  transition: transform 850ms cubic-bezier(0.7, 0, 0.25, 1);
   will-change: transform;
 }
 
@@ -627,11 +627,11 @@ html.intro-on body { overflow: hidden; }
 
 /* The logo: X and Y move on separate layers with different easing, so the flight curves */
 
-.lp-intro__flight { position: relative; z-index: 2; transition: transform 1100ms cubic-bezier(0.55, 0, 0.25, 1); }
+.lp-intro__flight { position: relative; z-index: 2; transition: transform 850ms cubic-bezier(0.55, 0, 0.25, 1); }
 
 .lp-intro__mark {
   position: relative; width: clamp(92px, 11vw, 132px); aspect-ratio: 1;
-  transition: transform 1100ms cubic-bezier(0.6, 0, 0.15, 1);
+  transition: transform 850ms cubic-bezier(0.6, 0, 0.15, 1);
 }
 
 .lp-intro__logo {
@@ -658,7 +658,7 @@ html.intro-on body { overflow: hidden; }
   position: absolute; right: 24px; bottom: 24px; z-index: 3;
   padding: 8px 16px; border-radius: var(--r-pill); cursor: pointer;
   background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); color: rgba(241, 245, 244, 0.75);
-  font: 500 var(--fs-xs)/1 var(--font); backdrop-filter: blur(10px); opacity: 0; animation: lpi-fade-in 0.6s ease 0.6s forwards;
+  font: 500 var(--fs-xs)/1 var(--font); backdrop-filter: blur(10px); opacity: 0; animation: lpi-fade-in 0.4s ease 0.3s forwards;
   transition: opacity 300ms ease;
 }
 
@@ -666,27 +666,27 @@ html.intro-on body { overflow: hidden; }
 
 /* --- Playing: the logo appears in the centre --- */
 
-.lp-intro.is-playing .lp-intro__logo { animation: lpi-appear 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s forwards; }
+.lp-intro.is-playing .lp-intro__logo { animation: lpi-appear 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.08s forwards; }
 
-.lp-intro.is-playing .lp-intro__wordmark span { animation: lpi-letter 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+.lp-intro.is-playing .lp-intro__wordmark span { animation: lpi-letter 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
 
-.lp-intro__wordmark span:nth-child(1) { animation-delay: 0.60s !important; }
+.lp-intro__wordmark span:nth-child(1) { animation-delay: 0.34s !important; }
 
-.lp-intro__wordmark span:nth-child(2) { animation-delay: 0.66s !important; }
+.lp-intro__wordmark span:nth-child(2) { animation-delay: 0.38s !important; }
 
-.lp-intro__wordmark span:nth-child(3) { animation-delay: 0.72s !important; }
+.lp-intro__wordmark span:nth-child(3) { animation-delay: 0.42s !important; }
 
-.lp-intro__wordmark span:nth-child(4) { animation-delay: 0.78s !important; }
+.lp-intro__wordmark span:nth-child(4) { animation-delay: 0.46s !important; }
 
-.lp-intro__wordmark span:nth-child(5) { animation-delay: 0.84s !important; }
+.lp-intro__wordmark span:nth-child(5) { animation-delay: 0.50s !important; }
 
-.lp-intro__wordmark span:nth-child(6) { animation-delay: 0.90s !important; }
+.lp-intro__wordmark span:nth-child(6) { animation-delay: 0.54s !important; }
 
-.lp-intro__wordmark span:nth-child(7) { animation-delay: 0.96s !important; }
+.lp-intro__wordmark span:nth-child(7) { animation-delay: 0.58s !important; }
 
-.lp-intro__wordmark span:nth-child(8) { animation-delay: 1.02s !important; }
+.lp-intro__wordmark span:nth-child(8) { animation-delay: 0.62s !important; }
 
-.lp-intro.is-playing .lp-intro__tag { animation: lpi-fade-in 0.8s ease 1.2s forwards; }
+.lp-intro.is-playing .lp-intro__tag { animation: lpi-fade-in 0.5s ease 0.7s forwards; }
 
 /* --- Flying: logo to the nav slot, veil lifts, page rises underneath --- */
 
@@ -696,7 +696,7 @@ html.intro-on body { overflow: hidden; }
 
 .lp-intro.is-flying .lp-intro__mark { transform: translateY(var(--fy)) scale(var(--fs)); }
 
-.lp-intro.is-flying .lp-intro__logo { opacity: 1; transform: none; filter: blur(0) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.6)); animation: none; transition: filter 1100ms ease; }
+.lp-intro.is-flying .lp-intro__logo { opacity: 1; transform: none; filter: blur(0) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.6)); animation: none; transition: filter 850ms ease; }
 
 .lp-intro.is-flying .lp-intro__veil { transform: translateY(calc(-100% - 10px)); }
 
@@ -1480,8 +1480,8 @@ body.lp {
 .pin-spacer + .lp-beyond { background: linear-gradient(180deg, #0b0b0c 0%, var(--bg) 40%); }
 
 /* Scroll reveal: elements rise in once (only when outlook.js has armed it) */
-.js-reveal [data-reveal] { opacity: 0; transform: translateY(18px); }
-.js-reveal [data-reveal].is-in { opacity: 1; transform: none; transition: opacity 800ms ease calc(var(--i, 0) * 90ms), transform 900ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i, 0) * 90ms); }
+.js-reveal [data-reveal] { opacity: 0; transform: translateY(12px); }
+.js-reveal [data-reveal].is-in { opacity: 1; transform: none; transition: opacity 450ms ease calc(var(--i, 0) * 50ms), transform 550ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i, 0) * 50ms); }
 
 .lp-beyond .ui-lead, .lp-india .ui-lead { max-width: 60ch; margin-inline: auto; }
 
@@ -1527,7 +1527,7 @@ body.lp {
 .lp-yr__num { display: block; font-size: clamp(3.4rem, 8vw, 5.6rem); font-weight: 300; letter-spacing: -0.055em; line-height: 1; font-variant-numeric: tabular-nums; background: linear-gradient(180deg, #ffffff, #a9acb2); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .lp-yr__unit { display: block; margin-top: 10px; font-size: var(--fs-lg); color: var(--text); }
 .lp-bar { height: 10px; margin-top: 26px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
-.lp-bar i { display: block; height: 100%; width: var(--pct, 0%); border-radius: inherit; background: linear-gradient(90deg, #8d9197, #ffffff); transition: width 1000ms cubic-bezier(0.22, 1, 0.36, 1); }
+.lp-bar i { display: block; height: 100%; width: var(--pct, 0%); border-radius: inherit; background: linear-gradient(90deg, #8d9197, #ffffff); transition: width 700ms cubic-bezier(0.22, 1, 0.36, 1); }
 .lp-explorer.is-armed:not(.is-seen) .lp-bar i { width: 0; }
 .lp-yr__share { margin: 18px 0 0; color: var(--text-2); font-size: 0.9375rem; line-height: 1.5; }
 .lp-yr__share b { font-weight: 600; color: var(--text); }
@@ -1616,7 +1616,7 @@ body.lp {
 .js-reveal .lp-art [data-a] { opacity: 0; transform: translateY(8px); }
 .js-reveal .is-in .lp-art [data-a] {
   opacity: 1; transform: none;
-  transition: opacity 800ms ease calc(var(--k, 0) * 140ms + 300ms), transform 900ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--k, 0) * 140ms + 300ms);
+  transition: opacity 450ms ease calc(var(--k, 0) * 70ms + 100ms), transform 550ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--k, 0) * 70ms + 100ms);
 }
 @media (prefers-reduced-motion: no-preference) {
   .lp-art__spin { transform-box: fill-box; transform-origin: center; animation: lp-art-spin 120s linear infinite; }
@@ -1879,3 +1879,14 @@ main > .lp-section, main > .lp-light { padding-bottom: clamp(40px, 6vw, 84px); }
 .lp-auth__foot { margin: 4px 0 0; text-align: center; font-size: 0.875rem; color: var(--text-2); }
 .lp-auth__foot--pilot { margin-top: -6px; font-size: 0.75rem; color: var(--text-3); text-wrap: balance; }
 .lp-auth .lp-demo { text-align: left; }
+
+/* =========================================================
+   Paint cost: live background blur only where something moves behind it.
+   Cards on the flat page background look the same without it, and silver-on-black
+   gains nothing from saturate(), so both are dropped there.
+   ========================================================= */
+.lp-section .lp-glass, .lp-closing .lp-glass, .lp-act, .lp-light .lp-glass {
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+.lp-chapters .lp-glass { -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.lp-hero .ui-btn { -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }

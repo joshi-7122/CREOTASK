@@ -6,8 +6,11 @@
 "use strict";
 process.env.GOOGLE_CLIENT_ID = "test-google-id";
 process.env.GOOGLE_CLIENT_SECRET = "test-google-secret";
-delete process.env.GITHUB_CLIENT_ID;
-delete process.env.GITHUB_CLIENT_SECRET;
+// Empty (not deleted) so keys in a developer's .env can't switch these on during the test.
+process.env.GITHUB_CLIENT_ID = "";
+process.env.GITHUB_CLIENT_SECRET = "";
+process.env.LINKEDIN_CLIENT_ID = "";
+process.env.LINKEDIN_CLIENT_SECRET = "";
 
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
