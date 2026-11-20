@@ -17,14 +17,14 @@ the Render dashboard and are never committed.
 
 1. Sign in at render.com with GitHub and allow access to the `CREOTASK` repository.
 2. **New → Blueprint**, pick the repository. Render reads `render.yaml` and proposes the
-   `creotask-api` web service with a 1 GB disk.
+   `creotask-api` web service on the free plan (no card needed).
 3. Fill in the values it asks for (all marked `sync: false`):
    - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — from Google Auth Platform → Clients
    - `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` — from GitHub → Developer settings → OAuth Apps
    - `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM` — an email provider for verification and
      password-reset emails. Without them accounts still work, but no emails are sent (the server
      logs "Not sent").
-4. **Apply.** The disk needs a paid instance type; Render shows the price before you confirm.
+4. **Apply.**
 5. When it is live, open `https://<your-service>.onrender.com/api/health` — it should return
    `{"status":"ok", ...}`.
 
@@ -51,9 +51,12 @@ After pushing, Vercel redeploys with the forwarding rules. Then:
 
 ## Notes
 
-- **Database:** SQLite at `/var/data/creotask.db` on the Render disk; it survives deploys and
-  restarts. Back it up from the Render shell (`sqlite3 /var/data/creotask.db ".backup /var/data/backup.db"`)
-  before risky changes.
+- **Free plan limits:** there is no persistent disk, so the SQLite database starts empty after every
+  redeploy or restart (accounts created on the live site disappear), and the service sleeps after
+  about 15 minutes idle, so the next visit takes up to a minute. Good for a preview, not for real users.
+- **Moving to persistent data:** either a paid Render plan with a disk (set `plan: starter`, add a
+  `disk` mounted at `/var/data`, and point `DB_PATH` there), or a hosted database with a free tier
+  (Turso or Neon), which needs the server's storage code changed.
 - **Proxy:** `TRUST_PROXY=2` tells the server that requests pass through Vercel and Render, so rate
   limits see each visitor's own address.
 - **Payments** stay disabled (`PAYMENTS_MODE=disabled`) until a provider and legal review are approved.

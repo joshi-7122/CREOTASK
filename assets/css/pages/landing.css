@@ -1902,3 +1902,5 @@ main > .lp-section, main > .lp-light { padding-bottom: clamp(40px, 6vw, 84px); }
   transform: perspective(1400px) rotateY(-6deg); transform-origin: right bottom;
 }
 .lp-notes canvas { display: block; }
+/* The soft glows inside the sign-in panel must never make it scroll sideways */
+.lp-auth__panel { overflow-x: hidden; }

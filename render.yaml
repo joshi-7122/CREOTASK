@@ -1,29 +1,30 @@
 # Render blueprint for the CreoTask server (Express + SQLite).
 # The pages stay on Vercel; vercel.json forwards /api/* here.
 # Secrets marked `sync: false` are entered in the Render dashboard, never committed.
+#
+# FREE PLAN: no persistent disk, so the SQLite database is reset whenever the service
+# redeploys or restarts, and the service sleeps after ~15 minutes idle (first visit then
+# takes up to a minute). Fine for a preview; for real users switch to a paid plan with a
+# disk (see docs/DEPLOY.md).
 services:
   - type: web
     name: creotask-api
     runtime: node
-    plan: starter            # persistent disks need a paid instance type
+    plan: free
     region: singapore        # closest Render region to India
     buildCommand: npm ci --omit=dev
     startCommand: npm start
     healthCheckPath: /api/health
     autoDeploy: true
-    disk:
-      name: creotask-data
-      mountPath: /var/data   # the SQLite database lives here and survives deploys
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
       - key: NODE_VERSION
         value: "22"
       - key: DB_PATH
-        value: /var/data/creotask.db
+        value: ./server/data/creotask.db   # temporary on the free plan
       - key: UPLOAD_DIR
-        value: /var/data/uploads
+        value: ./uploads
       - key: JWT_SECRET
         generateValue: true
       # The public site address: used for email links and sign-in callbacks
