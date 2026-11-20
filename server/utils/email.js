@@ -48,14 +48,24 @@ async function sendMail({ to, subject, html, text }) {
     console.log(`   ${text || "(html only)"}\n`);
     return;
   }
-  const t = getTransporter();
-  await t.sendMail({
-    from: process.env.EMAIL_FROM || "CreoTask <noreply@creotask.in>",
-    to,
-    subject,
-    html,
-    text,
-  });
+  // Production without email settings, or a failed send, must not break the request that
+  // triggered it (an account is already created by then). Log it so it can be fixed.
+  if (!process.env.SMTP_HOST) {
+    console.warn(`[email] Not sent (SMTP_HOST is not set): "${subject}"`);
+    return;
+  }
+  try {
+    const t = getTransporter();
+    await t.sendMail({
+      from: process.env.EMAIL_FROM || "CreoTask <noreply@creotask.in>",
+      to,
+      subject,
+      html,
+      text,
+    });
+  } catch (err) {
+    console.error(`[email] Sending "${subject}" failed:`, err.message);
+  }
 }
 
 async function sendVerificationEmail(email, token) {

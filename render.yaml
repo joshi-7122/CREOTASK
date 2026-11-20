@@ -1,0 +1,60 @@
+# Render blueprint for the CreoTask server (Express + SQLite).
+# The pages stay on Vercel; vercel.json forwards /api/* here.
+# Secrets marked `sync: false` are entered in the Render dashboard, never committed.
+services:
+  - type: web
+    name: creotask-api
+    runtime: node
+    plan: starter            # persistent disks need a paid instance type
+    region: singapore        # closest Render region to India
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    disk:
+      name: creotask-data
+      mountPath: /var/data   # the SQLite database lives here and survives deploys
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: DB_PATH
+        value: /var/data/creotask.db
+      - key: UPLOAD_DIR
+        value: /var/data/uploads
+      - key: JWT_SECRET
+        generateValue: true
+      # The public site address: used for email links and sign-in callbacks
+      - key: CLIENT_ORIGIN
+        value: https://creotask.vercel.app
+      - key: OAUTH_REDIRECT_BASE
+        value: https://creotask.vercel.app
+      # Requests arrive through Vercel's forwarding and Render's proxy
+      - key: TRUST_PROXY
+        value: "2"
+      - key: PAYMENTS_MODE
+        value: disabled
+      # Social sign-in (enter in the dashboard)
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      # Email for verification and password-reset links (enter in the dashboard)
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false

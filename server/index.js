@@ -24,6 +24,9 @@ const ENV  = process.env.NODE_ENV || "development";
 
 // ── Security ──────────────────────────────────────────────
 const isProd = ENV === "production";
+// Behind a hosting proxy (and Vercel forwarding /api), trust that many hops so rate limits and
+// session records see each visitor's real address rather than the proxy's.
+app.set("trust proxy", parseInt(process.env.TRUST_PROXY || "0", 10) || false);
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
