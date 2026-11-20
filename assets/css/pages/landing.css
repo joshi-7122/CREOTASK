@@ -1892,13 +1892,13 @@ main > .lp-section, main > .lp-light { padding-bottom: clamp(40px, 6vw, 84px); }
 .lp-hero .ui-btn { -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 
 /* =========================================================
-   Currency-note fan (notes.js): eight glass notes fanned out at the far left of
-   the closing section, above the cards. Decorative; hidden where it can't fit.
+   Currency-note spiral (notes.js): eight glass notes along a spiral at the left of
+   the closing section; the heading stays in front. Decorative; hidden where it can't fit.
    ========================================================= */
 .lp-closing { position: relative; }
 .lp-closing__inner { position: relative; z-index: 1; }
 .lp-notes {
   position: absolute; z-index: 0; pointer-events: none;
-  transform: perspective(1100px) rotateY(-10deg); transform-origin: right bottom;
+  transform: perspective(1400px) rotateY(-6deg); transform-origin: right bottom;
 }
 .lp-notes canvas { display: block; }

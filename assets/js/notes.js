@@ -1,18 +1,19 @@
 /* =========================================================
    CREOTASK — Currency-note fan ("Start with what you can do")
-   Eight black glass notes, C R E O T A S K from the bottom up, fanned out from
-   a point at the far left of the closing section, above the cards. Each note is drawn once into an
-   offscreen texture, then revealed in real time with Canvas2D:
-     1. ASCII: the note appears as dithered characters (ordered Bayer threshold),
-        flickering, under scanlines;
-     2. reconstruction: the image rebuilds from large pixels down to sharp, with
-        horizontal glitch slices;
-     3. settled: the crisp glass note, with a soft shadow for depth.
+   Eight large black glass notes, C R E O T A S K, fanned out from one point at
+   the left of the closing section and overlapping like a hand of cards. The
+   heading stays in front of the notes.
+   Each note swings in from straight down (its tip at the lowest point, just above
+   the cards), round the left and up into place, growing a little, while it is
+   revealed in real time with Canvas2D:
+     1. ASCII: dithered characters (ordered Bayer threshold), flickering, under scanlines;
+     2. reconstruction: rebuilt from large pixels down to sharp, with glitch slices;
+     3. settled: the crisp glass note with a soft shadow.
    Afterwards a random note glitches briefly every few seconds.
+   - Letters stay upright on screen, in a layer above every note.
    - Only drawn while something is changing; idle otherwise.
-   - Sized to stay clear of the heading, text and cards; hidden where even a
-     small fan can't fit (phones, narrow windows).
-   - Reduced motion: the finished notes are drawn once, with no animation.
+   - Hidden where it can't fit (phones, narrow windows).
+   - Reduced motion: the finished fan is drawn once, with no animation.
    ========================================================= */
 (function () {
   "use strict";
@@ -32,19 +33,23 @@
   const ctx = canvas.getContext("2d");
   if (!ctx) { wrap.remove(); return; }
 
-  const LETTERS = ["C", "R", "E", "O", "T", "A", "S", "K"]; // index 0 sits at the bottom
-  const DUR = 1700;          // one note's reveal (swing plus rebuild)
-  const STAGGER = 200;       // between notes
+  const LETTERS = ["C", "R", "E", "O", "T", "A", "S", "K"];
+  const DUR = 1900;           // one note's reveal (swing plus rebuild)
+  const STAGGER = 200;        // between notes
+  const SWING = 0.8;          // share of the reveal spent swinging into place
   const GLITCH_MS = 420;
+  const TH = 0.34, LEN = 0.82; // note width and length, as fractions of the fan's radius
+  const LX = 0.38, LY = 0.14; // where the letter sits on a note: near the tip, on the side left uncovered
   const RAMP = " .:-=+*#%@";
   const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
 
-  let dpr = 1, W = 0, H = 0, noteW = 0, noteH = 0, cell = 4;
-  let notes = [], atlas = null, shadow = null, scan = null, scanFill = null, pix = null, pixCtx = null;
+  let dpr = 1, W = 0, H = 0, ox = 0, oy = 0;
+  let notes = [], spiral = null /* the fan: pivot and radius */, atlases = new Map(), scanFill = null, pix = null, pixCtx = null;
   let t0 = -1, raf = 0, started = false, onScreen = false, ready = false, idleTimer = 0;
 
   const clamp = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
   const easeOut = (k) => 1 - Math.pow(1 - k, 3);
+  const backOut = (k) => { const c1 = 1.2, c3 = c1 + 1; return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2); };
 
   function rr(g, x, y, w, h, r) {
     g.beginPath();
@@ -56,16 +61,8 @@
     g.closePath();
   }
 
-  // ── Layout: a fan of notes at the far left, opening up and to the left ──
-  // The fan pivots on its right, nearest the content, and the notes spread toward the screen
-  // edge: C points left (lowest), K points straight up (highest), its top level with the top of
-  // the heading's first line. Its size is the largest that keeps every note clear of the
-  // heading, the text, the cards and the screen edge; if even a small fan can't fit, it hides.
-  const A_LOW = -168, A_HIGH = -90;  // degrees: C's direction, K's direction (screen y points down)
-  const TH = 0.3, LEN = 0.82;        // note width and length, as fractions of the fan radius
-  let ox = 0, oy = 0;                // canvas origin, in section coordinates
-
   function textBox(el, sr) {
+    if (!el) return null;
     const rg = document.createRange();
     rg.selectNodeContents(el);
     const rs = [...rg.getClientRects()].filter((r) => r.width && r.height);
@@ -76,84 +73,79 @@
     };
   }
 
-  // Entrance: every note starts folded down below the pivot and swings clockwise (round the
-  // left, up over the top, a little past, then back) to its place, so the tips trace an arc.
-  const START = (70 * Math.PI) / 180;
-  const SWING = 0.8;                 // share of each note's reveal spent swinging
-  const backOut = (k) => { const c1 = 1.25, c3 = c1 + 1; return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2); };
+  // ── The fan: every note pivots on one point and they overlap like a hand of cards ──
+  // C points up-left, K up-right. On entrance each note starts pointing straight down from the
+  // pivot (its tip at the lowest point, just above the cards), swings clockwise round the left and
+  // up into place with a slight overshoot, and grows a little as it comes.
+  const A_FIRST = -150, A_LAST = -50;          // final directions of C and K, in degrees (screen y down)
+  const START = Math.PI / 2;                   // straight down
 
-  function pose(n, a) {
-    return { cx: n.px + n.rc * Math.cos(a), cy: n.py + n.rc * Math.sin(a), rot: a + Math.PI / 2 };
+  function pose(n, a, s, fan) {
+    const mid = fan.R * (1 - LEN / 2) * s;     // centre of the note, from the pivot
+    return { cx: fan.px + mid * Math.cos(a), cy: fan.py + mid * Math.sin(a), rot: a + Math.PI / 2, s };
   }
+  const swingAngle = (n, k) => START + (n.th - START) * backOut(k);
+  const swingScale = (k) => 0.55 + 0.45 * easeOut(Math.min(1, k));
 
-  function fanNotes(px, py, R) {
-    const L = R * LEN;
-    return LETTERS.map((letter, i) => {
-      let th = ((A_LOW + ((A_HIGH - A_LOW) * i) / 7) * Math.PI) / 180;
-      if (th < START) th += Math.PI * 2;   // so the swing from START runs clockwise
-      const n = { letter, px, py, rc: R - L / 2, th, glitchUntil: 0 };
-      return Object.assign(n, pose(n, th));
-    });
-  }
-
-  // Points around a rotated note's outline (centre cx, cy; size w × h; rotation rot)
-  function outline(n, w, h, grow) {
-    const pts = [], c = Math.cos(n.rot), sn = Math.sin(n.rot), hw = w / 2 + grow, hh = h / 2 + grow;
+  // Points around a note's outline at a given pose
+  function outline(n, at, grow) {
+    const pts = [], c = Math.cos(at.rot), sn = Math.sin(at.rot);
+    const hw = (n.w * at.s) / 2 + grow, hh = (n.h * at.s) / 2 + grow;
     for (let k = 0; k <= 8; k++) {
       const u = -hw + (2 * hw * k) / 8, v = -hh + (2 * hh * k) / 8;
-      for (const [x, y] of [[u, -hh], [u, hh], [-hw, v], [hw, v]]) pts.push([n.cx + x * c - y * sn, n.cy + x * sn + y * c]);
+      for (const [x, y] of [[u, -hh], [u, hh], [-hw, v], [hw, v]]) pts.push([at.cx + x * c - y * sn, at.cy + x * sn + y * c]);
     }
     return pts;
   }
 
+  function makeNotes(fan) {
+    return LETTERS.map((letter, i) => {
+      let th = ((A_FIRST + ((A_LAST - A_FIRST) * i) / 7) * Math.PI) / 180;
+      while (th < START) th += Math.PI * 2;    // so the swing from straight down runs clockwise
+      const n = { letter, th, w: fan.R * TH, h: fan.R * LEN, glitchUntil: 0 };
+      n.final = pose(n, th, 1, fan);
+      return n;
+    });
+  }
+
+  // ── Layout: the largest fan that fits at the left of the section ──
   function layout() {
     const sr = sec.getBoundingClientRect();
-    const cards = actions.getBoundingClientRect();
     if (sr.width < 980 || sr.height < 600) { wrap.hidden = true; return false; }
-    const GAP = 22;
-    const obstacles = [
-      textBox(sec.querySelector(".lp-closing__title"), sr),
-      textBox(sec.querySelector(".lp-closing__lead"), sr),
-      textBox(sec.querySelector(".lp-closing__note"), sr),
-      { l: cards.left - sr.left, t: cards.top - sr.top, r: cards.right - sr.left, b: cards.bottom - sr.top },
-    ].filter(Boolean).map((o) => ({ l: o.l - GAP, t: o.t - GAP, r: o.r + GAP, b: o.b + GAP }));
+    const rel = (r) => ({ l: r.left - sr.left, t: r.top - sr.top, r: r.right - sr.left, b: r.bottom - sr.top });
+    const cards = rel(actions.getBoundingClientRect());
+    const lead = textBox(sec.querySelector(".lp-closing__lead"), sr);
+    if (!lead) { wrap.hidden = true; return false; }
+    // Never reach into the content of the section above
+    const prev = sec.previousElementSibling;
+    const prevInner = prev && (prev.querySelector(".ui-container") || prev);
+    const ceiling = prevInner ? rel(prevInner.getBoundingClientRect()).b + 24 : -Infinity;
 
-    const cardsTop = cards.top - sr.top;
-    const title = textBox(sec.querySelector(".lp-closing__title"), sr);
-    const topLine = title ? title.t : 0;    // top of "Start with what"
-    const clear = (pts) => pts.every(([x, y]) => x >= 6 && y >= 6 && !obstacles.some((o) => x > o.l && x < o.r && y > o.t && y < o.b));
-    const cLow = (A_LOW * Math.PI) / 180;
-    // The pivot sits far enough right that C's tip stays on screen.
-    const pivotX = (r) => -Math.cos(cLow) * r + Math.abs(Math.sin(cLow)) * r * TH * 0.5 + 12;
+    const S = { x: lead.l - 72, y: cards.t - 50 };   // the lowest point: just above the cards, clear of the paragraph
+    const cardZone = { l: cards.l - 22, t: cards.t - 22, r: cards.r + 22, b: cards.b + 22 };
+    const ok = (pts) => pts.every(([x, y]) => x >= 6 && y >= ceiling && !(x > cardZone.l && x < cardZone.r && y > cardZone.t && y < cardZone.b));
 
-    let R = 0, fan = null;
-    // First choice: K's tip level with the top of the heading.
-    for (let r = 440; r >= 160 && !fan; r -= 4) {
-      const cand = fanNotes(pivotX(r), topLine + r, r);
-      if (cand.every((n) => clear(outline(n, r * TH, r * LEN, 3)))) { R = r; fan = cand; }
-    }
-    // Otherwise the largest fan that sits just above the cards.
-    for (let r = 440; r >= 160 && !fan; r -= 4) {
-      const cand = fanNotes(pivotX(r), cardsTop - GAP - 6 - r * TH * 0.55, r);
-      if (cand.every((n) => clear(outline(n, r * TH, r * LEN, 3)))) { R = r; fan = cand; }
+    let fan = null, cand = null;
+    for (let R = 460; R >= 200; R -= 6) {
+      const trial = { px: S.x, py: S.y - R * 0.55, R }; // pivot above the lowest point; notes start pointing down past it
+      const ns = makeNotes(trial);
+      if (ns.every((n) => ok(outline(n, n.final, 3)))) { fan = trial; cand = ns; break; }
     }
     if (!fan) { wrap.hidden = true; return false; }
     wrap.hidden = false;
+    spiral = fan;
+    notes = cand;
 
-    noteW = Math.round(R * TH);
-    noteH = Math.round(R * LEN);
-    cell = Math.max(3, Math.round(noteW / 18));
-
-    // Canvas covers the fan and the path each note swings along (kept inside the section)
+    // Canvas covers every note along its whole swing (kept below the section above)
     const all = [];
-    for (const n of fan) {
-      for (let k = 0; k <= 1.0001; k += 0.05) all.push(...outline(Object.assign({}, n, pose(n, START + (n.th - START) * backOut(k))), noteW, noteH, 0));
+    for (const n of notes) {
+      for (let k = 0; k <= 1.0001; k += 0.05) all.push(...outline(n, pose(n, swingAngle(n, k), swingScale(k), fan), 0));
     }
     const pad = 26;
-    ox = Math.floor(Math.max(0, Math.min(...all.map((p) => p[0])) - pad));
-    oy = Math.floor(Math.max(0, Math.min(...all.map((p) => p[1])) - pad));
-    W = Math.ceil(Math.min(sr.width, Math.max(...all.map((p) => p[0])) + pad) - ox);
-    H = Math.ceil(Math.min(sr.height, Math.max(...all.map((p) => p[1])) + pad) - oy);
+    ox = Math.floor(Math.max(0, Math.min(...all.map((q) => q[0])) - pad));
+    oy = Math.floor(Math.max(Number.isFinite(ceiling) ? ceiling : -Infinity, Math.min(...all.map((q) => q[1])) - pad));
+    W = Math.ceil(Math.min(sr.width, Math.max(...all.map((q) => q[0])) + pad) - ox);
+    H = Math.ceil(Math.min(sr.height, Math.max(...all.map((q) => q[1])) + pad) - oy);
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     wrap.style.left = ox + "px";
     wrap.style.top = oy + "px";
@@ -161,18 +153,17 @@
     canvas.style.height = H + "px";
     canvas.width = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
-    notes = fan;
     return true;
   }
 
-  // ── One note, drawn crisp into its own texture ──
-  function buildTexture(letter) {
+  // ── A note, drawn crisp into its own texture (letter excluded; it is drawn upright on top) ──
+  function buildTexture(n) {
+    const w = n.w, h = n.h, r = Math.max(5, w * 0.1);
     const c = document.createElement("canvas");
-    c.width = Math.round(noteW * dpr);
-    c.height = Math.round(noteH * dpr);
+    c.width = Math.round(w * dpr);
+    c.height = Math.round(h * dpr);
     const g = c.getContext("2d");
     g.scale(dpr, dpr);
-    const w = noteW, h = noteH, r = Math.max(5, w * 0.1);
 
     const body = g.createLinearGradient(0, 0, w * 0.45, h);
     body.addColorStop(0, "rgba(48, 49, 55, 0.97)");
@@ -198,6 +189,12 @@
     sheen.addColorStop(1, "rgba(255, 255, 255, 0)");
     g.fillStyle = sheen;
     g.fillRect(0, 0, w, h * 0.32);
+    // a soft dark pad where the letter sits, so it reads against the glass
+    const halo = g.createRadialGradient(w * LX, h * LY, 0, w * LX, h * LY, w * 0.5);
+    halo.addColorStop(0, "rgba(0, 0, 0, 0.55)");
+    halo.addColorStop(1, "rgba(0, 0, 0, 0)");
+    g.fillStyle = halo;
+    g.fillRect(0, 0, w, h);
     g.restore();
 
     rr(g, 0.5, 0.5, w - 1, h - 1, r);
@@ -220,20 +217,11 @@
     };
     corners();
     g.save(); g.translate(w, h); g.rotate(Math.PI); corners(); g.restore();
-
-    // A soft dark pad where the letter sits, so it reads against the glass
-    const halo = g.createRadialGradient(w * LX, h * LY, 0, w * LX, h * LY, w * 0.5);
-    halo.addColorStop(0, "rgba(0, 0, 0, 0.55)");
-    halo.addColorStop(1, "rgba(0, 0, 0, 0)");
-    g.fillStyle = halo;
-    g.fillRect(0, 0, w, h);
     return c;
   }
 
-  // The letter, as its own upright sprite: it stays level on screen however the note is turned.
-  const LX = 0.45, LY = 0.15;        // where the letter sits on the note: near the outer end, where the fan is widest
-  function buildLetter(letter) {
-    const ls = Math.round(noteW * 0.54);
+  function buildLetter(n) {
+    const ls = Math.round(n.w * 0.46);
     const S = Math.round(ls * 1.5);
     const c = document.createElement("canvas");
     c.width = Math.round(S * dpr);
@@ -247,87 +235,93 @@
     lg.addColorStop(0, "#ffffff");
     lg.addColorStop(0.6, "#e6e8eb");
     lg.addColorStop(1, "#b7bac0");
-    g.shadowColor = "rgba(0, 0, 0, 0.95)";   // dark halo for contrast
+    g.shadowColor = "rgba(0, 0, 0, 0.95)";
     g.shadowBlur = Math.max(6, ls * 0.22);
     g.fillStyle = lg;
-    g.fillText(letter, S / 2, S / 2 + ls * 0.05);
+    g.fillText(n.letter, S / 2, S / 2 + ls * 0.05);
     g.shadowBlur = 0;
-    g.fillText(letter, S / 2, S / 2 + ls * 0.05);
+    g.fillText(n.letter, S / 2, S / 2 + ls * 0.05);
     c.size = S;
     return c;
   }
 
+  function buildShadow(n) {
+    const pad = 18;
+    const c = document.createElement("canvas");
+    c.width = Math.round((n.w + pad * 2) * dpr);
+    c.height = Math.round((n.h + pad * 2) * dpr);
+    const s = c.getContext("2d");
+    s.scale(dpr, dpr);
+    s.shadowColor = "rgba(0, 0, 0, 0.75)";
+    s.shadowBlur = 14;
+    s.shadowOffsetY = 6;
+    s.fillStyle = "#000";
+    rr(s, pad, pad, n.w, n.h, Math.max(5, n.w * 0.1));
+    s.fill();
+    return c;
+  }
+
+  // Glyph atlas for one cell size: the ramp characters, pre-drawn once
+  function atlasFor(cell) {
+    if (atlases.has(cell)) return atlases.get(cell);
+    const A = Math.round(cell * dpr);
+    const c = document.createElement("canvas");
+    c.width = A * RAMP.length;
+    c.height = A;
+    const a = c.getContext("2d");
+    a.font = `${Math.round(A * 1.15)}px ui-monospace, Menlo, Consolas, monospace`;
+    a.textAlign = "center";
+    a.textBaseline = "middle";
+    a.fillStyle = "#eceef1";
+    for (let i = 1; i < RAMP.length; i++) a.fillText(RAMP[i], i * A + A / 2, A / 2 + 1);
+    atlases.set(cell, c);
+    return c;
+  }
+
   // Brightness grid used by the ASCII stage
-  function lumGrid(tex) {
-    const cols = Math.floor(noteW / cell), rows = Math.floor(noteH / cell);
+  function lumGrid(n) {
+    const cols = Math.floor(n.w / n.cell), rows = Math.floor(n.h / n.cell);
+    const tex = n.tex;
     const data = tex.getContext("2d").getImageData(0, 0, tex.width, tex.height).data;
     const lum = new Float32Array(cols * rows);
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        const px = Math.min(tex.width - 1, Math.round((c + 0.5) * cell * dpr));
-        const py = Math.min(tex.height - 1, Math.round((r + 0.5) * cell * dpr));
-        const k = (py * tex.width + px) * 4;
+        const x = Math.min(tex.width - 1, Math.round((c + 0.5) * n.cell * dpr));
+        const y = Math.min(tex.height - 1, Math.round((r + 0.5) * n.cell * dpr));
+        const k = (y * tex.width + x) * 4;
         lum[r * cols + c] = ((0.299 * data[k] + 0.587 * data[k + 1] + 0.114 * data[k + 2]) / 255) * (data[k + 3] / 255);
       }
     }
     return { lum, cols, rows };
   }
 
-  function buildShared() {
-    // Glyph atlas: the ramp characters, pre-drawn once (drawImage is far cheaper than fillText)
-    const A = Math.round(cell * dpr);
-    atlas = document.createElement("canvas");
-    atlas.width = A * RAMP.length;
-    atlas.height = A;
-    const a = atlas.getContext("2d");
-    a.font = `${Math.round(A * 1.15)}px ui-monospace, Menlo, Consolas, monospace`;
-    a.textAlign = "center";
-    a.textBaseline = "middle";
-    a.fillStyle = "#eceef1";
-    for (let i = 1; i < RAMP.length; i++) a.fillText(RAMP[i], i * A + A / 2, A / 2 + 1);
-
-    // Soft shadow under each note
-    const pad = 18;
-    shadow = document.createElement("canvas");
-    shadow.width = Math.round((noteW + pad * 2) * dpr);
-    shadow.height = Math.round((noteH + pad * 2) * dpr);
-    const s = shadow.getContext("2d");
-    s.scale(dpr, dpr);
-    s.shadowColor = "rgba(0, 0, 0, 0.75)";
-    s.shadowBlur = 14;
-    s.shadowOffsetY = 6;
-    s.fillStyle = "#000";
-    rr(s, pad, pad, noteW, noteH, Math.max(5, noteW * 0.1));
-    s.fill();
-
-    // Scanline pattern
-    scan = document.createElement("canvas");
+  function build() {
+    if (!layout()) { ready = false; return; }
+    atlases = new Map();
+    const scan = document.createElement("canvas");
     scan.width = 1;
     scan.height = 3;
     const sc = scan.getContext("2d");
     sc.fillStyle = "rgba(0, 0, 0, 0.55)";
     sc.fillRect(0, 0, 1, 1);
     scanFill = ctx.createPattern(scan, "repeat");
-
     pix = document.createElement("canvas");
     pixCtx = pix.getContext("2d");
-  }
-
-  function build() {
-    if (!layout()) { ready = false; return; }
-    buildShared();
     notes.forEach((n) => {
-      n.tex = buildTexture(n.letter);
-      n.letterTex = buildLetter(n.letter);
-      Object.assign(n, lumGrid(n.tex));
+      n.cell = Math.max(3, Math.round(n.w / 18));
+      n.tex = buildTexture(n);
+      n.letterTex = buildLetter(n);
+      n.shadow = buildShadow(n);
+      n.atlas = atlasFor(n.cell);
+      Object.assign(n, lumGrid(n));
     });
     ready = true;
   }
 
-  // ── Stages ──
+  // ── Stages (drawn in the note's own coordinates) ──
   function drawAscii(n, appear, alpha) {
-    const A = Math.round(cell * dpr);
-    const { lum, cols, rows } = n;
+    const A = Math.round(n.cell * dpr), cell = n.cell;
+    const { lum, cols, rows, atlas } = n;
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         if (BAYER[(r & 3) * 4 + (c & 3)] > appear) continue;   // ordered-dither dissolve
@@ -353,13 +347,11 @@
   }
 
   function drawSliced(n, g) {
-    if (g < 0.05) { ctx.drawImage(n.tex, 0, 0, noteW, noteH); return; }
-    // Cut into horizontal bands; a few slide sideways
-    const bands = 7;
-    const bh = noteH / bands;
+    if (g < 0.05) { ctx.drawImage(n.tex, 0, 0, n.w, n.h); return; }
+    const bands = 7, bh = n.h / bands;
     for (let b = 0; b < bands; b++) {
       const shift = Math.random() < g * 0.55 ? (Math.random() - 0.5) * 14 * g : 0;
-      ctx.drawImage(n.tex, 0, b * bh * dpr, n.tex.width, bh * dpr, shift, b * bh, noteW, bh);
+      ctx.drawImage(n.tex, 0, b * bh * dpr, n.tex.width, bh * dpr, shift, b * bh, n.w, bh);
     }
   }
 
@@ -374,10 +366,10 @@
 
     if (rebuild > 0) {
       ctx.globalAlpha = clamp(rebuild * 1.6) * 0.9;
-      ctx.drawImage(shadow, -18, -18, noteW + 36, noteH + 36);
+      ctx.drawImage(n.shadow, -18, -18, n.w + 36, n.h + 36);
       ctx.globalAlpha = clamp(rebuild * 1.5) * flick;
-      const blk = Math.max(1, Math.round(cell * 3.2 * (1 - easeOut(rebuild))));
-      if (blk > 1) drawPixelated(n.tex, 0, 0, noteW, noteH, blk);
+      const blk = Math.max(1, Math.round(n.cell * 3.2 * (1 - easeOut(rebuild))));
+      if (blk > 1) drawPixelated(n.tex, 0, 0, n.w, n.h, blk);
       else drawSliced(n, Math.max(g, (1 - q) * 0.9));
       letter = { alpha: clamp(rebuild * 1.4) * flick, blk };
     }
@@ -387,18 +379,18 @@
     if (lines > 0.02) {
       ctx.globalAlpha = lines;
       ctx.fillStyle = scanFill;
-      rr(ctx, 0, 0, noteW, noteH, Math.max(5, noteW * 0.1));
+      rr(ctx, 0, 0, n.w, n.h, Math.max(5, n.w * 0.1));
       ctx.fill();
     }
     ctx.globalAlpha = 1;
     return letter;
   }
 
-  // Letters go on top of every note, upright on screen, so none is covered by the next note.
+  // Letters go on top of every note, upright on screen, so none is covered by another note.
   function drawLetter(n, at, l) {
     const c = Math.cos(at.rot), sn = Math.sin(at.rot);
-    const lx = noteW * (LX - 0.5), ly = noteH * (LY - 0.5);   // offset from the note's centre
-    const S = n.letterTex.size;
+    const lx = n.w * (LX - 0.5) * at.s, ly = n.h * (LY - 0.5) * at.s;   // offset from the note's centre
+    const S = n.letterTex.size * at.s;
     ctx.save();
     ctx.translate(at.cx - ox + lx * c - ly * sn, at.cy - oy + lx * sn + ly * c);
     ctx.globalAlpha = l.alpha;
@@ -416,20 +408,21 @@
     ctx.clearRect(0, 0, W, H);
     let busy = false;
     const letters = [];
-    for (let i = 0; i < notes.length; i++) {   // C at the back, K in front, like a dealt fan
+    for (let i = 0; i < notes.length; i++) {   // C at the back, K in front
       const n = notes[i];
       const p = reduce ? 1 : clamp((now - t0 - i * STAGGER) / DUR);
       if (p < 1) busy = true;
       let g = 0;
       if (n.glitchUntil > now) { g = (n.glitchUntil - now) / GLITCH_MS; busy = true; }
       if (p <= 0) continue;
-      // Swing into place along the arc, then hold the fan pose
+      // Swing in from straight down, growing a little, then hold the final pose
       const k = clamp(p / SWING);
-      const at = k >= 1 ? n : pose(n, START + (n.th - START) * backOut(k));
+      const at = k >= 1 ? n.final : pose(n, swingAngle(n, k), swingScale(k), spiral);
       ctx.save();
       ctx.translate(at.cx - ox, at.cy - oy);
       ctx.rotate(at.rot);
-      ctx.translate(-noteW / 2, -noteH / 2);
+      ctx.scale(at.s, at.s);
+      ctx.translate(-n.w / 2, -n.h / 2);
       const l = drawNote(n, p, g);
       ctx.restore();
       if (l) letters.push([n, at, l]);
@@ -454,7 +447,7 @@
   // ── Start once the section is in view (fonts first, so the textures use them) ──
   const fontsReady = Promise.race([
     Promise.all([
-      document.fonts ? document.fonts.load('600 64px "Cinzel"') : null,
+      document.fonts ? document.fonts.load('700 64px "Cinzel"') : null,
       document.fonts ? document.fonts.load('600 16px "Geist"') : null,
     ]),
     new Promise((r) => setTimeout(r, 1500)),
@@ -477,7 +470,7 @@
   }
   document.addEventListener("visibilitychange", () => { if (!document.hidden && ready) scheduleGlitch(); });
 
-  // Re-fit on resize; a finished stack is redrawn settled, without replaying the reveal.
+  // Re-fit on resize; a finished fan is redrawn settled, without replaying the entrance.
   let rt = 0;
   window.addEventListener("resize", () => {
     clearTimeout(rt);
@@ -489,4 +482,5 @@
       kick();
     }, 150);
   });
+
 })();
