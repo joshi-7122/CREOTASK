@@ -1890,3 +1890,15 @@ main > .lp-section, main > .lp-light { padding-bottom: clamp(40px, 6vw, 84px); }
 }
 .lp-chapters .lp-glass { -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
 .lp-hero .ui-btn { -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+
+/* =========================================================
+   Currency-note fan (notes.js): eight glass notes fanned out at the far left of
+   the closing section, above the cards. Decorative; hidden where it can't fit.
+   ========================================================= */
+.lp-closing { position: relative; }
+.lp-closing__inner { position: relative; z-index: 1; }
+.lp-notes {
+  position: absolute; z-index: 0; pointer-events: none;
+  transform: perspective(1100px) rotateY(-10deg); transform-origin: right bottom;
+}
+.lp-notes canvas { display: block; }
