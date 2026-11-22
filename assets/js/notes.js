@@ -1,18 +1,18 @@
 /* =========================================================
    CREOTASK — Currency-note fan ("Start with what you can do")
-   Eight large black glass notes, C R E O T A S K, fanned out from one point at
-   the left of the closing section and overlapping like a hand of cards. The
-   heading stays in front of the notes.
-   Each note swings in from straight down (its tip at the lowest point, just above
-   the cards), round the left and up into place, growing a little, while it is
-   revealed in real time with Canvas2D:
+   Eight large black glass notes, C R E O T A S K, fanned out from one point
+   behind the heading, as the section's backdrop. The heading, text and cards
+   stay in front and readable (the notes sit at reduced opacity).
+   On entrance the notes start stacked, pointing up, then expand and rotate
+   outward into their fan, one after another (C first), overshooting slightly
+   and settling, while each is revealed in real time with Canvas2D:
      1. ASCII: dithered characters (ordered Bayer threshold), flickering, under scanlines;
      2. reconstruction: rebuilt from large pixels down to sharp, with glitch slices;
      3. settled: the crisp glass note with a soft shadow.
    Afterwards a random note glitches briefly every few seconds.
    - Letters stay upright on screen, in a layer above every note.
    - Only drawn while something is changing; idle otherwise.
-   - Hidden where it can't fit (phones, narrow windows).
+   - Hidden on phones and very narrow windows.
    - Reduced motion: the finished fan is drawn once, with no animation.
    ========================================================= */
 (function () {
@@ -74,18 +74,18 @@
   }
 
   // ── The fan: every note pivots on one point and they overlap like a hand of cards ──
-  // C points up-left, K up-right. On entrance each note starts pointing straight down from the
-  // pivot (its tip at the lowest point, just above the cards), swings clockwise round the left and
-  // up into place with a slight overshoot, and grows a little as it comes.
-  const A_FIRST = -150, A_LAST = -50;          // final directions of C and K, in degrees (screen y down)
-  const START = Math.PI / 2;                   // straight down
+  // C points up-left, K up-right, spread across the heading. On entrance every note starts
+  // pointing straight up, small, then rotates outward to its place with a slight overshoot and
+  // grows as it settles.
+  const A_FIRST = -158, A_LAST = -22;          // final directions of C and K, in degrees (screen y down)
+  const START = -Math.PI / 2;                  // straight up
 
   function pose(n, a, s, fan) {
     const mid = fan.R * (1 - LEN / 2) * s;     // centre of the note, from the pivot
     return { cx: fan.px + mid * Math.cos(a), cy: fan.py + mid * Math.sin(a), rot: a + Math.PI / 2, s };
   }
   const swingAngle = (n, k) => START + (n.th - START) * backOut(k);
-  const swingScale = (k) => 0.55 + 0.45 * easeOut(Math.min(1, k));
+  const swingScale = (k) => 0.6 + 0.4 * easeOut(Math.min(1, k));
 
   // Points around a note's outline at a given pose
   function outline(n, at, grow) {
@@ -100,36 +100,41 @@
 
   function makeNotes(fan) {
     return LETTERS.map((letter, i) => {
-      let th = ((A_FIRST + ((A_LAST - A_FIRST) * i) / 7) * Math.PI) / 180;
-      while (th < START) th += Math.PI * 2;    // so the swing from straight down runs clockwise
+      const th = ((A_FIRST + ((A_LAST - A_FIRST) * i) / 7) * Math.PI) / 180;
       const n = { letter, th, w: fan.R * TH, h: fan.R * LEN, glitchUntil: 0 };
       n.final = pose(n, th, 1, fan);
       return n;
     });
   }
 
-  // ── Layout: the largest fan that fits at the left of the section ──
+  // ── Layout: the largest fan, centred behind the heading, that stays inside the section ──
   function layout() {
     const sr = sec.getBoundingClientRect();
-    if (sr.width < 980 || sr.height < 600) { wrap.hidden = true; return false; }
+    if (sr.width < 700 || sr.height < 560) { wrap.hidden = true; return false; }
     const rel = (r) => ({ l: r.left - sr.left, t: r.top - sr.top, r: r.right - sr.left, b: r.bottom - sr.top });
     const cards = rel(actions.getBoundingClientRect());
-    const lead = textBox(sec.querySelector(".lp-closing__lead"), sr);
-    if (!lead) { wrap.hidden = true; return false; }
+    const title = textBox(sec.querySelector(".lp-closing__title"), sr);
+    if (!title) { wrap.hidden = true; return false; }
     // Never reach into the content of the section above
     const prev = sec.previousElementSibling;
     const prevInner = prev && (prev.querySelector(".ui-container") || prev);
-    const ceiling = prevInner ? rel(prevInner.getBoundingClientRect()).b + 24 : -Infinity;
+    const ceiling = prevInner ? rel(prevInner.getBoundingClientRect()).b + 24 : 0;
 
-    const S = { x: lead.l - 72, y: cards.t - 50 };   // the lowest point: just above the cards, clear of the paragraph
+    const px = (title.l + title.r) / 2;                          // centred on the heading
+    const py = title.t + (title.b - title.t) * 0.82;              // pivot low in the heading, so it fans up behind it
     const cardZone = { l: cards.l - 22, t: cards.t - 22, r: cards.r + 22, b: cards.b + 22 };
-    const ok = (pts) => pts.every(([x, y]) => x >= 6 && y >= ceiling && !(x > cardZone.l && x < cardZone.r && y > cardZone.t && y < cardZone.b));
+    const ok = (pts) => pts.every(([x, y]) => x >= 6 && x <= sr.width - 6 && y >= ceiling && !(x > cardZone.l && x < cardZone.r && y > cardZone.t && y < cardZone.b));
 
     let fan = null, cand = null;
-    for (let R = 460; R >= 200; R -= 6) {
-      const trial = { px: S.x, py: S.y - R * 0.55, R }; // pivot above the lowest point; notes start pointing down past it
+    for (let R = 560; R >= 150; R -= 6) {
+      const trial = { px, py, R };
       const ns = makeNotes(trial);
-      if (ns.every((n) => ok(outline(n, n.final, 3)))) { fan = trial; cand = ns; break; }
+      // The final fan and the whole expansion must stay inside the allowed area
+      const fits = ns.every((n) => {
+        for (let k = 0; k <= 1.0001; k += 0.1) if (!ok(outline(n, pose(n, swingAngle(n, k), swingScale(k), trial), 3))) return false;
+        return true;
+      });
+      if (fits) { fan = trial; cand = ns; break; }
     }
     if (!fan) { wrap.hidden = true; return false; }
     wrap.hidden = false;
@@ -143,7 +148,7 @@
     }
     const pad = 26;
     ox = Math.floor(Math.max(0, Math.min(...all.map((q) => q[0])) - pad));
-    oy = Math.floor(Math.max(Number.isFinite(ceiling) ? ceiling : -Infinity, Math.min(...all.map((q) => q[1])) - pad));
+    oy = Math.floor(Math.max(ceiling, Math.min(...all.map((q) => q[1])) - pad));
     W = Math.ceil(Math.min(sr.width, Math.max(...all.map((q) => q[0])) + pad) - ox);
     H = Math.ceil(Math.min(sr.height, Math.max(...all.map((q) => q[1])) + pad) - oy);
     dpr = Math.min(window.devicePixelRatio || 1, 2);

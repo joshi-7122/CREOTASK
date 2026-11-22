@@ -1899,8 +1899,12 @@ main > .lp-section, main > .lp-light { padding-bottom: clamp(40px, 6vw, 84px); }
 .lp-closing__inner { position: relative; z-index: 1; }
 .lp-notes {
   position: absolute; z-index: 0; pointer-events: none;
-  transform: perspective(1400px) rotateY(-6deg); transform-origin: right bottom;
+  opacity: 0.62;                           /* a backdrop: the heading stays clearly in front */
+  transform: perspective(1500px) rotateX(5deg); transform-origin: center bottom;
 }
+/* A soft shadow lifts the heading off the notes behind it */
+.lp-closing__title { filter: drop-shadow(0 6px 26px rgba(0, 0, 0, 0.75)); }
+.lp-closing__lead { text-shadow: 0 2px 18px rgba(0, 0, 0, 0.9); }
 .lp-notes canvas { display: block; }
 /* The soft glows inside the sign-in panel must never make it scroll sideways */
 .lp-auth__panel { overflow-x: hidden; }
