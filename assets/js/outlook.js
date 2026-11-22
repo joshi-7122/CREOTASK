@@ -139,12 +139,12 @@
     const count = document.getElementById("csCount");
     const text = document.getElementById("csText");
 
-    const PASS_MS_PER_STEP = 1250;       // the one-time glide, per step
+    const PASS_MS_PER_STEP = 900;        // the one-time glide, per step
     let cur = -1, u = 0, fracs = [0], pts = [];
     let glide = null, rafId = 0, layoutUntil = 0;
     let traveled = false, onScreen = false;
     const clock = () => performance.now() / 1000;
-    const ease = (k) => 0.5 - 0.5 * Math.cos(Math.PI * k);   // smooth in and out
+    const ease = (k) => 1 - Math.pow(1 - k, 1.6);        // moves at once, settles softly
 
     // ── Geometry ──
     function curveD() {
@@ -287,7 +287,7 @@
         if (now === onScreen) return;
         onScreen = now;
         if (onScreen) {
-          setTimeout(travel, 350);
+          travel();   // no delay: the glide begins the moment the route is about to be seen
           // The route only needs to know it was seen once; stop watching after that.
           clearInterval(safety);
           window.removeEventListener("scroll", check);
@@ -296,9 +296,9 @@
       };
       const check = () => {
         const r = route.getBoundingClientRect();
-        setOn(r.top < window.innerHeight * 0.9 && r.bottom > window.innerHeight * 0.1);
+        setOn(r.top < window.innerHeight * 1.25 && r.bottom > 0);   // a little before it reaches the screen
       };
-      if (hasIO) new IntersectionObserver((e) => { if (e.length) setOn(e[e.length - 1].isIntersecting); }, { threshold: 0.25 }).observe(route);
+      if (hasIO) new IntersectionObserver((e) => { if (e.length) setOn(e[e.length - 1].isIntersecting); }, { rootMargin: "0px 0px 25% 0px", threshold: 0 }).observe(route);
       window.addEventListener("scroll", check, { passive: true });
       safety = setInterval(check, 600); // cheap safety net in case a scroll or observer event is delayed
       check();
