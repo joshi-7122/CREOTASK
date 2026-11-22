@@ -43,7 +43,7 @@
   const RAMP = " .:-=+*#%@";
   const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
 
-  let dpr = 1, W = 0, H = 0, ox = 0, oy = 0;
+  let dpr = 1, W = 0, H = 0, ox = 0, oy = 0, fadeFrom = 0, fadeTo = 0;   // fadeFrom/To: section y where the notes' lower part fades out
   let notes = [], spiral = null /* the fan: pivot and radius */, atlases = new Map(), scanFill = null, pix = null, pixCtx = null;
   let t0 = -1, raf = 0, started = false, onScreen = false, ready = false, idleTimer = 0;
 
@@ -138,6 +138,8 @@
     }
     if (!fan) { wrap.hidden = true; return false; }
     wrap.hidden = false;
+    fadeFrom = title.t - (title.b - title.t) * 0.05;   // just above the heading's first line
+    fadeTo = fan.py + 28;                               // gone by the pivot, where the notes converge
     spiral = fan;
     notes = cand;
 
@@ -431,6 +433,18 @@
       const l = drawNote(n, p, g);
       ctx.restore();
       if (l) letters.push([n, at, l]);
+    }
+    // Fade the lower part of the notes out behind the heading so its text stays clear.
+    // (Letters are drawn after this, so they are not dimmed.)
+    if (fadeTo > fadeFrom) {
+      const g = ctx.createLinearGradient(0, fadeFrom - oy, 0, fadeTo - oy);
+      g.addColorStop(0, "rgba(0,0,0,0)");
+      g.addColorStop(1, "rgba(0,0,0,0.96)");
+      ctx.save();
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.fillStyle = g;
+      ctx.fillRect(0, Math.max(0, fadeFrom - oy), W, H);
+      ctx.restore();
     }
     for (const [n, at, l] of letters) drawLetter(n, at, l);
     if (busy) raf = requestAnimationFrame(frame);
