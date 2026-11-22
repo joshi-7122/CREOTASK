@@ -1900,6 +1900,7 @@ main > .lp-section, main > .lp-light { padding-bottom: clamp(40px, 6vw, 84px); }
 .lp-notes {
   position: absolute; z-index: 0; pointer-events: none;
   opacity: 0.62;                           /* a backdrop: the heading stays clearly in front */
+  will-change: transform; backface-visibility: hidden;   /* own compositor layer: redraws never re-raster the page */
   transform: perspective(1500px) rotateX(5deg); transform-origin: center bottom;
 }
 /* A soft shadow lifts the heading off the notes behind it */

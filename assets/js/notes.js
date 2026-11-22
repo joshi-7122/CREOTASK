@@ -34,8 +34,8 @@
   if (!ctx) { wrap.remove(); return; }
 
   const LETTERS = ["C", "R", "E", "O", "T", "A", "S", "K"];
-  const DUR = 1900;           // one note's reveal (swing plus rebuild)
-  const STAGGER = 200;        // between notes
+  const DUR = 1600;           // one note's reveal (swing plus rebuild)
+  const STAGGER = 130;        // between notes
   const SWING = 0.8;          // share of the reveal spent swinging into place
   const GLITCH_MS = 420;
   const TH = 0.34, LEN = 0.82; // note width and length, as fractions of the fan's radius
@@ -151,7 +151,7 @@
     oy = Math.floor(Math.max(ceiling, Math.min(...all.map((q) => q[1])) - pad));
     W = Math.ceil(Math.min(sr.width, Math.max(...all.map((q) => q[0])) + pad) - ox);
     H = Math.ceil(Math.min(sr.height, Math.max(...all.map((q) => q[1])) + pad) - oy);
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = Math.min(window.devicePixelRatio || 1, 1.75);   // a backdrop at reduced opacity needs no more
     wrap.style.left = ox + "px";
     wrap.style.top = oy + "px";
     canvas.style.width = W + "px";
@@ -364,7 +364,7 @@
     let letter = null;
     // An idle glitch briefly sends the note back through the last stages.
     const q = Math.min(p, 1 - g * 0.5);
-    const asciiIn = clamp(q / 0.42);
+    const asciiIn = clamp(0.3 + q / 0.34);   // visible from the first frame, then fills in
     const asciiOut = 1 - clamp((q - 0.5) / 0.25);
     const rebuild = clamp((q - 0.36) / 0.5);
     const flick = q < 0.86 ? 0.82 + Math.random() * 0.18 : 1;
@@ -458,17 +458,38 @@
     new Promise((r) => setTimeout(r, 1500)),
   ]).catch(() => {});
 
+  // Build ahead of time, while the browser is idle, so the reveal can start the instant the
+  // section approaches (a build takes ~40 ms, which would otherwise be a visible hitch).
+  let builtSig = "";
+  const signature = () => {
+    const sr = sec.getBoundingClientRect(), t = sec.querySelector(".lp-closing__title");
+    const tr = t ? t.getBoundingClientRect() : { top: 0 };
+    return [Math.round(sr.width), Math.round(sr.height), Math.round(tr.top - sr.top)].join("x");
+  };
+  function prebuild() {
+    builtSig = signature();
+    build();
+  }
+  const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 200));
+  function schedulePrebuild() { fontsReady.then(() => idle(() => { if (!ready) prebuild(); }, { timeout: 2500 })); }
+  if (document.readyState === "complete") schedulePrebuild();
+  else window.addEventListener("load", schedulePrebuild, { once: true });
+
   function start() {
     if (started) return;
     started = true;
-    fontsReady.then(() => { build(); kick(); });
+    fontsReady.then(() => {
+      if (!ready || builtSig !== signature()) prebuild();   // layout moved since: refit
+      kick();
+    });
   }
 
   if ("IntersectionObserver" in window) {
+    // Begin while the section is still a little below the fold, so it is already moving on arrival
     new IntersectionObserver((entries) => {
       onScreen = entries[entries.length - 1].isIntersecting;
       if (onScreen) start();
-    }, { threshold: 0.25 }).observe(sec);
+    }, { rootMargin: "0px 0px 35% 0px", threshold: 0 }).observe(sec);
   } else {
     onScreen = true;
     start();
@@ -482,6 +503,7 @@
     rt = setTimeout(() => {
       if (!started) return;
       const done = t0 >= 0 && performance.now() - t0 > STAGGER * 7 + DUR;
+      builtSig = signature();
       build();
       if (done) t0 = performance.now() - (STAGGER * 7 + DUR) - 1;
       kick();
